@@ -79,5 +79,4 @@ class CaterPillar extends SpriteComponent
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     position += direction * dt  *movingSpeed;
   }
-
 }

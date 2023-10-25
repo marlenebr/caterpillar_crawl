@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +19,7 @@ class GroundMap extends SpriteComponent
     sprite = await Sprite.load('BackgroundTile.png');
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-
+    fillWithSnacks(80);
   }
 
     @override
@@ -39,6 +42,16 @@ class GroundMap extends SpriteComponent
     {
       player.transform.position = Vector2.all(0);
     }
+  }
+
+    void fillWithSnacks(int snackCount)
+  {
+    for(int i= 0; i<snackCount;i++)
+    {
+      Vector2 randomVector = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
+      add(Snack(position: randomVector));
+    }
+
   }
 
 }
