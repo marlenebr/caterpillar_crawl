@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
-class CaterPillar extends SpriteComponent
+class CaterPillar extends SpriteComponent with CollisionCallbacks
 {
   static const double fullCircle = 2*pi;
 
@@ -24,6 +26,8 @@ class CaterPillar extends SpriteComponent
     initRotation = angle;
     angleToLerpTo = angle;
     directionPoint  = Vector2(0, 0);
+    add(RectangleHitbox());
+
   }
 
   @override
@@ -32,8 +36,6 @@ class CaterPillar extends SpriteComponent
 
     updateLerpToAngle(dt);
     updateMoveOn(dt);
-
-
 
     angle = angle%(fullCircle);
     if(angle <0)
@@ -46,6 +48,15 @@ class CaterPillar extends SpriteComponent
   void onGameResize(Vector2 gameSize) {
     super.onGameResize(gameSize);
     position = gameSize / 2;
+  }
+
+@override
+  void onCollision(Set<Vector2> points, PositionComponent other) {
+    super.onCollision(points,other);
+
+    if (other is Snack) {
+      print('snack!: -> $other');     
+    }
   }
 
   void updateLerpToAngle(double dt)
@@ -70,7 +81,6 @@ class CaterPillar extends SpriteComponent
   void onMoveDirectionChange(Vector2 pointToMoveTo)
   {
     angleToLerpTo = FlameGameUtils.getAngleFromUp(pointToMoveTo);
-    //position.moveToTarget(pointToMoveTo, 10);   
   }
 
   void updateMoveOn(double dt)

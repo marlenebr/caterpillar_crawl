@@ -28,7 +28,7 @@ class CaterPillarWorld extends World
   }
 }
 
-class CaterpillarCrawlMain extends FlameGame with TapCallbacks {
+class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDetection  {
 
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
@@ -41,7 +41,6 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks {
 
   @override
   Future<void> onLoad() async {
-    // TODO: implement onLoad
     await super.onLoad();   
     _caterPillar = CaterPillar(speed,60);
     _groundMap = GroundMap(1000, _caterPillar);
@@ -61,7 +60,6 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    // TODO: implement render
     canvas.drawPaint(Paint()..color = Colors.orange.shade700);
     super.render(canvas);
   }
@@ -74,13 +72,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks {
   void moveCaterpillarOnTap(Vector2 tapPosition)
   {
         Vector2 tapDirection = size/2 - tapPosition;
-       // Vector2 tapDirection = _caterPillar.transform.position - tapPosition;
-
         _caterPillar.onMoveDirectionChange(tapDirection);
-        print('caterpillar pos: -> ${_caterPillar.transform.position}');
-        print('tap pos: -> $tapPosition');
-        
-
   }
 
 }
