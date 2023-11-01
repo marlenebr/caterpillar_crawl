@@ -15,6 +15,10 @@ class CaterPillar extends SpriteComponent with CollisionCallbacks
 
   late double angleToLerpTo;
   late Vector2 directionPoint;
+  late Vector2 velocity;
+
+
+  int snackCount = 0;
 
 
   CaterPillar(this.rotationSpeed, this.movingSpeed) : super(size: Vector2.all(32));
@@ -26,6 +30,7 @@ class CaterPillar extends SpriteComponent with CollisionCallbacks
     initRotation = angle;
     angleToLerpTo = angle;
     directionPoint  = Vector2(0, 0);
+    velocity = Vector2(0, 0);
     add(RectangleHitbox());
 
   }
@@ -55,7 +60,8 @@ class CaterPillar extends SpriteComponent with CollisionCallbacks
     super.onCollision(points,other);
 
     if (other is Snack) {
-      print('snack!: -> $other');     
+      snackCount++;
+      print('snacks eaten!: -> $snackCount');     
     }
   }
 
@@ -87,6 +93,7 @@ class CaterPillar extends SpriteComponent with CollisionCallbacks
   { 
     //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
-    position += direction * dt  *movingSpeed;
+    velocity = direction * dt  *movingSpeed;
+    position += velocity;
   }
 }
