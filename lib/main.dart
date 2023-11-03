@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
+import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -45,7 +46,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   @override
   Future<void> onLoad() async {
     await super.onLoad();   
-    _caterPillar = CaterPillar(speed,60);
+    _caterPillar = CaterPillar(speed,60,createCaterpillarData());
     _groundMap = GroundMap(1000, _caterPillar);
     _caterPillar.transform.position = Vector2(40,100);
     
@@ -78,4 +79,19 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
         _caterPillar.onMoveDirectionChange(tapDirection);
   }
 
+  CaterpillarData createCaterpillarData()
+  {
+    //Data for first Caterpillar - Green Wobbly
+    return  CaterpillarData(
+      imagePath: 'caterPillar_head.png', 
+      spriteSize: Vector2.all(128), 
+      anchorPosY: 106, 
+      caterpillarSegment: 
+      CaterpillarSegmentData(
+        imagePath: 'caterPillar_segment', 
+        spriteSize: Vector2.all(128), 
+        anchorPosYTop: 35,
+        anchorPosYBottom: 100)
+    );
+  }
 }

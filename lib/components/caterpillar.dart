@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -15,6 +16,8 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   double rotationSpeed;
   double movingSpeed;
 
+  CaterpillarData caterpillardata;
+
   late double angleToLerpTo;
   late Vector2 directionPoint;
   late Vector2 velocity;
@@ -23,32 +26,33 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   int snackCount = 0;
 
 
-  CaterPillar(this.rotationSpeed, this.movingSpeed) : super(size: Vector2.all(64));
+  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata) : super(size: Vector2.all(64));
 
   @override
   Future<void> onLoad() async {
-    final size = Vector2.all(128.0);
-    final scale = Vector2.all(super.size.x/size.x);
+    final scale = Vector2.all(super.size.x/caterpillardata.spriteSize.x);
     final data = SpriteAnimationData.sequenced(
-    textureSize: size,
+    textureSize: caterpillardata.spriteSize,
     amount: 4,
     stepTime: 0.1,
     );
     final animation = SpriteAnimationComponent.fromFrameData(
-      await imageLoader.load('caterPillar_head.png'),
+      await imageLoader.load(caterpillardata.imagePath),
       data,
       scale: scale
     );
     add(animation);
 
+    final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
 
-    
-    anchor = Anchor.center;
+    anchor = Anchor(0.5,anchorPos);
     initRotation = angle;
     angleToLerpTo = angle;
     directionPoint  = Vector2(0, 0);
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
+
+    //Create first segment on default
 
   }
 
