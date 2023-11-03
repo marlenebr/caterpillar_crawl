@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/snack.dart';
+import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 
-class CaterPillar extends SpriteComponent with CollisionCallbacks
+class CaterPillar extends PositionComponent with CollisionCallbacks
 {
   static const double fullCircle = 2*pi;
 
@@ -21,11 +23,26 @@ class CaterPillar extends SpriteComponent with CollisionCallbacks
   int snackCount = 0;
 
 
-  CaterPillar(this.rotationSpeed, this.movingSpeed) : super(size: Vector2.all(32));
+  CaterPillar(this.rotationSpeed, this.movingSpeed) : super(size: Vector2.all(64));
 
   @override
   Future<void> onLoad() async {
-    sprite = await Sprite.load('TestBug.png');
+    final size = Vector2.all(128.0);
+    final scale = Vector2.all(super.size.x/size.x);
+    final data = SpriteAnimationData.sequenced(
+    textureSize: size,
+    amount: 4,
+    stepTime: 0.1,
+    );
+    final animation = SpriteAnimationComponent.fromFrameData(
+      await imageLoader.load('caterPillar_head.png'),
+      data,
+      scale: scale
+    );
+    add(animation);
+
+
+    
     anchor = Anchor.center;
     initRotation = angle;
     angleToLerpTo = angle;

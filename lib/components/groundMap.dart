@@ -18,11 +18,11 @@ class GroundMap extends PositionComponent
 
   @override
   Future<void> onLoad() async {
-    add(GroundMapFloorParallax(player));
+    add(GroundMapFloorParallax(player,super.size/6));
     add(SpriteComponent(
-      sprite: await Sprite.load('caterPillarBG_03.png'))
+      sprite: await Sprite.load('leafGround01.png'),
+      size: Vector2.all(mapSize))
     );
-    //sprite = await Sprite.load('caterPillarBG_03.png');
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
     fillWithSnacks(80);
@@ -64,29 +64,28 @@ class GroundMap extends PositionComponent
 class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
 
   CaterPillar player;
+  Vector2 tileSize;
 
-  GroundMapFloorParallax(this.player);
+  GroundMapFloorParallax(this.player, this.tileSize);
 
   @override
   Future<void> onLoad() async {
     parallax = await game.loadParallax(
       [
-        ParallaxImageData('caterPillarBG_01.png'),
-        ParallaxImageData('caterPillarBG_02.png'),
+        ParallaxImageData('leafGround03.png'),
+        ParallaxImageData('leafGround02.png'),
       ],
       baseVelocity: Vector2(0.1,0.1),
       velocityMultiplierDelta: Vector2(4, 4),
       filterQuality: FilterQuality.none,
-      repeat: ImageRepeat.repeat
+      repeat: ImageRepeat.repeat,
+      size: tileSize
     );
   }
 
    @override
    void update(double dt) {   
     super.update(dt);
-    parallax?.baseVelocity = player.velocity;
-     //Vector2 v = player.velocity;
-     //print('baseVelocity: -> $v');     
-
+    parallax?.baseVelocity = player.velocity; 
    }
 }

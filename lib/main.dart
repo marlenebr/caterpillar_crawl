@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
+import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+
+final Images imageLoader = Images();
 
 void main() {
 
