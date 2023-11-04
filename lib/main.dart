@@ -10,6 +10,7 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+
 final Images imageLoader = Images();
 
 void main() {
@@ -46,7 +47,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   @override
   Future<void> onLoad() async {
     await super.onLoad();   
-    _caterPillar = CaterPillar(speed,60,createCaterpillarData());
+    _caterPillar = CaterPillar(speed,60,createCaterpillarData(),world);
     _groundMap = GroundMap(1000, _caterPillar);
     _caterPillar.transform.position = Vector2(40,100);
     
@@ -88,7 +89,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
       anchorPosY: 106, 
       caterpillarSegment: 
       CaterpillarSegmentData(
-        imagePath: 'caterPillar_segment', 
+        imagePath: 'caterPillar_segment.png', 
         spriteSize: Vector2.all(128), 
         anchorPosYTop: 35,
         anchorPosYBottom: 100)

@@ -6,7 +6,7 @@ import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/extensions.dart';
+
 
 class CaterPillar extends PositionComponent with CollisionCallbacks
 {
@@ -17,6 +17,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   double movingSpeed;
 
   CaterpillarData caterpillardata;
+  World gameWorld;
 
   late double angleToLerpTo;
   late Vector2 directionPoint;
@@ -26,7 +27,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   int snackCount = 0;
 
 
-  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata) : super(size: Vector2.all(64));
+  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata, this.gameWorld) : super(size: Vector2.all(64));
 
   @override
   Future<void> onLoad() async {
