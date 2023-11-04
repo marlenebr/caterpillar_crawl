@@ -1,12 +1,29 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/palette.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 
+class CaterpillarBody extends BodyComponent  
+{
+  CaterpillarBody();
+
+  @override
+  Future<void> onLoad() async { 
+    super.onLoad();
+    bodyDef = BodyDef(
+        type: BodyType.kinematic);
+
+    renderBody = true;
+    debugMode = true;
+  }
+}
 
 class CaterPillar extends PositionComponent with CollisionCallbacks
 {
@@ -16,8 +33,10 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   double rotationSpeed;
   double movingSpeed;
 
+  late BodyComponent bodyComponent;
+
   CaterpillarData caterpillardata;
-  World gameWorld;
+  Forge2DWorld gameWorld;
 
   late double angleToLerpTo;
   late Vector2 directionPoint;
@@ -53,6 +72,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
 
+    //add(CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, parentSegmentBody: bodyComponent, gameWorld: gameWorld));
     //Create first segment on default
 
   }

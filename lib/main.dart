@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
+import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 
 final Images imageLoader = Images();
@@ -24,16 +27,16 @@ void main() {
   );
 }
 
-class CaterPillarWorld extends World
-{
-  @override
-  FutureOr<void> onLoad() async {
-    // Load all the assets that are needed in this world
-    // and add components etc.
-  }
-}
+// class CaterPillarWorld extends World
+// {
+//   @override
+//   FutureOr<void> onLoad() async {
+//     // Load all the assets that are needed in this world
+//     // and add components etc.
+//   }
+// }
 
-class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDetection  {
+class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDetection  {
 
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
@@ -47,12 +50,8 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   @override
   Future<void> onLoad() async {
     await super.onLoad();   
-    _caterPillar = CaterPillar(speed,60,createCaterpillarData(),world);
-    _groundMap = GroundMap(1000, _caterPillar);
-    _caterPillar.transform.position = Vector2(40,100);
-    
-    world.add(_groundMap);
-    world.add(_caterPillar);
+    createAndAddCaterillar();
+    camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
   }  
 
@@ -94,5 +93,25 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
         anchorPosYTop: 35,
         anchorPosYBottom: 100)
     );
+  }
+
+  void createAndAddCaterillar()
+  {
+    BodyDef bodyDef = BodyDef(
+      type: BodyType.kinematic);
+
+    final bodyComponent = BodyComponent(bodyDef: bodyDef);
+    bodyComponent.renderBody = true;
+    bodyComponent.debugMode = true;
+
+    _caterPillar = CaterPillar(speed,60,createCaterpillarData(),world);
+    _caterPillar.transform.position = Vector2(40,100);
+
+    _groundMap = GroundMap(1000, _caterPillar);
+    world.add(_groundMap);
+
+    world.add(bodyComponent);
+    bodyComponent.add(_caterPillar);
+
   }
 }

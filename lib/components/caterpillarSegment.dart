@@ -1,5 +1,6 @@
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
+import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
@@ -13,8 +14,6 @@ class CaterpillarSegment extends PositionComponent
 
   Forge2DWorld gameWorld;
 
-  late BodyComponent bodyComponent;
-
   CaterpillarSegment({required this.segmentData , required this.parentSegmentBody, required this.gameWorld}): super(size: Vector2.all(64));
 
   @override
@@ -22,11 +21,16 @@ class CaterpillarSegment extends PositionComponent
     super.onLoad();
     final double anchorPos = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
     anchor = Anchor(0,anchorPos);
-    bodyComponent =  BodyComponent();
-    bodyComponent.debugMode = true;
-    add(bodyComponent);
     addSegmentSprite();
+
+
+    // final bottomBodyComponent = FlameGameUtils.createBodyComponent(Vector2(size.x/2,segmentData.anchorPosYBottom * scale.y));
+    // add(bottomBodyComponent);
     //position = parentSegment.transform.position + Vector2.all(1);
+//     final jointDef = RevoluteJointDef()
+//   ..initialize(topBodyComponent.body, parentSegmentBody.body, anchor.toVector2());
+// gameWorld.createJoint(RevoluteJoint(jointDef));
+
   }
 
   @override
@@ -50,10 +54,5 @@ class CaterpillarSegment extends PositionComponent
         scale: scale
       );
     add(animation);
-
-    final jointDef = RevoluteJointDef()
-  ..initialize(bodyComponent.body, parentSegmentBody.body, anchor.toVector2());
-gameWorld.createJoint(RevoluteJoint(jointDef));
   }
-
 }

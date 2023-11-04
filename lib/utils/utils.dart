@@ -1,9 +1,12 @@
 import 'dart:math';
 
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 
 class FlameGameUtils
 {
+  ///Gets the angle from a point and the up vector
   static double getAngleFromUp(Vector2 point)
   {
 	 	double radiansOfTap = atan2( point.y, point.x );
@@ -21,7 +24,5 @@ class FlameGameUtils
       finalAngle =worldRadiansOfTap;
     }
     return finalAngle;
-    //print('caterpillar Rotation: -> ${degrees(_caterPillar.transform.angle)}');
-    //print('math tap: -> ${angleOfTap}');
   }
 }
