@@ -33,8 +33,6 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   double rotationSpeed;
   double movingSpeed;
 
-  late BodyComponent bodyComponent;
-
   CaterpillarData caterpillardata;
   Forge2DWorld gameWorld;
 
@@ -71,7 +69,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     directionPoint  = Vector2(0, 0);
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
-
+    addCaterPillarSegment();
     //add(CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, parentSegmentBody: bodyComponent, gameWorld: gameWorld));
     //Create first segment on default
 
@@ -137,5 +135,11 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     velocity = direction * dt  *movingSpeed;
     position += velocity;
+  }
+
+  void addCaterPillarSegment()
+  {
+    final CaterpillarSegment segment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld);
+    add(segment);
   }
 }

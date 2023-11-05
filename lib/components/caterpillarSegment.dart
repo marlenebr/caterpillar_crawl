@@ -10,27 +10,19 @@ class CaterpillarSegment extends PositionComponent
 
   CaterpillarSegmentData segmentData;
 
-  BodyComponent parentSegmentBody;
-
   Forge2DWorld gameWorld;
 
-  CaterpillarSegment({required this.segmentData , required this.parentSegmentBody, required this.gameWorld}): super(size: Vector2.all(64));
+  CaterpillarSegment({required this.segmentData, required this.gameWorld});
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    size = Vector2.all(64);
+    final scale = Vector2.all(size.x/segmentData.spriteSize.x);
     final double anchorPos = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
-    anchor = Anchor(0,anchorPos);
+    //anchor = Anchor(0,anchorPos);
     addSegmentSprite();
-
-
-    // final bottomBodyComponent = FlameGameUtils.createBodyComponent(Vector2(size.x/2,segmentData.anchorPosYBottom * scale.y));
-    // add(bottomBodyComponent);
-    //position = parentSegment.transform.position + Vector2.all(1);
-//     final jointDef = RevoluteJointDef()
-//   ..initialize(topBodyComponent.body, parentSegmentBody.body, anchor.toVector2());
-// gameWorld.createJoint(RevoluteJoint(jointDef));
-
+    position = Vector2(0,anchorPos * size.y*2);
   }
 
   @override
@@ -54,5 +46,12 @@ class CaterpillarSegment extends PositionComponent
         scale: scale
       );
     add(animation);
+  }
+
+  void connectSegments(BodyComponent previousSegmentBody, BodyComponent thisSegmentBody)
+  {
+    final jointDef = RevoluteJointDef()
+    ..initialize(previousSegmentBody.createBody(), thisSegmentBody.createBody(), Vector2(0, 0));
+    gameWorld.createJoint(RevoluteJoint(jointDef));
   }
 }

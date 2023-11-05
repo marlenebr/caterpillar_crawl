@@ -97,21 +97,11 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
 
   void createAndAddCaterillar()
   {
-    BodyDef bodyDef = BodyDef(
-      type: BodyType.kinematic);
-
-    final bodyComponent = BodyComponent(bodyDef: bodyDef);
-    bodyComponent.renderBody = true;
-    bodyComponent.debugMode = true;
-
     _caterPillar = CaterPillar(speed,60,createCaterpillarData(),world);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(1000, _caterPillar);
     world.add(_groundMap);
-
-    world.add(bodyComponent);
-    bodyComponent.add(_caterPillar);
-
+    world.add(_caterPillar);
   }
 }
