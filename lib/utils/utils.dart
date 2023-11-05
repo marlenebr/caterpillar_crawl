@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
@@ -36,4 +37,14 @@ class FlameGameUtils
     paint: Paint()..color = Color.fromARGB(255, 60, 4, 214),
     position: Vector2(anchorPosLocal.x-renderSize/2,anchorPosLocal.y-renderSize/2));
   }
+}
+
+extension PositionComponentExtensions on PositionComponent {
+    void setChildToAnchorPosition(PositionComponent child)
+    {
+      //cause anchor is not the 0/0 position - calculate that
+      final anchorVector  = anchor.toVector2();
+      final anchorPosLocal = Vector2(size.x*anchorVector.x,size.y*anchorVector.y);
+      child.position = anchorPosLocal;
+    }
 }

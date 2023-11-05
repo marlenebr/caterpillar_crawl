@@ -42,6 +42,8 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   late Vector2 velocity;
   late double scaledAnchorYPos;
 
+  late CaterpillarSegment nextSegment;
+
 
   int snackCount = 0;
 
@@ -93,6 +95,8 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     {
       angle = fullCircle+(angle%(fullCircle));
     }
+
+    nextSegment.angle = -angle;
   }
 
   @override
@@ -145,7 +149,8 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
 
   void addCaterPillarSegment()
   {
-    final CaterpillarSegment segment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize);
-    add(segment);
+    nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize);
+    add(nextSegment);
+    setChildToAnchorPosition(nextSegment);
   }
 }

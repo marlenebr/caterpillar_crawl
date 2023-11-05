@@ -29,12 +29,7 @@ class CaterpillarSegment extends PositionComponent
 
     addSegmentSprite();
     //DEBUG
-    add(FlameGameUtils.debugDrawAnchor(this));
-
-    //cause anchor is not the 0/0 position - calculate that
-    final anchorVector  = anchor.toVector2();
-    final anchorPosLocal = Vector2(size.x*anchorVector.x,size.y*anchorVector.y);
-    position = Vector2(anchorPosLocal.x,anchorPosLocal.y + segmentData.anchorPosYTop * previousSegment.scale.y);
+    add(FlameGameUtils.debugDrawAnchor(this)); 
   }
 
   @override
