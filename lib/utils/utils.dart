@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 
 class FlameGameUtils
 {
@@ -24,5 +25,15 @@ class FlameGameUtils
       finalAngle =worldRadiansOfTap;
     }
     return finalAngle;
+  }
+
+  static RectangleComponent debugDrawAnchor(PositionComponent positionComp)
+  {
+    final anchorVector  =positionComp.anchor.toVector2();
+    final anchoPosLocal = Vector2(positionComp.size.x*anchorVector.x,positionComp.size.y*anchorVector.y);
+    double renderSize = 10;   
+    return RectangleComponent(size: Vector2.all(renderSize), 
+    paint: Paint()..color = Color.fromARGB(255, 60, 4, 214),
+    position: Vector2(anchoPosLocal.x-renderSize/2,anchoPosLocal.y-renderSize/2));
   }
 }
