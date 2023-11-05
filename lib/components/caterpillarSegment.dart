@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -24,7 +26,6 @@ class CaterpillarSegment extends PositionComponent
     super.onLoad();
     size = previousSegment.size;
     final double anchorPosY = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
-    print(anchorPosY);
     anchor = Anchor(0.5,anchorPosY);
 
     addSegmentSprite();
@@ -35,6 +36,8 @@ class CaterpillarSegment extends PositionComponent
   @override
   void update(double dt) {
     super.update(dt); 
+
+    //lerp towards parent normal
   }
 
   Future<void> addSegmentSprite()
@@ -59,10 +62,22 @@ class CaterpillarSegment extends PositionComponent
 
   }
 
-  void connectSegments(BodyComponent previousSegmentBody, BodyComponent thisSegmentBody)
+  void updateLerpToAngle(double dt, double angleToLerpTo, double rotationSpeed)
   {
-    final jointDef = RevoluteJointDef()
-    ..initialize(previousSegmentBody.createBody(), thisSegmentBody.createBody(), Vector2(0, 0));
-    gameWorld.createJoint(RevoluteJoint(jointDef));
+    double diff = transform.angle - angleToLerpTo;
+    if(diff.abs() < 0.1)
+    {
+      transform.angle = angleToLerpTo;
+      //initRotation  = angleToLerpTo;
+      return;
+    }
+    int direction = 1;
+    if((diff>0  && diff<pi) || diff<-pi)
+    {
+      direction = -1;
+    }
+
+    double lerpSpeedDt = dt*rotationSpeed*direction;
+    transform.angle += lerpSpeedDt;   
   }
 }

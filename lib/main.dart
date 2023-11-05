@@ -43,13 +43,14 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
   double rotationDuration = 3.2;
   double angleToLerpTo = 0;
   double speed = 3;
-  
+
   CaterpillarCrawlMain();
 
 
   @override
   Future<void> onLoad() async {
-    await super.onLoad();   
+    await super.onLoad();  
+    add(FpsTextComponent());
     createAndAddCaterillar();
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);

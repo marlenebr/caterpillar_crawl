@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
@@ -44,9 +45,12 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
 
   late CaterpillarSegment nextSegment;
 
+  final angleQueue = Queue<double>(); // ListQueue() by default
+  bool isInitializing = true;
+  late Vector2 initPosition;
+
 
   int snackCount = 0;
-
 
   CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata, this.gameWorld, this.finalSize);
 
@@ -65,7 +69,6 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
       data,
       scale: Vector2.all(finalSize/caterpillardata.spriteSize.x)
     );
-    add(animation);
 
     final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
     //scaledAnchorYPos = anchorPos *scale.y;
@@ -77,9 +80,16 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
     addCaterPillarSegment();
-
+    add(animation);
     //DEBUG
     add(FlameGameUtils.debugDrawAnchor(this));
+  }
+
+  @override
+  void onMount()
+  {
+    super.onMount();
+    print('Mount with pos: -> $position');     
 
   }
 
@@ -95,8 +105,10 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     {
       angle = fullCircle+(angle%(fullCircle));
     }
+    //angle queue
+    updateAngleQueue(angle);
+    //print('after mo8nt: -> $position');     
 
-    nextSegment.angle = -angle;
   }
 
   @override
@@ -111,7 +123,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
 
     if (other is Snack) {
       snackCount++;
-      print('snacks eaten!: -> $snackCount');     
+      //print('snacks eaten!: -> $snackCount');     
     }
   }
 
@@ -131,7 +143,8 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     }
 
     double lerpSpeedDt = dt*rotationSpeed*direction;
-    transform.angle += lerpSpeedDt;   
+    transform.angle += lerpSpeedDt;
+   
   }
 
   void onMoveDirectionChange(Vector2 pointToMoveTo)
@@ -139,12 +152,39 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     angleToLerpTo = FlameGameUtils.getAngleFromUp(pointToMoveTo);
   }
 
+  //onMounted is not giving the vorrect position - too early?
+  bool initOnUpdate = false;
+
   void updateMoveOn(double dt)
   { 
     //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     velocity = direction * dt  *movingSpeed;
     position += velocity;
+    //print(position);
+    //print(initPosition.distanceTo(position));
+    if(isMounted)
+    {
+      if(!initOnUpdate)
+      {
+        initPosition = Vector2(position.x,position.y); 
+        initOnUpdate  =true;
+      }
+      if(isInitializing && initPosition.distanceTo(position) > size.y)
+      {
+        isInitializing = false;
+        print("INIT DONE OF HEAD SEGMENT");
+
+      }
+      else if(isInitializing)
+      {
+        print("Tick in init");
+
+      }
+      double dist = initPosition.distanceTo(position);
+      //print("init pos is: $initPosition and pos is $position ---- dist: $dist");
+    }
+
   }
 
   void addCaterPillarSegment()
@@ -152,5 +192,16 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize);
     add(nextSegment);
     setChildToAnchorPosition(nextSegment);
+  }
+
+  void updateAngleQueue(double deltaAngle)
+  {
+    angleQueue.addFirst(deltaAngle);
+    if(!isInitializing)
+    {
+      nextSegment.angle = angleQueue.last - angle;
+      print(angleQueue.last);
+      angleQueue.removeLast();
+    }
   }
 }
