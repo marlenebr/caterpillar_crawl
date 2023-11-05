@@ -32,6 +32,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   late double initRotation;
   double rotationSpeed;
   double movingSpeed;
+  double finalSize;
 
   CaterpillarData caterpillardata;
   Forge2DWorld gameWorld;
@@ -39,16 +40,19 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   late double angleToLerpTo;
   late Vector2 directionPoint;
   late Vector2 velocity;
+  late double scaledAnchorYPos;
 
 
   int snackCount = 0;
 
 
-  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata, this.gameWorld) : super(size: Vector2.all(64));
+  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata, this.gameWorld, this.finalSize);
 
   @override
   Future<void> onLoad() async {
-    final scale = Vector2.all(super.size.x/caterpillardata.spriteSize.x);
+    //scale = Vector2.all(finalSize/caterpillardata.spriteSize.x);
+    size = Vector2.all(finalSize);
+    debugMode = true;
     final data = SpriteAnimationData.sequenced(
     textureSize: caterpillardata.spriteSize,
     amount: 4,
@@ -57,11 +61,12 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     final animation = SpriteAnimationComponent.fromFrameData(
       await imageLoader.load(caterpillardata.imagePath),
       data,
-      scale: scale
+      scale: Vector2.all(finalSize/caterpillardata.spriteSize.x)
     );
     add(animation);
 
     final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
+    //scaledAnchorYPos = anchorPos *scale.y;
 
     anchor = Anchor(0.5,anchorPos);
     initRotation = angle;
@@ -70,8 +75,9 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
     addCaterPillarSegment();
-    //add(CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, parentSegmentBody: bodyComponent, gameWorld: gameWorld));
-    //Create first segment on default
+
+    //DEBUG
+    add(FlameGameUtils.debugDrawAnchor(this));
 
   }
 
@@ -139,7 +145,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
 
   void addCaterPillarSegment()
   {
-    final CaterpillarSegment segment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld);
+    final CaterpillarSegment segment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize);
     add(segment);
   }
 }

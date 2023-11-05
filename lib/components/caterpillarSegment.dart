@@ -2,38 +2,48 @@ import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
+import 'package:flame/palette.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
 
 ///The body segments to be added behind the previous one (or the head)
 class CaterpillarSegment extends PositionComponent
 {
 
   CaterpillarSegmentData segmentData;
+  double finalSize;
 
   Forge2DWorld gameWorld;
 
-  CaterpillarSegment({required this.segmentData, required this.gameWorld});
+  PositionComponent previousSegment;
+
+  CaterpillarSegment({required this.segmentData, required this.gameWorld, required this.previousSegment, required this.finalSize});
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    size = Vector2.all(64);
-    final scale = Vector2.all(size.x/segmentData.spriteSize.x);
-    final double anchorPos = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
-    //anchor = Anchor(0,anchorPos);
+    size = previousSegment.size;
+    final double anchorPosY = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
+    print(anchorPosY);
+    anchor = Anchor(0.5,anchorPosY);
+
     addSegmentSprite();
-    position = Vector2(0,anchorPos * size.y*2);
+    //DEBUG
+    add(FlameGameUtils.debugDrawAnchor(this));
+
+    //cause anchor is not the 0/0 position - calculate that
+    final anchorVector  = anchor.toVector2();
+    final anchorPosLocal = Vector2(size.x*anchorVector.x,size.y*anchorVector.y);
+    position = Vector2(anchorPosLocal.x,anchorPosLocal.y + segmentData.anchorPosYTop * previousSegment.scale.y);
   }
 
   @override
   void update(double dt) {
     super.update(dt); 
-    //position = parentSegment.position;
   }
 
   Future<void> addSegmentSprite()
   async {
-    final scale = Vector2.all(super.size.x/segmentData.spriteSize.x);
     final data = SpriteAnimationData.sequenced(
     textureSize: segmentData.spriteSize,
     amount: 4,
@@ -43,9 +53,15 @@ class CaterpillarSegment extends PositionComponent
     final SpriteAnimationComponent animation = SpriteAnimationComponent.fromFrameData(
         await imageLoader.load(segmentData.imagePath),
         data,
-        scale: scale
+        scale: Vector2.all(finalSize/segmentData.spriteSize.x)
+
       );
     add(animation);
+  }
+
+  void updateSegmentByPrevious(PositionComponent preveiousSegment)
+  {
+
   }
 
   void connectSegments(BodyComponent previousSegmentBody, BodyComponent thisSegmentBody)
