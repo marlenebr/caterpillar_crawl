@@ -11,22 +11,15 @@ import 'package:flame/components.dart';
 import 'package:flame/palette.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
-class CaterpillarBody extends BodyComponent  
+class CaterpillarElement extends PositionComponent
 {
-  CaterpillarBody();
+  late CaterpillarSegment nextSegment;
 
-  @override
-  Future<void> onLoad() async { 
-    super.onLoad();
-    bodyDef = BodyDef(
-        type: BodyType.kinematic);
-
-    renderBody = true;
-    debugMode = true;
-  }
+  final angleQueue = Queue<double>(); // ListQueue() by default
+  bool isInitializing = true;
 }
 
-class CaterPillar extends PositionComponent with CollisionCallbacks
+class CaterPillar extends CaterpillarElement with CollisionCallbacks
 {
   static const double fullCircle = 2*pi;
 
@@ -43,10 +36,6 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
   late Vector2 velocity;
   late double scaledAnchorYPos;
 
-  late CaterpillarSegment nextSegment;
-
-  final angleQueue = Queue<double>(); // ListQueue() by default
-  bool isInitializing = true;
   late Vector2 initPosition;
 
 
@@ -106,7 +95,7 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
       angle = fullCircle+(angle%(fullCircle));
     }
     //angle queue
-    updateAngleQueue(angle);
+    updateAngleQueue();
     //print('after mo8nt: -> $position');     
 
   }
@@ -194,13 +183,12 @@ class CaterPillar extends PositionComponent with CollisionCallbacks
     setChildToAnchorPosition(nextSegment);
   }
 
-  void updateAngleQueue(double deltaAngle)
+  void updateAngleQueue()
   {
-    angleQueue.addFirst(deltaAngle);
+    angleQueue.addFirst(angle);
     if(!isInitializing)
     {
       nextSegment.angle = angleQueue.last - angle;
-      print(angleQueue.last);
       angleQueue.removeLast();
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -9,7 +10,7 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 
 ///The body segments to be added behind the previous one (or the head)
-class CaterpillarSegment extends PositionComponent
+class CaterpillarSegment extends CaterpillarElement
 {
 
   CaterpillarSegmentData segmentData;
