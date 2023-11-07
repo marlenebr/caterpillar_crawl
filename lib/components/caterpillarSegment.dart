@@ -12,15 +12,15 @@ import 'package:flutter/material.dart';
 ///The body segments to be added behind the previous one (or the head)
 class CaterpillarSegment extends CaterpillarElement
 {
-
+  CaterPillar caterpillar;
   CaterpillarSegmentData segmentData;
   double finalSize;
 
   Forge2DWorld gameWorld;
 
-  PositionComponent previousSegment;
+  CaterpillarElement previousSegment;
 
-  CaterpillarSegment({required this.segmentData, required this.gameWorld, required this.previousSegment, required this.finalSize});
+  CaterpillarSegment({required this.segmentData, required this.gameWorld, required this.previousSegment, required this.finalSize, required this.caterpillar});
 
   @override
   Future<void> onLoad() async {
@@ -37,9 +37,19 @@ class CaterpillarSegment extends CaterpillarElement
   @override
   void update(double dt) {
     super.update(dt); 
-
+    initSegment();
+    updateAngleQueue();
     //lerp towards parent normal
   }
+
+  void initSegment()
+  {
+    if(angleQueue.length >= previousSegment.angleQueue.length)
+    {
+      isInitializing =false;
+    }
+  }
+  
 
   Future<void> addSegmentSprite()
   async {
@@ -49,7 +59,7 @@ class CaterpillarSegment extends CaterpillarElement
     stepTime: 0.1,
     );
 
-    final SpriteAnimationComponent animation = SpriteAnimationComponent.fromFrameData(
+    animation = SpriteAnimationComponent.fromFrameData(
         await imageLoader.load(segmentData.imagePath),
         data,
         scale: Vector2.all(finalSize/segmentData.spriteSize.x)
@@ -58,9 +68,16 @@ class CaterpillarSegment extends CaterpillarElement
     add(animation);
   }
 
-  void updateSegmentByPrevious(PositionComponent preveiousSegment)
+  void updateAngleQueue()
   {
+    //nextSegment?.angle = angle;
 
+    angleQueue.addFirst(angle);
+    if(!isInitializing)
+    {
+      nextSegment?.angle = angleQueue.last;
+      angleQueue.removeLast();
+    }
   }
 
   void updateLerpToAngle(double dt, double angleToLerpTo, double rotationSpeed)
