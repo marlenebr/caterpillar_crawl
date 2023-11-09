@@ -98,4 +98,15 @@ class CaterpillarSegment extends CaterpillarElement
     double lerpSpeedDt = dt*rotationSpeed*direction;
     transform.angle += lerpSpeedDt;   
   }
+
+  CaterpillarSegment addCaterPillarSegment()
+  {
+    CaterpillarSegment segment = CaterpillarSegment(segmentData: segmentData, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: caterpillar);
+    nextSegment = segment;
+    caterpillar.lastSegment = segment;
+    segment.previousSegment = this;
+    add(segment);
+    segment.position = Vector2(size.x/2,segmentData.anchorPosYBottom*animation.scale.y);
+    return segment;
+  }
 }

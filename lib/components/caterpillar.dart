@@ -35,12 +35,13 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   Forge2DWorld gameWorld;
 
   late double angleToLerpTo;
-  late Vector2 directionPoint;
   late Vector2 velocity;
   late double scaledAnchorYPos;
 
   late Vector2 initPosition;
   late double segmentDist;
+
+  CaterpillarSegment? lastSegment;
 
 
   int snackCount = 0;
@@ -49,9 +50,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   @override
   Future<void> onLoad() async {
-    //scale = Vector2.all(finalSize/caterpillardata.spriteSize.x);
     size = Vector2.all(finalSize);
-    debugMode = true;
     final data = SpriteAnimationData.sequenced(
     textureSize: caterpillardata.spriteSize,
     amount: 4,
@@ -64,18 +63,18 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     );
 
     final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
-    //scaledAnchorYPos = anchorPos *scale.y;
     segmentDist = (caterpillardata.caterpillarSegment.anchorPosYBottom -caterpillardata.caterpillarSegment.anchorPosYTop)*animation.scale.y;
     anchor = Anchor(0.5,anchorPos);
     initRotation = angle;
     angleToLerpTo = angle;
-    directionPoint  = Vector2(0, 0);
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
     addCaterPillarSegment();
     add(animation);
     //DEBUG
-    add(FlameGameUtils.debugDrawAnchor(this));
+    //add(FlameGameUtils.debugDrawAnchor(this));
+    //debugMode = true;
+
   }
 
   @override
@@ -99,8 +98,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     }
     //angle queue
     updateAngleQueue();
-    //print('after mo8nt: -> $position');     
-
   }
 
   @override
@@ -115,7 +112,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
     if (other is Snack) {
       snackCount++;
-      //print('snacks eaten!: -> $snackCount');     
+      addCaterPillarSegment();
     }
   }
 
@@ -153,8 +150,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     velocity = direction * dt  *movingSpeed;
     position += velocity;
-    //print(position);
-    //print(initPosition.distanceTo(position));
     if(isMounted)
     {
       if(!initOnUpdate)
@@ -191,20 +186,16 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   void addCaterPillarSegment()
   {
-    nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
-    add(nextSegment!);
-    setChildToAnchorPosition(nextSegment!);
-    CaterpillarSegment nextNextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
-    nextSegment?.add(nextNextSegment);
-    nextSegment?.nextSegment = nextNextSegment;
-    nextSegment?.previousSegment = this;
-    nextNextSegment.position = Vector2(size.x/2,caterpillardata.caterpillarSegment.anchorPosYBottom*animation.scale.y);
-
-    //Debug: Next Next Next
-    CaterpillarSegment? nextNextNextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
-    nextNextSegment.add(nextNextNextSegment);
-    nextNextSegment.nextSegment = nextNextNextSegment;
-    nextNextSegment.previousSegment = this;
-    nextNextNextSegment.position = Vector2(size.x/2,caterpillardata.caterpillarSegment.anchorPosYBottom*animation.scale.y);
+    if( lastSegment != null)
+    {
+      lastSegment?.addCaterPillarSegment();
+    }
+    else
+    {
+      nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
+      add(nextSegment!);
+      setChildToAnchorPosition(nextSegment!);
+      lastSegment = nextSegment;
+    }
   }
 }
