@@ -4,7 +4,7 @@ Very first version of a Snake like caterpillar Game made with Flutter and Flame
 
 [![Powered by Flame](https://img.shields.io/badge/Powered%20by-%F0%9F%94%A5-orange.svg)](https://flame-engine.org)
 
-![Screenshot 1](https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot02.png)   ![Screenshot 2](https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot03.png)   ![Screenshot 3](https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot04.png)
+<img src="https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot02.png" width="200">   <img src="https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot03.png" width="200"> <img src="https://raw.githubusercontent.com/marlenebr/caterpillar_crawl/main/caterpillar_crawl_screenshot04.png" width="200"> 
 
 ## Description
 
