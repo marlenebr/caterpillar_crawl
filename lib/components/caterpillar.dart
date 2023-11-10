@@ -8,12 +8,14 @@ import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/palette.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 
 class CaterpillarElement extends PositionComponent
 {
   CaterpillarSegment? nextSegment;
+  CaterpillarData caterpillardata;
+  Forge2DWorld gameWorld;
+
   late SpriteAnimationComponent animation;
 
   final angleQueue = Queue<MovementTransferData>(); // ListQueue() by default
@@ -23,9 +25,9 @@ class CaterpillarElement extends PositionComponent
   double frameDuration = 1/5;
 
   bool segemntAddRequest =false;
+  double finalSize;
 
-
-  CaterpillarElement();
+  CaterpillarElement(this.finalSize, this.caterpillardata, this.gameWorld);
 
   void caterPillarFixedUpdate(double dt, Function f)
   {
@@ -35,7 +37,17 @@ class CaterpillarElement extends PositionComponent
       f();
       secondCounter  =0;
     }
-
+  } 
+  CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
+  {
+    nextSegment = CaterpillarSegment(finalSize, caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
+    nextSegment?.position = position;
+    gameWorld.add(nextSegment!);
+    caterpillar.lastSegment = nextSegment;
+    nextSegment?.previousSegment = this; 
+    nextSegment?.priority = priority-1;
+    return nextSegment!;
+    
   }
 }
 
@@ -43,13 +55,9 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 {
   static const double fullCircle = 2*pi;
 
-  late double initRotation;
   double rotationSpeed;
   double movingSpeed;
-  double finalSize;
 
-  CaterpillarData caterpillardata;
-  Forge2DWorld gameWorld;
 
   late double angleToLerpTo;
   late Vector2 velocity;
@@ -63,7 +71,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   int snackCount = 0;
 
-  CaterPillar(this.rotationSpeed, this.movingSpeed, this.caterpillardata, this.gameWorld, this.finalSize);
+  CaterPillar(super.finalSize, super.caterpillardata, super.gameWorld, this.rotationSpeed, this.movingSpeed);
 
   @override
   Future<void> onLoad() async {
@@ -82,7 +90,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
     segmentDist = (caterpillardata.caterpillarSegment.anchorPosYBottom -caterpillardata.caterpillarSegment.anchorPosYTop)*animation.scale.y;
     anchor = Anchor(0.5,anchorPos);
-    initRotation = angle;
     angleToLerpTo = angle;
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
@@ -139,7 +146,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     if(diff.abs() < 0.1)
     {
       transform.angle = angleToLerpTo;
-      initRotation  = angleToLerpTo;
       return;
     }
     int direction = 1;
@@ -158,7 +164,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     angleToLerpTo = FlameGameUtils.getAngleFromUp(pointToMoveTo);
   }
 
-  //onMounted is not giving the vorrect position - too early?
+  //onMounted is not giving the correct position - too early?
   bool initOnUpdate = false;
 
   void updateMoveOn(double dt)
@@ -179,32 +185,21 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
         isInitializing = false;
         if(segemntAddRequest)
         {
-          _addCaterPillarSegment();
+          addSegment();
         }
         print("INIT DONE OF HEAD SEGMENT");
       }
-      else if(isInitializing)
-      {
-        print("Tick in init $position");
-
-
-      }
-      double dist = initPosition.distanceTo(position);
-      //print("init pos is: $initPosition and pos is $position ---- dist: $dist");
     }
 
   }
 
   void updateAngleQueue()
   {
-    if(isInitializing)
-    {
-    angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
 
-    }
+    angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
+    
     if(!isInitializing)
     {
-      angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
       nextSegment?.angle = angleQueue.last.angle;
       nextSegment?.position = angleQueue.last.position;
       angleQueue.removeLast();
@@ -215,7 +210,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   {
     if(!isInitializing)
     {
-      _addCaterPillarSegment();
+      addSegment();
     }
     else
     {
@@ -223,24 +218,14 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     }
   }
 
-  void _addCaterPillarSegment()
+  void addSegment()
   {
     if(lastSegment != null)
     {
       lastSegment?.addCaterpillarSegemntRequest();
-      int debug = lastSegment!.index;
-      print("NEXT SEG $debug");
     }
     else{
-       nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
-       nextSegment?.position = position;
-       gameWorld.add(nextSegment!);
-       int debug = angleQueue.length;
-       print('AAA - LENGHT OF ANGLE LIST; $debug');
-       print("AAAAAA in init $position");
-       nextSegment?.previousSegment = this;
-       nextSegment?.priority = priority-1;
-       lastSegment = nextSegment;
+      super.addCaterPillarSegment(this);   
     }
   }
     

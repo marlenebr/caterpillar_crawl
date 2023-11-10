@@ -27,15 +27,6 @@ void main() {
   );
 }
 
-// class CaterPillarWorld extends World
-// {
-//   @override
-//   FutureOr<void> onLoad() async {
-//     // Load all the assets that are needed in this world
-//     // and add components etc.
-//   }
-// }
-
 class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDetection  {
 
   late CaterPillar _caterPillar;
@@ -89,7 +80,7 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
       anchorPosY: 106, 
       caterpillarSegment: 
       CaterpillarSegmentData(
-        imagePath: 'caterPillar_segment.png', 
+        imagePath: 'caterPillar_segment.png',
         spriteSize: Vector2.all(128), 
         anchorPosYTop: 35,
         anchorPosYBottom: 100)
@@ -98,7 +89,7 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
 
   void createAndAddCaterillar()
   {
-    _caterPillar = CaterPillar(rotationSpeed,movingSpeed,createCaterpillarData(),world,64);
+    _caterPillar = CaterPillar(64,createCaterpillarData(),world,rotationSpeed,movingSpeed);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(1000, _caterPillar);
