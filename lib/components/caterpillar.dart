@@ -19,7 +19,21 @@ class CaterpillarElement extends PositionComponent
   final angleQueue = Queue<double>(); // ListQueue() by default
   bool isInitializing = true;
 
+  double secondCounter = 0;
+  double frameDuration = 1/5;
+
   CaterpillarElement();
+
+  void caterPillarFixedUpdate(double dt, Function f)
+  {
+    secondCounter += dt;
+    if(secondCounter >=frameDuration)
+    {
+      f();
+      secondCounter  =0;
+    }
+
+  }
 }
 
 class CaterPillar extends CaterpillarElement with CollisionCallbacks

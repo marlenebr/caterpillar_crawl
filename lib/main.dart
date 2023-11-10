@@ -40,9 +40,9 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
 
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
-  double rotationDuration = 3.2;
   double angleToLerpTo = 0;
-  double speed = 3;
+  double rotationSpeed = 2;
+  double movingSpeed = 90;
 
   CaterpillarCrawlMain();
 
@@ -98,7 +98,7 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
 
   void createAndAddCaterillar()
   {
-    _caterPillar = CaterPillar(speed,60,createCaterpillarData(),world,64);
+    _caterPillar = CaterPillar(rotationSpeed,movingSpeed,createCaterpillarData(),world,64);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(1000, _caterPillar);
