@@ -42,7 +42,7 @@ class CaterpillarCrawlMain extends Forge2DGame with TapCallbacks, HasCollisionDe
   late GroundMap _groundMap;
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  double movingSpeed = 20;
+  double movingSpeed = 90;
 
   CaterpillarCrawlMain();
 

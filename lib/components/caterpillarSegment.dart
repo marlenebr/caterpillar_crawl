@@ -32,7 +32,7 @@ class CaterpillarSegment extends CaterpillarElement
     final double anchorPosY = (segmentData.anchorPosYTop/segmentData.spriteSize.y);
     anchor = Anchor(0.5,anchorPosY);
     index = caterpillar.snackCount;
-    print("NEW SEGMENT $index");
+    print("NEW SEGMENT $index");  
 
     addSegmentSprite();
     //DEBUG
@@ -142,6 +142,7 @@ class CaterpillarSegment extends CaterpillarElement
 
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
+    nextSegment?.priority = priority-1;
     return nextSegment!;
     
   }

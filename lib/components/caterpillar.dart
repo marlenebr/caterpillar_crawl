@@ -87,6 +87,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
     add(animation);
+    priority = 10000;
     //DEBUG
     // add(FlameGameUtils.debugDrawAnchor(this));
     // debugMode = true;
@@ -196,9 +197,14 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   void updateAngleQueue()
   {
+    if(isInitializing)
+    {
     angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
+
+    }
     if(!isInitializing)
     {
+      angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
       nextSegment?.angle = angleQueue.last.angle;
       nextSegment?.position = angleQueue.last.position;
       angleQueue.removeLast();
@@ -233,7 +239,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
        print('AAA - LENGHT OF ANGLE LIST; $debug');
        print("AAAAAA in init $position");
        nextSegment?.previousSegment = this;
-
+       nextSegment?.priority = priority-1;
        lastSegment = nextSegment;
     }
   }
