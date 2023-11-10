@@ -39,12 +39,12 @@ class FlameGameUtils
   }
 }
 
-extension PositionComponentExtensions on PositionComponent {
-    void setChildToAnchorPosition(PositionComponent child)
-    {
-      //cause anchor is not the 0/0 position - calculate that
-      final anchorVector  = anchor.toVector2();
-      final anchorPosLocal = Vector2(size.x*anchorVector.x,size.y*anchorVector.y);
-      child.position = anchorPosLocal;
-    }
-}
+// extension PositionComponentExtensions on PositionComponent {
+//     void setChildToAnchorPosition(PositionComponent child)
+//     {
+//       //cause anchor is not the 0/0 position - calculate that
+//       final anchorVector  = anchor.toVector2();
+//       final anchorPosLocal = Vector2(size.x*anchorVector.x,size.y*anchorVector.y);
+//       child.position = anchorPosLocal;// + position;
+//     }
+// }

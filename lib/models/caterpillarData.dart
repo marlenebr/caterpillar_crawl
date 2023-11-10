@@ -31,3 +31,11 @@ class CaterpillarSegmentData
     required this.anchorPosYBottom,
     });
 }
+
+class MovementTransferData
+{
+  final double angle;
+  final Vector2 position;
+
+  const MovementTransferData({required this.angle,required this.position});
+}

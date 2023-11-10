@@ -16,11 +16,14 @@ class CaterpillarElement extends PositionComponent
   CaterpillarSegment? nextSegment;
   late SpriteAnimationComponent animation;
 
-  final angleQueue = Queue<double>(); // ListQueue() by default
+  final angleQueue = Queue<MovementTransferData>(); // ListQueue() by default
   bool isInitializing = true;
 
   double secondCounter = 0;
   double frameDuration = 1/5;
+
+  bool segemntAddRequest =false;
+
 
   CaterpillarElement();
 
@@ -83,11 +86,10 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     angleToLerpTo = angle;
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
-    addCaterPillarSegment();
     add(animation);
     //DEBUG
-    //add(FlameGameUtils.debugDrawAnchor(this));
-    //debugMode = true;
+    // add(FlameGameUtils.debugDrawAnchor(this));
+    // debugMode = true;
 
   }
 
@@ -126,7 +128,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
     if (other is Snack) {
       snackCount++;
-      addCaterPillarSegment();
+      addCaterpillarSegemntRequest();
     }
   }
 
@@ -174,12 +176,16 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
       if(isInitializing && initPosition.distanceTo(position) > segmentDist)
       {
         isInitializing = false;
+        if(segemntAddRequest)
+        {
+          _addCaterPillarSegment();
+        }
         print("INIT DONE OF HEAD SEGMENT");
-
       }
       else if(isInitializing)
       {
-        print("Tick in init");
+        print("Tick in init $position");
+
 
       }
       double dist = initPosition.distanceTo(position);
@@ -190,26 +196,46 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   void updateAngleQueue()
   {
-    angleQueue.addFirst(angle);
+    angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
     if(!isInitializing)
     {
-      nextSegment?.angle = angleQueue.last - angle;
+      nextSegment?.angle = angleQueue.last.angle;
+      nextSegment?.position = angleQueue.last.position;
       angleQueue.removeLast();
     }
   }
 
-  void addCaterPillarSegment()
+  void addCaterpillarSegemntRequest()
   {
-    if( lastSegment != null)
+    if(!isInitializing)
     {
-      lastSegment?.addCaterPillarSegment();
+      _addCaterPillarSegment();
     }
     else
     {
-      nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
-      add(nextSegment!);
-      setChildToAnchorPosition(nextSegment!);
-      lastSegment = nextSegment;
+      segemntAddRequest  =true;
     }
   }
+
+  void _addCaterPillarSegment()
+  {
+    if(lastSegment != null)
+    {
+      lastSegment?.addCaterpillarSegemntRequest();
+      int debug = lastSegment!.index;
+      print("NEXT SEG $debug");
+    }
+    else{
+       nextSegment = CaterpillarSegment(segmentData: caterpillardata.caterpillarSegment, gameWorld: gameWorld,previousSegment: this, finalSize: finalSize, caterpillar: this);
+       nextSegment?.position = position;
+       gameWorld.add(nextSegment!);
+       int debug = angleQueue.length;
+       print('AAA - LENGHT OF ANGLE LIST; $debug');
+       print("AAAAAA in init $position");
+       nextSegment?.previousSegment = this;
+
+       lastSegment = nextSegment;
+    }
+  }
+    
 }
