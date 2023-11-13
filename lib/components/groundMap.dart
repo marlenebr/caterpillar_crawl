@@ -25,7 +25,7 @@ class GroundMap extends PositionComponent
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-    fillWithSnacks(80);
+    await fillWithSnacks(200);
   }
 
     @override
@@ -50,16 +50,21 @@ class GroundMap extends PositionComponent
     }
   }
 
-  void fillWithSnacks(int snackCount)
-  {
+  Future<void> fillWithSnacks(int snackCount)
+  async {
     for(int i= 0; i<snackCount;i++)
     {
-      Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
-      double randomSize = (Random().nextDouble() +8) * 2;
-      double randomAngle = Random().nextDouble() * 360;
-
-      add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition));
+      addSnack();
     }
+  }
+
+  void addSnack()
+  {
+    Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
+    double randomSize = (Random().nextDouble() +8) * 2;
+    double randomAngle = Random().nextDouble() * 360;
+
+    add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
   }
 }
 

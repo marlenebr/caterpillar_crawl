@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
+import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
