@@ -54,10 +54,12 @@ class GroundMap extends PositionComponent
   {
     for(int i= 0; i<snackCount;i++)
     {
-      Vector2 randomVector = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
-      add(Snack(position: randomVector));
-    }
+      Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
+      double randomSize = (Random().nextDouble() +8) * 2;
+      double randomAngle = Random().nextDouble() * 360;
 
+      add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition));
+    }
   }
 }
 
