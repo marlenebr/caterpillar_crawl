@@ -20,8 +20,9 @@ class CaterpillarSegment extends CaterpillarElement
     size = previousSegment.size;
     final double anchorPosY = (caterpillardata.caterpillarSegment.anchorPosYTop/caterpillardata.caterpillarSegment.spriteSize.y);
     anchor = Anchor(0.5,anchorPosY);
-    index = caterpillar.snackCount;
+    index = previousSegment.index +1;
     addSegmentSprite2();
+    
     //DEBUG
     //add(FlameGameUtils.debugDrawAnchor(this)); 
   }

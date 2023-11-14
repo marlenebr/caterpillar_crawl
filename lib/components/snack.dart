@@ -25,8 +25,19 @@ late final RectangleHitbox hitBox;
     int randomInt = Random().nextInt(2)+1;
     sprite= await Sprite.load("snack00$randomInt.png");
     anchor = Anchor.center;
-    hitBox = RectangleHitbox();
-    add(hitBox);
+    // hitBox = RectangleHitbox();
+    // add(hitBox);
+  }
+
+   @override
+  void update(double dt) {    
+    if(groundMap.player.position.distanceTo(position) <60)
+    {
+      removeFromParent();
+      groundMap.addSnack();
+      groundMap.player.snackCount++;
+      groundMap.player.addCaterpillarSegemntRequest();
+    }
   }
 
   // Future<void> _addSnackAnimationSprite(String spritePath)
@@ -45,12 +56,12 @@ late final RectangleHitbox hitBox;
 
   // }
 
-  @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollision(intersectionPoints, other);
-    if (other is CaterPillar) {
-      removeFromParent();
-      groundMap.addSnack();
-    }
-  }
+  // @override
+  // void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+  //   super.onCollision(intersectionPoints, other);
+  //   if (other is CaterPillar) {
+  //     removeFromParent();
+  //     groundMap.addSnack();
+  //   }
+  // }
 }

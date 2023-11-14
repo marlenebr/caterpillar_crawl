@@ -12,8 +12,9 @@ class GroundMap extends PositionComponent
 
   double mapSize;
   CaterPillar player;
+  World world;
 
-  GroundMap(this.mapSize, this.player) : super(size: Vector2.all(mapSize));
+  GroundMap(this.mapSize, this.player, this.world) : super(size: Vector2.all(mapSize));
 
 
   @override
@@ -25,10 +26,10 @@ class GroundMap extends PositionComponent
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-    await fillWithSnacks(400);
+    await fillWithSnacks(200);
   }
 
-    @override
+  @override
   void update(double dt) {    
     super.update(dt);
     resetPlayerOnMapEnd();
@@ -60,11 +61,11 @@ class GroundMap extends PositionComponent
 
   void addSnack()
   {
-    Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize;
+    Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize - size/2;
     double randomSize = (Random().nextDouble() +8) * 2;
     double randomAngle = Random().nextDouble() * 360;
 
-    add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
+    world.add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
   }
 }
 

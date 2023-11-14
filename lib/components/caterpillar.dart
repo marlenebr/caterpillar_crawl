@@ -19,6 +19,8 @@ class CaterpillarElement extends PositionComponent
 
   final angleQueue = Queue<MovementTransferData>(); // ListQueue() by default
   bool isInitializing = true;
+  late int index;
+
 
   double secondCounter = 0;
   double frameDuration = 1/2;
@@ -95,6 +97,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     add(RectangleHitbox());
     add(animation);
     priority = 10000;
+    index  =0;
     //DEBUG
     // add(FlameGameUtils.debugDrawAnchor(this));
     // debugMode = true;
@@ -112,10 +115,10 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   @override
   void update(double dt) {
     super.update(dt);
-    if(caterPillarFixedUpdate(dt))
-    {
+     if(caterPillarFixedUpdate(dt))
+     {
       addCaterpillarSegemntRequest();
-    }
+     }
     updateLerpToAngle(dt);
     updateMoveOn(dt);
 

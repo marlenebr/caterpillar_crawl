@@ -43,7 +43,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   Future<void> onLoad() async {
     await super.onLoad();  
     add(FpsTextComponent());
-    createAndAddCaterillar(1000);
+    createAndAddCaterillar(5000);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
   }  
@@ -93,7 +93,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     _caterPillar = CaterPillar(64,createCaterpillarData(),world,rotationSpeed,movingSpeed);
     _caterPillar.transform.position = Vector2(40,100);
 
-    _groundMap = GroundMap(mapSize, _caterPillar);
+    _groundMap = GroundMap(mapSize, _caterPillar,world);
     world.add(_groundMap);
     world.add(_caterPillar);
 
