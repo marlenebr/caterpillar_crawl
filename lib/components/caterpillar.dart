@@ -2,20 +2,18 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
-import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
 
 class CaterpillarElement extends PositionComponent
 {
   CaterpillarSegment? nextSegment;
   CaterpillarData caterpillardata;
-  Forge2DWorld gameWorld;
+  World gameWorld;
 
   late SpriteAnimationComponent animation;
 
@@ -23,21 +21,22 @@ class CaterpillarElement extends PositionComponent
   bool isInitializing = true;
 
   double secondCounter = 0;
-  double frameDuration = 1/5;
+  double frameDuration = 1/2;
 
   bool segemntAddRequest =false;
   double finalSize;
 
   CaterpillarElement(this.finalSize, this.caterpillardata, this.gameWorld);
 
-  void caterPillarFixedUpdate(double dt, Function f)
+  bool caterPillarFixedUpdate(double dt)
   {
     secondCounter += dt;
     if(secondCounter >=frameDuration)
     {
-      f();
       secondCounter  =0;
+      return true;
     }
+    return false;
   } 
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
@@ -113,6 +112,10 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   @override
   void update(double dt) {
     super.update(dt);
+    if(caterPillarFixedUpdate(dt))
+    {
+      addCaterpillarSegemntRequest();
+    }
     updateLerpToAngle(dt);
     updateMoveOn(dt);
 

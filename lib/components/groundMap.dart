@@ -25,7 +25,7 @@ class GroundMap extends PositionComponent
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-    await fillWithSnacks(200);
+    await fillWithSnacks(400);
   }
 
     @override

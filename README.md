@@ -21,3 +21,13 @@ Caterpillar Crawl is a small game developed using Flutter and the Flame engine. 
 ## Getting Started
 
 First rough implementation: a simple Bug navigated over Tap-input on a small environment. The Bug respawns to the middle when touching the sides.
+
+## Some notes about Performance
+results of a Very Frist Performance Test:
+    - Caterpillar with 400 segments and 200 Snacks in the Scene: 48 FPS
+    - Caterpillar, calculate with Framerate of 25,  with 400 segments, 200 Snacks: 50 FPS
+    - Caterpillar, sprite not animated,  with 400 segments, 200 Snacks: 50 FPS
+
+    Snacks with Hitboxes perform very badly when they are a lot!!
+
+
