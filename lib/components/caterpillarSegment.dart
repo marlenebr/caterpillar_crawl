@@ -12,7 +12,7 @@ class CaterpillarSegment extends CaterpillarElement
   CaterpillarElement previousSegment;
   late int index;
 
-  CaterpillarSegment(super.finalSize, super.caterpillardata, super.gameWorld, {required this.previousSegment, required this.caterpillar});
+  CaterpillarSegment(super.finalSize, super.caterpillardata, super.gameWorld, super.segmentTravelTime, {required this.previousSegment, required this.caterpillar});
 
   @override
   Future<void> onLoad() async {
@@ -33,8 +33,9 @@ class CaterpillarSegment extends CaterpillarElement
 
   void initSegment()
   {
-    if(isInitializing && angleQueue.length >= previousSegment.angleQueue.length)
+    if(isInitializing && timeSinceInit > segmentTravelTime)
     {
+      //kommt einmal vor
       isInitializing =false;
       if(debugMode)
       {

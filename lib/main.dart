@@ -30,7 +30,12 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   late GroundMap _groundMap;
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  double movingSpeed = 120;
+  double movingSpeed = 320;
+  double travelTimePerSegment = 0;
+  double caterpillarSize = 64;
+  //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
+  //eg. ist needs mor segments for a longer caterpillar
+  double accuracy = 0.4;
 
   CaterpillarCrawlMain();
 
@@ -67,6 +72,11 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     moveCaterpillarOnTap(event.localPosition);
   }
 
+  double _calcTimeForSegmentTravel(double distance, double speed)
+  {
+    return distance/speed;
+  }
+
   void moveCaterpillarOnTap(Vector2 tapPosition)
   {
         Vector2 tapDirection = size/2 - tapPosition;
@@ -89,7 +99,10 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   void createAndAddCaterillar(double mapSize)
   {
-    _caterPillar = CaterPillar(64,createCaterpillarData(),world,rotationSpeed,movingSpeed);
+    double refinedSegmentDistance = caterpillarSize *accuracy; //segments are overlapping a bit - depent on the desing another value could be better
+    travelTimePerSegment = _calcTimeForSegmentTravel(refinedSegmentDistance,movingSpeed);
+    print("time for segment: $travelTimePerSegment");
+    _caterPillar = CaterPillar(caterpillarSize,createCaterpillarData(),world,rotationSpeed,movingSpeed,travelTimePerSegment);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(mapSize, _caterPillar,world);
