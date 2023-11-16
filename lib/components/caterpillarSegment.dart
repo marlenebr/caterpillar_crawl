@@ -18,13 +18,10 @@ class CaterpillarSegment extends CaterpillarElement
   Future<void> onLoad() async {
     super.onLoad();
     size = previousSegment.size;
-    final double anchorPosY = (caterpillardata.caterpillarSegment.anchorPosYTop/caterpillardata.caterpillarSegment.spriteSize.y);
-    anchor = Anchor(0.5,anchorPosY);
+    anchor = Anchor(0.5,0.5);
     index = previousSegment.index +1;
     addSegmentSprite2();
-    
-    //DEBUG
-    //add(FlameGameUtils.debugDrawAnchor(this)); 
+
   }
 
   @override
@@ -41,7 +38,10 @@ class CaterpillarSegment extends CaterpillarElement
       isInitializing =false;
       if(debugMode)
       {
+        var queueListLength = angleQueue.length;
         print("init of segment done $index");
+        print("listLen $queueListLength");
+
       }
       if(segemntAddRequest)
       {
@@ -70,11 +70,6 @@ class CaterpillarSegment extends CaterpillarElement
 
   Future<void> addSegmentSprite2()
   async {
-    // final data = SpriteAnimationData.sequenced(
-    // textureSize: caterpillardata.caterpillarSegment.spriteSize,
-    // amount: 4,
-    // stepTime: 0.1,
-    // );
     Sprite segmentSprite = await Sprite.load(caterpillardata.caterpillarSegment.imagePath);
     SpriteComponent spritecomp = SpriteComponent(
       sprite: segmentSprite, 

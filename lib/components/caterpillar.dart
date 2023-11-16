@@ -43,7 +43,7 @@ class CaterpillarElement extends PositionComponent
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
     nextSegment = CaterpillarSegment(finalSize, caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
-    nextSegment?.position = position;
+    //nextSegment?.position = angleQueue.last.position;
     gameWorld.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
@@ -60,13 +60,16 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   double rotationSpeed;
   double movingSpeed;
 
+  //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
+  //eg. ist needs mor segments for a longer caterpillar
+  double accuracy = 0.65;
+
 
   late double angleToLerpTo;
   late Vector2 velocity;
   late double scaledAnchorYPos;
 
   late Vector2 initPosition;
-  late double segmentDist;
 
   CaterpillarSegment? lastSegment;
 
@@ -89,19 +92,14 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
       scale: Vector2.all(finalSize/caterpillardata.spriteSize.x)
     );
 
-    final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
-    segmentDist = (caterpillardata.caterpillarSegment.anchorPosYBottom -caterpillardata.caterpillarSegment.anchorPosYTop)*0.5;
-    anchor = Anchor(0.5,anchorPos);
+   final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
+   anchor = Anchor(0.5,anchorPos);
     angleToLerpTo = angle;
     velocity = Vector2(0, 0);
     add(RectangleHitbox());
     add(animation);
     priority = 10000;
     index  =0;
-    //DEBUG
-    // add(FlameGameUtils.debugDrawAnchor(this));
-    // debugMode = true;
-
   }
 
   @override
@@ -188,7 +186,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
         initPosition = Vector2(position.x,position.y); 
         initOnUpdate  =true;
       }
-      if(isInitializing && initPosition.distanceTo(position) > segmentDist)
+      if(isInitializing && initPosition.distanceTo(position) > size.y/(1+accuracy))
       {
         isInitializing = false;
         if(segemntAddRequest)

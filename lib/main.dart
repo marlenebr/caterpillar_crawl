@@ -3,16 +3,12 @@ import 'dart:async';
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
-import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/cache.dart';
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 
 final Images imageLoader = Images();
@@ -43,7 +39,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   Future<void> onLoad() async {
     await super.onLoad();  
     add(FpsTextComponent());
-    createAndAddCaterillar(5000);
+    createAndAddCaterillar(2000);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
     debugMode = false;
@@ -101,10 +97,5 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     _groundMap = GroundMap(mapSize, _caterPillar,world);
     world.add(_groundMap);
     world.add(_caterPillar);
-
-    // initializeCollisionDetection(
-    //   mapDimensions: Rect.fromLTWH(0, 0, mapSize, mapSize),
-    //   minimumDistance: 10,
-    // );
   }
 }
