@@ -90,7 +90,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     );
 
     final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
-    segmentDist = (caterpillardata.caterpillarSegment.anchorPosYBottom -caterpillardata.caterpillarSegment.anchorPosYTop)*animation.scale.y;
+    segmentDist = (caterpillardata.caterpillarSegment.anchorPosYBottom -caterpillardata.caterpillarSegment.anchorPosYTop)*0.5;
     anchor = Anchor(0.5,anchorPos);
     angleToLerpTo = angle;
     velocity = Vector2(0, 0);
@@ -115,10 +115,11 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   @override
   void update(double dt) {
     super.update(dt);
-     if(caterPillarFixedUpdate(dt))
-     {
+    if(debugMode && caterPillarFixedUpdate(dt))
+    {
+      //Create Segemtns Faster
       addCaterpillarSegemntRequest();
-     }
+    }
     updateLerpToAngle(dt);
     updateMoveOn(dt);
 
@@ -194,7 +195,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
         {
           addSegment();
         }
-        print("INIT DONE OF HEAD SEGMENT");
       }
     }
 

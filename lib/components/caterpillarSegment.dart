@@ -39,7 +39,10 @@ class CaterpillarSegment extends CaterpillarElement
     if(isInitializing && angleQueue.length >= previousSegment.angleQueue.length)
     {
       isInitializing =false;
-      print("init of segment done $index");
+      if(debugMode)
+      {
+        print("init of segment done $index");
+      }
       if(segemntAddRequest)
       {
         addCaterPillarSegment(caterpillar);

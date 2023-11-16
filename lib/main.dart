@@ -34,7 +34,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   late GroundMap _groundMap;
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  double movingSpeed = 80;
+  double movingSpeed = 120;
 
   CaterpillarCrawlMain();
 
@@ -46,6 +46,11 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     createAndAddCaterillar(5000);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
+    debugMode = false;
+    if(debugMode)
+    {
+      print("DEBUG IS ON");
+    }
   }  
 
   @override
