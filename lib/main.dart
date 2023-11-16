@@ -83,9 +83,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
       caterpillarSegment: 
       CaterpillarSegmentData(
         imagePath: 'segment_single64.png',
-        spriteSize: Vector2.all(64), 
-        anchorPosYTop: 35,
-        anchorPosYBottom: 100)
+        spriteSize: Vector2.all(64))
     );
   }
 

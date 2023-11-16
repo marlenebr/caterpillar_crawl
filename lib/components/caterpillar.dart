@@ -62,7 +62,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
   //eg. ist needs mor segments for a longer caterpillar
-  double accuracy = 0.65;
+  double accuracy = 0.4;
 
 
   late double angleToLerpTo;
