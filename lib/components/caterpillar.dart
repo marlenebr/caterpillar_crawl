@@ -13,7 +13,7 @@ class CaterpillarElement extends PositionComponent
 {
   CaterpillarSegment? nextSegment;
   CaterpillarData caterpillardata;
-  World gameWorld;
+  CaterpillarCrawlMain gameWorld;
 
   late SpriteAnimationComponent animation;
 
@@ -54,10 +54,12 @@ class CaterpillarElement extends PositionComponent
   {
     nextSegment = CaterpillarSegment(finalSize, caterpillardata, gameWorld,segmentTravelTime, previousSegment: this, caterpillar: caterpillar);
     //nextSegment?.position = angleQueue.last.position;
-    gameWorld.add(nextSegment!);
+    gameWorld.world.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
     nextSegment?.priority = priority-1;
+    nextSegment?.index = index+1;
+    gameWorld.onSegmentAddedToPlayer(nextSegment!.index);
     return nextSegment!;
     
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:flame/cache.dart';
@@ -28,9 +29,11 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
+  late CaterpillarGameUI _gameUI;
+
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  double movingSpeed = 320;
+  double movingSpeed = 120;
   double travelTimePerSegment = 0;
   double caterpillarSize = 64;
   //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
@@ -43,7 +46,10 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   @override
   Future<void> onLoad() async {
     await super.onLoad();  
+    world = World();
     add(FpsTextComponent());
+    _gameUI = CaterpillarGameUI(mainGame: this);
+    add(_gameUI);
     createAndAddCaterillar(2000);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
@@ -63,7 +69,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   @override
   void render(Canvas canvas) {
-    canvas.drawPaint(Paint()..color = Colors.orange.shade700);
+    canvas.drawPaint(Paint()..color = Color.fromARGB(255, 120, 155, 117));
     super.render(canvas);
   }
 
@@ -102,11 +108,17 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     double refinedSegmentDistance = caterpillarSize *accuracy; //segments are overlapping a bit - depent on the desing another value could be better
     travelTimePerSegment = _calcTimeForSegmentTravel(refinedSegmentDistance,movingSpeed);
     print("time for segment: $travelTimePerSegment");
-    _caterPillar = CaterPillar(caterpillarSize,createCaterpillarData(),world,rotationSpeed,movingSpeed,travelTimePerSegment);
+    _caterPillar = CaterPillar(caterpillarSize,createCaterpillarData(),this,rotationSpeed,movingSpeed,travelTimePerSegment);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(mapSize, _caterPillar,world);
     world.add(_groundMap);
     world.add(_caterPillar);
+    //world.priority =100;
+  }
+
+  void onSegmentAddedToPlayer(int segmentCount)
+  {
+      _gameUI.setSegmentCountUi(segmentCount);
   }
 }

@@ -19,7 +19,6 @@ class CaterpillarSegment extends CaterpillarElement
     super.onLoad();
     size = previousSegment.size;
     anchor = Anchor(0.5,0.5);
-    index = previousSegment.index +1;
     addSegmentSprite2();
 
   }

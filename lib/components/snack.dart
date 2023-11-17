@@ -22,6 +22,7 @@ late final RectangleHitbox hitBox;
 
   @override
   Future<void> onLoad() async {
+    priority = 2;
     int randomInt = Random().nextInt(2)+1;
     sprite= await Sprite.load("snack00$randomInt.png");
     anchor = Anchor.center;

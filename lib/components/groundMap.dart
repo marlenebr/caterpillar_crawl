@@ -19,6 +19,7 @@ class GroundMap extends PositionComponent
 
   @override
   Future<void> onLoad() async {
+    priority = 1;
     add(GroundMapFloorParallax(player,super.size/6));
     add(SpriteComponent(
       sprite: await Sprite.load('leafGround01.png'),
@@ -26,7 +27,7 @@ class GroundMap extends PositionComponent
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-    await fillWithSnacks(200);
+    await fillWithSnacks(300);
   }
 
   @override
@@ -38,7 +39,7 @@ class GroundMap extends PositionComponent
   @override
   void render(Canvas canvas) {
     // TODO: implement render
-    canvas.drawPaint(Paint()..color = Color.fromARGB(255, 158, 179, 139));
+    // canvas.drawPaint(Paint()..color = Color.fromARGB(255, 158, 179, 139));
     super.render(canvas);
 
   }
