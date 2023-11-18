@@ -12,7 +12,12 @@ class GroundMap extends PositionComponent
 
   double mapSize;
   CaterPillar player;
-  World world;
+  late CaterPillar? enemy;
+  double secondCounter = 0;
+
+  CaterpillarCrawlMain world;
+
+  bool hasEnemies = false;
 
   GroundMap(this.mapSize, this.player, this.world) : super(size: Vector2.all(mapSize));
 
@@ -20,6 +25,7 @@ class GroundMap extends PositionComponent
   @override
   Future<void> onLoad() async {
     priority = 1;
+    enemy = null;
     add(GroundMapFloorParallax(player,super.size/6));
     add(SpriteComponent(
       sprite: await Sprite.load('leafGround01.png'),
@@ -34,6 +40,7 @@ class GroundMap extends PositionComponent
   void update(double dt) {    
     super.update(dt);
     resetPlayerOnMapEnd();
+    updateEnemydirection(dt,3);
   }
 
   @override
@@ -49,6 +56,14 @@ class GroundMap extends PositionComponent
     if(player.transform.position.x.abs() >mapSize/2 || player.transform.position.y.abs() >mapSize/2)
     {
       player.transform.position = Vector2.all(0);
+    }
+
+    if(enemy !=  null)
+    {Vector2 enemyPos = enemy!.transform.position;
+      if(enemyPos.x.abs() >mapSize/2 || enemyPos.y.abs() >mapSize/2)
+      {
+        enemy?.transform.position = Vector2.all(0);
+      }
     }
   }
 
@@ -66,8 +81,28 @@ class GroundMap extends PositionComponent
     double randomSize = (Random().nextDouble() +8) * 2;
     double randomAngle = Random().nextDouble() * 360;
 
-    world.add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
+    world.world.add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
   }
+
+  void addEnemy(CaterPillar enemyCaterpillar)
+  {
+    enemy = enemyCaterpillar;
+    hasEnemies  = true;
+  }
+
+  bool updateEnemydirection(double dt,double frameDuration)
+  {
+    if(hasEnemies)
+    {
+      secondCounter += dt;
+      if(secondCounter >=frameDuration)
+      {
+        secondCounter  =0;
+        enemy?.onMoveDirectionChange(player.position);
+      }
+    }
+    return false;
+  } 
 }
 
 class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {

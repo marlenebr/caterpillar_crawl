@@ -6,6 +6,9 @@ class CaterpillarData
   final String imagePath;
   final Vector2 spriteSize;
   final double anchorPosY;
+  final double movingspeed;
+  final double refinedSegmentDistance; //value to slightly change the segment distance - depends on how the sprite design looks the best with
+  final int animationSprites;
   final CaterpillarSegmentData caterpillarSegment;
   final Vector2 finalSize;
 
@@ -14,6 +17,9 @@ class CaterpillarData
     required this.imagePath,
     required this.spriteSize,
     required this.anchorPosY,
+    required this.movingspeed,
+    required this.refinedSegmentDistance,
+    required this.animationSprites,
     required this.caterpillarSegment,
     required this.finalSize
     });

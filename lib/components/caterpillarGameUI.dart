@@ -8,6 +8,7 @@ class CaterpillarGameUI extends PositionComponent
 {
 
   late TextComponent? _segmentCounterText;
+  late TextComponent? _enemySegmentCounterText;
 
   late TextPaint regularTextPaint;
 
@@ -21,7 +22,7 @@ class CaterpillarGameUI extends PositionComponent
     super.priority = double.maxFinite.toInt();
     size = mainGame.size;
 
-    double textLength = 150;
+    double textLength = 250;
 
     createRegularTextStyle();
     _segmentCounterText  = TextBoxComponent(
@@ -32,11 +33,25 @@ class CaterpillarGameUI extends PositionComponent
       align: Anchor.topRight,
       text: "-1");
     add(_segmentCounterText!);
+
+      _enemySegmentCounterText  = TextBoxComponent(
+      position: Vector2((super.size.x) - textLength/2,0 +40),
+      size: Vector2(textLength,40),
+      textRenderer: regularTextPaint,
+      anchor: Anchor.topCenter,
+      align: Anchor.topRight,
+      text: "-1");
+    add(_enemySegmentCounterText!);
   }
 
   void setSegmentCountUi(int segmentCount)
   {
-    _segmentCounterText?.text = "Len: " + segmentCount.toString();
+    _segmentCounterText?.text = "Player: " + segmentCount.toString();
+  }
+
+    void setEnemySegmentCountUi(int segmentCount)
+  {
+    _enemySegmentCounterText?.text = "Enemy: " + segmentCount.toString();
   }
 
   void createRegularTextStyle()

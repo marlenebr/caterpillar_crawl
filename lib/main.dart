@@ -33,14 +33,12 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  double movingSpeed = 120;
-  double travelTimePerSegment = 0;
+  // double movingSpeed = 120;
   // Vector2 caterpillarSize = Vector2(32,128);
   // Vector2 caterpillarSegmentSize = Vector2(32,128);
 
   //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
   //eg. ist needs mor segments for a longer caterpillar
-  double accuracy = 0.45;
 
   CaterpillarCrawlMain();
 
@@ -80,11 +78,6 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     moveCaterpillarOnTap(event.localPosition);
   }
 
-  double _calcTimeForSegmentTravel(double distance, double speed)
-  {
-    return distance/speed;
-  }
-
   void moveCaterpillarOnTap(Vector2 tapPosition)
   {
         Vector2 tapDirection = size/2 - tapPosition;
@@ -98,6 +91,9 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
       imagePath: 'caterPillar_head.png', 
       spriteSize: Vector2.all(128), 
       anchorPosY: 106, 
+      movingspeed: 120,
+      refinedSegmentDistance: 0.45,
+      animationSprites: 4,
       caterpillarSegment: 
       CaterpillarSegmentData(
         imagePath: 'segment_single64.png',
@@ -108,23 +104,53 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     );
   }
 
+    CaterpillarData createEnemyData()
+  {
+    //Data for enemy Caterpillar - Orange horned
+    return  CaterpillarData(
+      imagePath: 'enemy_head_anim.png', 
+      spriteSize: Vector2.all(128), 
+      anchorPosY: 106, 
+      movingspeed: 60,
+      refinedSegmentDistance: 0.6,
+      animationSprites: 3,
+      caterpillarSegment: 
+      CaterpillarSegmentData(
+        imagePath: 'enemy_segment.png',
+        spriteSize: Vector2.all(128),
+        finalSize: Vector2(64,64)
+),
+      finalSize: Vector2(64,64)
+    );
+  }
+
   void createAndAddCaterillar(double mapSize)
   {
     CaterpillarData mainPlayerCaterpillar = createCaterpillarData();
-    double refinedSegmentDistance = mainPlayerCaterpillar.caterpillarSegment.finalSize.y *accuracy; //segments are overlapping a bit - depent on the desing another value could be better
-    travelTimePerSegment = _calcTimeForSegmentTravel(refinedSegmentDistance,movingSpeed);
-    print("time for segment: $travelTimePerSegment");
-    _caterPillar = CaterPillar(mainPlayerCaterpillar,this,rotationSpeed,movingSpeed,travelTimePerSegment);
-    _caterPillar.transform.position = Vector2(40,100);
+    _caterPillar = CaterPillar(mainPlayerCaterpillar, this,rotationSpeed);
+    _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50,50);
 
-    _groundMap = GroundMap(mapSize, _caterPillar,world);
+
+    CaterpillarData enemyCaterpillar = createEnemyData();
+    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this,rotationSpeed);
+    _enemy.transform.position = Vector2(50,50);
+
+    _groundMap = GroundMap(mapSize, _caterPillar,this);
     world.add(_groundMap);
     world.add(_caterPillar);
+    world.add(_enemy);
+    _groundMap.addEnemy(_enemy);
+
     //world.priority =100;
   }
 
   void onSegmentAddedToPlayer(int segmentCount)
   {
       _gameUI.setSegmentCountUi(segmentCount);
+  }
+
+    void onSegmentAddedToEnemy(int segmentCount)
+  {
+      _gameUI.setEnemySegmentCountUi(segmentCount);
   }
 }

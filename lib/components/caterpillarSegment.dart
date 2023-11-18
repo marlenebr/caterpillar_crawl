@@ -13,7 +13,7 @@ class CaterpillarSegment extends CaterpillarElement
   late int index;
 
 
-  CaterpillarSegment(super.caterpillardata, super.gameWorld, super.segmentTravelTime, {required this.previousSegment, required this.caterpillar});
+  CaterpillarSegment(super.caterpillardata, super.gameWorld, {required this.previousSegment, required this.caterpillar});
 
   @override
   Future<void> onLoad() async {
@@ -34,7 +34,7 @@ class CaterpillarSegment extends CaterpillarElement
 
   void initSegment()
   {
-    if(isInitializing && timeSinceInit > segmentTravelTime)
+    if(isInitializing && timeSinceInit > caterpillar.segmentTravelTime)
     {
       //kommt einmal vor
       isInitializing =false;

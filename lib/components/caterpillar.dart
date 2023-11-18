@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
-import 'package:caterpillar_crawl/components/snack.dart';
+// import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -24,15 +24,11 @@ class CaterpillarElement extends PositionComponent
 
   double secondCounter= 0;
   double timeSinceInit = 0; 
-  double frameDuration = 1/2;
-
-  double segmentTravelTime;
-
 
   bool segemntAddRequest =false;
   late Vector2 finalSize;
 
-  CaterpillarElement(this.caterpillardata, this.gameWorld, this.segmentTravelTime);
+  CaterpillarElement(this.caterpillardata, this.gameWorld);
 
   @override
   void update(double dt) {
@@ -40,7 +36,7 @@ class CaterpillarElement extends PositionComponent
     timeSinceInit +=dt;
   }
 
-  bool caterPillarFixedUpdate(double dt)
+  bool caterPillarFixedUpdate(double dt,double frameDuration)
   {
     secondCounter += dt;
     if(secondCounter >=frameDuration)
@@ -52,20 +48,19 @@ class CaterpillarElement extends PositionComponent
   } 
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
-    nextSegment = CaterpillarSegment(caterpillardata, gameWorld,segmentTravelTime, previousSegment: this, caterpillar: caterpillar);
+    nextSegment = CaterpillarSegment(caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
     //nextSegment?.position = angleQueue.last.position;
     gameWorld.world.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
     nextSegment?.priority = priority-1;
     nextSegment?.index = index+1;
-    gameWorld.onSegmentAddedToPlayer(nextSegment!.index);
     return nextSegment!;
     
   }
 }
 
-class CaterPillar extends CaterpillarElement with CollisionCallbacks
+class CaterPillar extends CaterpillarElement
 {
   static const double fullCircle = 2*pi;
 
@@ -74,24 +69,26 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   late double angleToLerpTo;
   late Vector2 velocity;
   late double scaledAnchorYPos;
-  double movingSpeed;
 
   late Vector2 initPosition;
+  late double segmentTravelTime;
+
 
   CaterpillarSegment? lastSegment;
 
 
   int snackCount = 0;
 
-  CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed, this.movingSpeed, super.segmentTravelTime);
+  CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed);
 
   @override
   Future<void> onLoad() async {
+    segmentTravelTime = _calcTimeForSegmentTravel();
     size = caterpillardata.finalSize;
     finalSize = caterpillardata.finalSize;
     final data = SpriteAnimationData.sequenced(
     textureSize: caterpillardata.spriteSize,
-    amount: 4,
+    amount: caterpillardata.animationSprites,
     stepTime: 0.1,
     );
     animation = SpriteAnimationComponent.fromFrameData(
@@ -105,7 +102,6 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
    anchor = Anchor(0.5,anchorPos);
     angleToLerpTo = angle;
     velocity = Vector2(0, 0);
-    add(RectangleHitbox());
     add(animation);
     priority = 10000;
     index  =0;
@@ -130,7 +126,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
         addSegment();
       }
     }
-    if(debugMode && caterPillarFixedUpdate(dt))
+    if(debugMode && caterPillarFixedUpdate(dt,3))
     {
       //Create Segemtns Faster
       addCaterpillarSegemntRequest();
@@ -153,15 +149,15 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     position = gameSize / 2;
   }
 
-@override
-  void onCollision(Set<Vector2> points, PositionComponent other) {
-    super.onCollision(points,other);
+// @override
+//   void onCollision(Set<Vector2> points, PositionComponent other) {
+//     super.onCollision(points,other);
 
-    if (other is Snack) {
-      snackCount++;
-      addCaterpillarSegemntRequest();
-    }
-  }
+//     if (other is Snack) {
+//       snackCount++;
+//       addCaterpillarSegemntRequest();
+//     }
+//   }
 
   void updateLerpToAngle(double dt)
   {
@@ -194,7 +190,7 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
   { 
     //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
-    velocity = direction * dt  *movingSpeed;
+    velocity = direction * dt  *caterpillardata.movingspeed;
     position += velocity;
   }
 
@@ -231,6 +227,11 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     else{
       super.addCaterPillarSegment(this);   
     }
+  }
+
+    double _calcTimeForSegmentTravel()
+  {
+    return (caterpillardata.refinedSegmentDistance * caterpillardata.caterpillarSegment.finalSize.y)/caterpillardata.movingspeed;
   }
     
 }
