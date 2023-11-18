@@ -35,10 +35,12 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   double rotationSpeed = 2;
   double movingSpeed = 120;
   double travelTimePerSegment = 0;
-  double caterpillarSize = 64;
+  // Vector2 caterpillarSize = Vector2(32,128);
+  // Vector2 caterpillarSegmentSize = Vector2(32,128);
+
   //value between 0 and 1 - more higher is more accurate but the segment distance to another is lower
   //eg. ist needs mor segments for a longer caterpillar
-  double accuracy = 0.4;
+  double accuracy = 0.45;
 
   CaterpillarCrawlMain();
 
@@ -99,16 +101,20 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
       caterpillarSegment: 
       CaterpillarSegmentData(
         imagePath: 'segment_single64.png',
-        spriteSize: Vector2.all(64))
+        spriteSize: Vector2.all(64),
+        finalSize: Vector2(64,64)
+),
+      finalSize: Vector2(64,64)
     );
   }
 
   void createAndAddCaterillar(double mapSize)
   {
-    double refinedSegmentDistance = caterpillarSize *accuracy; //segments are overlapping a bit - depent on the desing another value could be better
+    CaterpillarData mainPlayerCaterpillar = createCaterpillarData();
+    double refinedSegmentDistance = mainPlayerCaterpillar.caterpillarSegment.finalSize.y *accuracy; //segments are overlapping a bit - depent on the desing another value could be better
     travelTimePerSegment = _calcTimeForSegmentTravel(refinedSegmentDistance,movingSpeed);
     print("time for segment: $travelTimePerSegment");
-    _caterPillar = CaterPillar(caterpillarSize,createCaterpillarData(),this,rotationSpeed,movingSpeed,travelTimePerSegment);
+    _caterPillar = CaterPillar(mainPlayerCaterpillar,this,rotationSpeed,movingSpeed,travelTimePerSegment);
     _caterPillar.transform.position = Vector2(40,100);
 
     _groundMap = GroundMap(mapSize, _caterPillar,world);

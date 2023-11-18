@@ -30,9 +30,9 @@ class CaterpillarElement extends PositionComponent
 
 
   bool segemntAddRequest =false;
-  double finalSize;
+  late Vector2 finalSize;
 
-  CaterpillarElement(this.finalSize, this.caterpillardata, this.gameWorld, this.segmentTravelTime);
+  CaterpillarElement(this.caterpillardata, this.gameWorld, this.segmentTravelTime);
 
   @override
   void update(double dt) {
@@ -52,7 +52,7 @@ class CaterpillarElement extends PositionComponent
   } 
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
-    nextSegment = CaterpillarSegment(finalSize, caterpillardata, gameWorld,segmentTravelTime, previousSegment: this, caterpillar: caterpillar);
+    nextSegment = CaterpillarSegment(caterpillardata, gameWorld,segmentTravelTime, previousSegment: this, caterpillar: caterpillar);
     //nextSegment?.position = angleQueue.last.position;
     gameWorld.world.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
@@ -83,11 +83,12 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
 
   int snackCount = 0;
 
-  CaterPillar(super.finalSize, super.caterpillardata, super.gameWorld, this.rotationSpeed, this.movingSpeed, super.segmentTravelTime);
+  CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed, this.movingSpeed, super.segmentTravelTime);
 
   @override
   Future<void> onLoad() async {
-    size = Vector2.all(finalSize);
+    size = caterpillardata.finalSize;
+    finalSize = caterpillardata.finalSize;
     final data = SpriteAnimationData.sequenced(
     textureSize: caterpillardata.spriteSize,
     amount: 4,
@@ -96,7 +97,8 @@ class CaterPillar extends CaterpillarElement with CollisionCallbacks
     animation = SpriteAnimationComponent.fromFrameData(
       await imageLoader.load(caterpillardata.imagePath),
       data,
-      scale: Vector2.all(finalSize/caterpillardata.spriteSize.x)
+      scale: Vector2(finalSize.x/caterpillardata.spriteSize.x,
+      finalSize.y/caterpillardata.spriteSize.y)
     );
 
    final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);

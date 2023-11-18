@@ -12,11 +12,13 @@ class CaterpillarSegment extends CaterpillarElement
   CaterpillarElement previousSegment;
   late int index;
 
-  CaterpillarSegment(super.finalSize, super.caterpillardata, super.gameWorld, super.segmentTravelTime, {required this.previousSegment, required this.caterpillar});
+
+  CaterpillarSegment(super.caterpillardata, super.gameWorld, super.segmentTravelTime, {required this.previousSegment, required this.caterpillar});
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    finalSize = caterpillardata.caterpillarSegment.finalSize;
     size = previousSegment.size;
     anchor = Anchor(0.5,0.5);
     addSegmentSprite2();
@@ -62,8 +64,8 @@ class CaterpillarSegment extends CaterpillarElement
     animation = SpriteAnimationComponent.fromFrameData(
         await imageLoader.load(caterpillardata.caterpillarSegment.imagePath),
         data,
-        scale: Vector2.all(finalSize/caterpillardata.caterpillarSegment.spriteSize.x)
-
+        scale: Vector2(finalSize.x/caterpillardata.caterpillarSegment.spriteSize.x,
+        finalSize.y/caterpillardata.caterpillarSegment.spriteSize.y)
       );
     add(animation);
   }
@@ -73,7 +75,8 @@ class CaterpillarSegment extends CaterpillarElement
     Sprite segmentSprite = await Sprite.load(caterpillardata.caterpillarSegment.imagePath);
     SpriteComponent spritecomp = SpriteComponent(
       sprite: segmentSprite, 
-      scale:Vector2.all(finalSize/caterpillardata.caterpillarSegment.spriteSize.x)
+      scale:Vector2(finalSize.x/caterpillardata.caterpillarSegment.spriteSize.x,
+      finalSize.y/caterpillardata.caterpillarSegment.spriteSize.y)
       );
     add(spritecomp);
   }
