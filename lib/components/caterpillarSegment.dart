@@ -29,7 +29,7 @@ class CaterpillarSegment extends CaterpillarElement
   void update(double dt) {
     super.update(dt); 
     initSegment();
-    updateAngleQueue();
+    // updateAngleQueue();
   }
 
   void initSegment()

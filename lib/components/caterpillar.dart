@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
@@ -8,6 +9,7 @@ import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
 class CaterpillarElement extends PositionComponent
 {
@@ -140,7 +142,27 @@ class CaterPillar extends CaterpillarElement
       angle = fullCircle+(angle%(fullCircle));
     }
     //angle queue
-    updateAngleQueue();
+    // updateAngleQueue();
+    if(!startIolateSegments)
+    {
+      startIsolateSegmentCalculation();
+    }
+  }
+
+  bool startIolateSegments  =false;
+
+  Future<void> startIsolateSegmentCalculation()
+  async {
+    startIolateSegments  =true;
+    final receivePort = ReceivePort();
+    Isolate isolate = await Isolate.spawn(updateCaterpillarsegmentMovement, [receivePort.sendPort, this]);
+
+    receivePort.listen((caterpillarDone) {
+    print(caterpillarDone);
+    receivePort.close();
+    isolate.kill();
+    startIolateSegments  =false;
+  });
   }
 
   @override
@@ -234,4 +256,37 @@ class CaterPillar extends CaterpillarElement
     return (caterpillardata.refinedSegmentDistance * caterpillardata.caterpillarSegment.finalSize.y)/caterpillardata.movingspeed;
   }
     
+}
+
+void updateCaterpillarsegmentMovement(List<dynamic> arguments)
+{
+  bool caterpillarDone = false;
+  CaterpillarElement caterpillarElement = arguments[1] as CaterpillarElement;
+  caterpillarElement.angleQueue.addFirst(MovementTransferData(angle: caterpillarElement.angle, position: caterpillarElement.position));
+  
+  if(!caterpillarElement.isInitializing)
+  {
+    caterpillarElement.nextSegment?.angle = caterpillarElement.angleQueue.last.angle;
+    caterpillarElement.nextSegment?.position = caterpillarElement.angleQueue.last.position;
+    caterpillarElement.angleQueue.removeLast();
+  }
+
+  if(caterpillarElement.nextSegment !=null)
+  {
+    updateCaterpillarsegmentMovement([arguments[0],caterpillarElement.nextSegment ]);
+  }
+  else
+  {
+    caterpillarDone = true;
+    SendPort sendport = arguments[0] as SendPort;
+    sendport.send(caterpillarDone);
+  }
+}
+
+class IsolateSegmentArgs
+{
+  final SendPort sendPort;
+  final CaterpillarElement caterpillarelement;
+
+  IsolateSegmentArgs({required this.sendPort, required this.caterpillarelement});
 }
