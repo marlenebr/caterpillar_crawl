@@ -13,10 +13,11 @@ class Snack extends SpriteComponent
 
   double snackSize;
   double snackAngle;
+  int index;
   Vector2 snackPosition;
   GroundMap groundMap;
 
-  Snack({required this.snackSize, required this.snackAngle, required this.snackPosition, required this.groundMap}) : super(size: Vector2.all(snackSize), angle: snackAngle, position: snackPosition);
+  Snack({required this.snackSize, required this.snackAngle, required this.snackPosition, required this.groundMap, required this.index}) : super(size: Vector2.all(snackSize), angle: snackAngle, position: snackPosition);
 
   @override
   Future<void> onLoad() async {
@@ -28,25 +29,31 @@ class Snack extends SpriteComponent
 
    @override
   void update(double dt) {    
-    if(groundMap.player.position.distanceTo(position) <60)
-    {
-      removeFromParent();
-      groundMap.addSnack();
-      groundMap.player.snackCount++;
-      groundMap.player.addCaterpillarSegemntRequest();
-      groundMap.world.onSegmentAddedToPlayer(groundMap.player.lastSegment!.index);
+    // if(groundMap.player.position.distanceTo(position) <60)
+    // {
+    //   removeFromParent();
+    //   groundMap.addSnack();
+    //   groundMap.player.snackCount++;
+    //   groundMap.player.addCaterpillarSegemntRequest();
+    //   if(groundMap.player.lastSegment!=null)
+    //   {
+    //     groundMap.world.onSegmentAddedToPlayer(groundMap.player.lastSegment!.index);
+    //   }
 
-    }
-    if(groundMap.enemy != null && groundMap.enemy!.position.distanceTo(position) < 60)
-    {
-      removeFromParent();
-      groundMap.addSnack();
-      groundMap.enemy?.snackCount++;
-      if(groundMap.enemy!.snackCount % 3 ==0)
-      {
-        groundMap.enemy?.addCaterpillarSegemntRequest();
-        groundMap.world.onSegmentAddedToEnemy(groundMap.enemy!.lastSegment!.index);
-      }
-    }
+    // }
+    // if(groundMap.enemy != null && groundMap.enemy!.position.distanceTo(position) < 60)
+    // {
+    //   removeFromParent();
+    //   groundMap.addSnack();
+    //   groundMap.enemy?.snackCount++;
+    //   if(groundMap.enemy!.snackCount % 3 ==0)
+    //   {
+    //     groundMap.enemy?.addCaterpillarSegemntRequest();
+    //     if(groundMap.enemy!.lastSegment != null)
+    //     {
+    //       groundMap.world.onSegmentAddedToEnemy(groundMap.enemy!.lastSegment!.index);
+    //     }
+    //   }
+    // }
   }
 }

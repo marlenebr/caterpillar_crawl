@@ -5,27 +5,38 @@ import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
+import 'package:flame_isolate/flame_isolate.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-class GroundMap extends PositionComponent
+class GroundMap extends PositionComponent with FlameIsolate
 {
 
   double mapSize;
   CaterPillar player;
-  late CaterPillar? enemy;
+  int snackCount;
+  late List<CaterPillar> enemies;
   double secondCounter = 0;
 
   CaterpillarCrawlMain world;
 
   bool hasEnemies = false;
+  bool calcDist  =false;
 
-  GroundMap(this.mapSize, this.player, this.world) : super(size: Vector2.all(mapSize));
+  //late List<Snack> allSnacks = List.filled(snackCount, Snack(snackSize: 0,snackAngle: 0, snackPosition: Vector2.zero(),groundMap: this));
+  Map<int,Vector2> snackData = {};
+  Map<int,Snack> snacks = {};
+
+  bool isCalculatingSnacks = false;
+
+
+  GroundMap(this.mapSize, this.player, this.world,this.snackCount) : super(size: Vector2.all(mapSize));
 
 
   @override
   Future<void> onLoad() async {
     priority = 1;
-    enemy = null;
+    enemies = List.empty(growable: true);
     add(GroundMapFloorParallax(player,super.size/6));
     add(SpriteComponent(
       sprite: await Sprite.load('leafGround01.png'),
@@ -33,7 +44,12 @@ class GroundMap extends PositionComponent
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
-    await fillWithSnacks(300);
+    await fillWithSnacks(snackCount);
+  }
+
+  @override
+  Future onMount() {
+    return super.onMount();
   }
 
   @override
@@ -41,14 +57,74 @@ class GroundMap extends PositionComponent
     super.update(dt);
     resetPlayerOnMapEnd();
     updateEnemydirection(dt,3);
+    if(world.usingIsolates)
+    {
+      if(!isCalculatingSnacks)
+      {
+        calculateSnacksIsolate();
+      }
+    }
+    else
+    {
+      calculateSnacksForWeb();
+    }
   }
 
   @override
   void render(Canvas canvas) {
-    // TODO: implement render
-    // canvas.drawPaint(Paint()..color = Color.fromARGB(255, 158, 179, 139));
     super.render(canvas);
+  }
 
+  void calculateSnacksForWeb()
+  {
+    for(int i  = 0; i<snacks.length;i++)
+    {
+      if(player.position.distanceTo(snacks[i]!.position) <60)
+      {
+        removeSnack(snacks[i]!);
+        addSnack(i);
+        updatePlayOnSnackEaten(player);
+      }
+
+      else
+      {
+        enemies.forEach((element) { 
+                if(element.position.distanceTo(snacks[i]!.position) <60)
+                {
+                  removeSnack(snacks[i]!);
+                  addSnack(i);
+                  updatePlayOnSnackEaten(element);
+                }
+        });
+      }
+    }
+  }
+
+  void updatePlayOnSnackEaten(CaterPillar caterpillar)
+  {
+    caterpillar.snackCount++;
+    caterpillar.addCaterpillarSegemntRequest();
+    if(caterpillar.lastSegment!=null)
+    {
+      world.onSegmentAddedToPlayer(caterpillar.lastSegment!.index);
+    }
+  }
+
+  Future calculateSnacksIsolate() async
+  {
+    isCalculatingSnacks = true;
+    isolate(checkAllSnacks, SnackDistanceArgs(snackData, player.position)).then(_updateSnackOmIsolateResult);
+    isCalculatingSnacks =false;
+  }
+
+  void _updateSnackOmIsolateResult(List<int> result)
+  {
+    for(int i  = 0; i<result.length;i++)
+    {
+      removeSnack(snacks[result[i]]!);
+      addSnack(result[i]);
+      updatePlayOnSnackEaten(player);    
+    }
   }
 
   void resetPlayerOnMapEnd()
@@ -58,35 +134,48 @@ class GroundMap extends PositionComponent
       player.transform.position = Vector2.all(0);
     }
 
-    if(enemy !=  null)
-    {Vector2 enemyPos = enemy!.transform.position;
-      if(enemyPos.x.abs() >mapSize/2 || enemyPos.y.abs() >mapSize/2)
-      {
-        enemy?.transform.position = Vector2.all(0);
+    for(int i = 0; i<enemies.length ;i++)
+    {
+      {Vector2 enemyPos = enemies[i].transform.position;
+        if(enemyPos.x.abs() >mapSize/2 || enemyPos.y.abs() >mapSize/2)
+        {
+          enemies[i].transform.position = Vector2.all(0);
+        }
       }
     }
+    
   }
 
   Future<void> fillWithSnacks(int snackCount)
   async {
     for(int i= 0; i<snackCount;i++)
     {
-      addSnack();
+      addSnack(i);
     }
   }
 
-  void addSnack()
+  Snack addSnack(int index)
   {
     Vector2 randomPosition = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize - size/2;
     double randomSize = (Random().nextDouble() +8) * 2;
     double randomAngle = Random().nextDouble() * 360;
+    Snack newSnack  =Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this, index: index);
+    snacks[index] = newSnack;
+    snackData[index] = newSnack.position;    
+    world.world.add(newSnack);
+    return newSnack;
+  }
 
-    world.world.add(Snack(snackSize: randomSize,snackAngle: randomAngle,snackPosition: randomPosition, groundMap: this));
+  void removeSnack(Snack snack)
+  {
+    //snacks.remove(snack.index);
+   // snackData.remove(snack.index);
+    snack.removeFromParent();
   }
 
   void addEnemy(CaterPillar enemyCaterpillar)
   {
-    enemy = enemyCaterpillar;
+    enemies.add(enemyCaterpillar);
     hasEnemies  = true;
   }
 
@@ -98,7 +187,9 @@ class GroundMap extends PositionComponent
       if(secondCounter >=frameDuration)
       {
         secondCounter  =0;
-        enemy?.onMoveDirectionChange(player.position);
+        enemies.forEach((element) {
+            element.onMoveDirectionChange(player.position);
+        });
       }
     }
     return false;
@@ -132,4 +223,29 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
     super.update(dt);
     parallax?.baseVelocity = player.velocity; 
    }
+}
+
+//Isolate Distance chack
+
+List<int> checkAllSnacks(SnackDistanceArgs args)
+{
+  List<int> snacksToRemove = List.empty(growable: true);
+
+  args.allSnacks.forEach((k, v) => 
+  {
+    if(args.playerPos.distanceTo(v) <60)
+      {
+        snacksToRemove.add(k)
+      }   
+  });
+  return snacksToRemove;
+}
+
+class SnackDistanceArgs
+{
+  Map<int,Vector2> allSnacks;
+  Vector2 playerPos;
+
+  SnackDistanceArgs(this.allSnacks, this.playerPos);
+
 }
