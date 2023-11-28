@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
@@ -30,12 +31,14 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
   late CaterpillarGameUI _gameUI;
+  late Timer _interval;
+
 
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  int snackCount = 5500;
+  int snackCount = 800;
   double mapSize = 2000;
-  bool usingIsolates = false;
+  bool usingIsolates = true;
 
   CaterpillarCrawlMain();
 
@@ -55,11 +58,14 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     {
       print("DEBUG IS ON");
     }
+     _interval = Timer(6, repeat: true, onTick: spawnEnemy)
+      ..start();
   }  
 
   @override
   void update(double dt) {
     // TODO: implement update
+    _interval.update(dt);
     super.update(dt);
 
   }
@@ -109,7 +115,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
       spriteSize: Vector2.all(128), 
       anchorPosY: 106, 
       movingspeed: 60,
-      refinedSegmentDistance: 0.6,
+      refinedSegmentDistance: 0.3,
       animationSprites: 3,
       caterpillarSegment: 
       CaterpillarSegmentData(
@@ -127,18 +133,24 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     _caterPillar = CaterPillar(mainPlayerCaterpillar, this,rotationSpeed);
     _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50,50);
 
-
-    CaterpillarData enemyCaterpillar = createEnemyData();
-    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this,rotationSpeed);
-    _enemy.transform.position = Vector2(50,50);
-
     _groundMap = GroundMap(mapSize, _caterPillar,this,snackCount);
     world.add(_groundMap);
     world.add(_caterPillar);
-    world.add(_enemy);
+    spawnEnemy();
+  }
+
+  void spawnEnemy()
+  {
+    print("Spawn enemy");
+    CaterpillarData enemyCaterpillar = createEnemyData();
+    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this,rotationSpeed);
+     world.add(_enemy);
     _groundMap.addEnemy(_enemy);
 
-    //world.priority =100;
+    if(_groundMap.enemyIndexer > 4)
+    {
+      _interval.stop();
+    }
   }
 
   void onSegmentAddedToPlayer(int segmentCount)

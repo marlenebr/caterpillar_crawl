@@ -29,31 +29,5 @@ class Snack extends SpriteComponent
 
    @override
   void update(double dt) {    
-    // if(groundMap.player.position.distanceTo(position) <60)
-    // {
-    //   removeFromParent();
-    //   groundMap.addSnack();
-    //   groundMap.player.snackCount++;
-    //   groundMap.player.addCaterpillarSegemntRequest();
-    //   if(groundMap.player.lastSegment!=null)
-    //   {
-    //     groundMap.world.onSegmentAddedToPlayer(groundMap.player.lastSegment!.index);
-    //   }
-
-    // }
-    // if(groundMap.enemy != null && groundMap.enemy!.position.distanceTo(position) < 60)
-    // {
-    //   removeFromParent();
-    //   groundMap.addSnack();
-    //   groundMap.enemy?.snackCount++;
-    //   if(groundMap.enemy!.snackCount % 3 ==0)
-    //   {
-    //     groundMap.enemy?.addCaterpillarSegemntRequest();
-    //     if(groundMap.enemy!.lastSegment != null)
-    //     {
-    //       groundMap.world.onSegmentAddedToEnemy(groundMap.enemy!.lastSegment!.index);
-    //     }
-    //   }
-    // }
   }
 }

@@ -11,11 +11,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class GroundMap extends PositionComponent with FlameIsolate
 {
-
   double mapSize;
-  CaterPillar player;
   int snackCount;
-  late List<CaterPillar> enemies;
+  int enemyIndexer = 1;
   double secondCounter = 0;
 
   CaterpillarCrawlMain world;
@@ -27,6 +25,9 @@ class GroundMap extends PositionComponent with FlameIsolate
   Map<int,Vector2> snackData = {};
   Map<int,Snack> snacks = {};
 
+  CaterPillar player;
+  Map<int,CaterPillar> caterpillars = {};
+
   bool isCalculatingSnacks = false;
 
 
@@ -36,7 +37,6 @@ class GroundMap extends PositionComponent with FlameIsolate
   @override
   Future<void> onLoad() async {
     priority = 1;
-    enemies = List.empty(growable: true);
     add(GroundMapFloorParallax(player,super.size/6));
     add(SpriteComponent(
       sprite: await Sprite.load('leafGround01.png'),
@@ -44,6 +44,7 @@ class GroundMap extends PositionComponent with FlameIsolate
     );
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
+    caterpillars[0] = player; 
     await fillWithSnacks(snackCount);
   }
 
@@ -79,24 +80,14 @@ class GroundMap extends PositionComponent with FlameIsolate
   {
     for(int i  = 0; i<snacks.length;i++)
     {
-      if(player.position.distanceTo(snacks[i]!.position) <60)
-      {
-        removeSnack(snacks[i]!);
-        addSnack(i);
-        updatePlayOnSnackEaten(player);
-      }
-
-      else
-      {
-        enemies.forEach((element) { 
-                if(element.position.distanceTo(snacks[i]!.position) <60)
-                {
-                  removeSnack(snacks[i]!);
-                  addSnack(i);
-                  updatePlayOnSnackEaten(element);
-                }
-        });
-      }
+      caterpillars.forEach((k,v) { 
+              if(v.position.distanceTo(snacks[i]!.position) <60)
+              {
+                removeSnack(snacks[i]!);
+                addSnack(i);
+                updatePlayOnSnackEaten(v);
+              }
+      });     
     }
   }
 
@@ -113,37 +104,31 @@ class GroundMap extends PositionComponent with FlameIsolate
   Future calculateSnacksIsolate() async
   {
     isCalculatingSnacks = true;
-    isolate(checkAllSnacks, SnackDistanceArgs(snackData, player.position)).then(_updateSnackOmIsolateResult);
+    Map<int,Vector2> caterpillarPoitionData = {};
+    caterpillarPoitionData[0] = player.position;
+    caterpillars.forEach((key, value) {caterpillarPoitionData[key]= value.position;});
+    isolate(checkAllSnacks, SnackDistanceArgs(snackData, caterpillarPoitionData)).then(_updateSnackOmIsolateResult);
     isCalculatingSnacks =false;
   }
 
-  void _updateSnackOmIsolateResult(List<int> result)
+//first int player id, second int snack id
+  void _updateSnackOmIsolateResult(Map<int,int> result)
   {
-    for(int i  = 0; i<result.length;i++)
-    {
-      removeSnack(snacks[result[i]]!);
-      addSnack(result[i]);
-      updatePlayOnSnackEaten(player);    
-    }
+  result.forEach((key, value) {
+      removeSnack(snacks[value]!);
+      addSnack(value);
+      updatePlayOnSnackEaten(caterpillars[key]!);
+  });
   }
 
   void resetPlayerOnMapEnd()
   {
-    if(player.transform.position.x.abs() >mapSize/2 || player.transform.position.y.abs() >mapSize/2)
-    {
-      player.transform.position = Vector2.all(0);
-    }
-
-    for(int i = 0; i<enemies.length ;i++)
-    {
-      {Vector2 enemyPos = enemies[i].transform.position;
-        if(enemyPos.x.abs() >mapSize/2 || enemyPos.y.abs() >mapSize/2)
-        {
-          enemies[i].transform.position = Vector2.all(0);
-        }
+    caterpillars.forEach((key, value) {
+      if(caterpillars[key]!.transform.position.x.abs() >mapSize/2 || caterpillars[key]!.transform.position.y.abs() >mapSize/2)
+      {
+        caterpillars[key]!.transform.position = Vector2.all(0);
       }
-    }
-    
+    }); 
   }
 
   Future<void> fillWithSnacks(int snackCount)
@@ -175,8 +160,10 @@ class GroundMap extends PositionComponent with FlameIsolate
 
   void addEnemy(CaterPillar enemyCaterpillar)
   {
-    enemies.add(enemyCaterpillar);
+    caterpillars[enemyIndexer]=enemyCaterpillar;
+    caterpillars[enemyIndexer]!.transform.position = Vector2(Random().nextDouble(),Random().nextDouble()) * mapSize - size/2;
     hasEnemies  = true;
+    enemyIndexer++;
   }
 
   bool updateEnemydirection(double dt,double frameDuration)
@@ -187,8 +174,11 @@ class GroundMap extends PositionComponent with FlameIsolate
       if(secondCounter >=frameDuration)
       {
         secondCounter  =0;
-        enemies.forEach((element) {
-            element.onMoveDirectionChange(player.position);
+        caterpillars.forEach((key, value) {
+          if(key > 0) //0 is player
+          {
+            value.onMoveDirectionChange(player.position);
+          }
         });
       }
     }
@@ -227,24 +217,26 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
 
 //Isolate Distance chack
 
-List<int> checkAllSnacks(SnackDistanceArgs args)
+Map<int,int> checkAllSnacks(SnackDistanceArgs args)
 {
-  List<int> snacksToRemove = List.empty(growable: true);
+  Map<int,int> snacksToRemove = Map<int,int>();
 
   args.allSnacks.forEach((k, v) => 
-  {
-    if(args.playerPos.distanceTo(v) <60)
-      {
-        snacksToRemove.add(k)
-      }   
-  });
+  args.playerPos.forEach((key, value) { 
+    if(value.distanceTo(v) <60)
+    {
+      snacksToRemove[key] = k;
+    } 
+  })
+  
+  );
   return snacksToRemove;
 }
 
 class SnackDistanceArgs
 {
   Map<int,Vector2> allSnacks;
-  Vector2 playerPos;
+  Map<int,Vector2> playerPos;
 
   SnackDistanceArgs(this.allSnacks, this.playerPos);
 
