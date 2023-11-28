@@ -38,7 +38,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   double rotationSpeed = 2;
   int snackCount = 800;
   double mapSize = 2000;
-  bool usingIsolates = true;
+  bool usingIsolates = false;
 
   CaterpillarCrawlMain();
 

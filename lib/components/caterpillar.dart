@@ -60,6 +60,22 @@ class CaterpillarElement extends PositionComponent
     return nextSegment!;
     
   }
+
+  void updateAngleQueue()
+  {
+    angleQueue.addFirst(MovementTransferData(angle: angle, position: absolutePositionOfAnchor(anchor)));
+    if(!isInitializing)
+    {
+      nextSegment?.angle = angleQueue.last.angle;
+      nextSegment?.position  = angleQueue.last.position;
+      angleQueue.removeLast();
+    }
+
+    if(nextSegment !=null)
+    {
+      nextSegment!.updateAngleQueue();
+    }
+  }
 }
 
 class CaterPillar extends CaterpillarElement
@@ -141,12 +157,8 @@ class CaterPillar extends CaterpillarElement
     {
       angle = fullCircle+(angle%(fullCircle));
     }
-    //angle queue
-    // updateAngleQueue();
-    if(!startIolateSegments)
-    {
-      startIsolateSegmentCalculation();
-    }
+    //TODO: fix startIsolateSegmentCalculation to run as isolate
+    updateAngleQueue();  
   }
 
   bool startIolateSegments  =false;
@@ -214,18 +226,6 @@ class CaterPillar extends CaterpillarElement
     Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     velocity = direction * dt  *caterpillardata.movingspeed;
     position += velocity;
-  }
-
-  void updateAngleQueue()
-  {
-    angleQueue.addFirst(MovementTransferData(angle: angle, position: position));
-    
-    if(!isInitializing)
-    {
-      nextSegment?.angle = angleQueue.last.angle;
-      nextSegment?.position = angleQueue.last.position;
-      angleQueue.removeLast();
-    }
   }
 
   void addCaterpillarSegemntRequest()

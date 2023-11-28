@@ -81,17 +81,6 @@ class CaterpillarSegment extends CaterpillarElement
     add(spritecomp);
   }
 
-  void updateAngleQueue()
-  {
-    angleQueue.addFirst(MovementTransferData(angle: angle, position: absolutePositionOfAnchor(anchor)));
-    if(!isInitializing)
-    {
-      nextSegment?.angle = angleQueue.last.angle;
-      nextSegment?.position  = angleQueue.last.position;
-      angleQueue.removeLast();
-    }
-  }
-
   void updateLerpToAngle(double dt, double angleToLerpTo, double rotationSpeed)
   {
     double diff = transform.angle - angleToLerpTo;
