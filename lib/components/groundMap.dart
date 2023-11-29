@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/SpeedUpItem.dart';
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
@@ -17,6 +18,7 @@ class GroundMap extends PositionComponent with FlameIsolate
   double secondCounter = 0;
 
   CaterpillarCrawlMain world;
+  late SpeedUpItem speedUp;
 
   bool hasEnemies = false;
   bool calcDist  =false;
@@ -46,6 +48,7 @@ class GroundMap extends PositionComponent with FlameIsolate
     player.transform.position = Vector2.all(0);
     caterpillars[0] = player; 
     await fillWithSnacks(snackCount);
+    addSpeedItem();
   }
 
   @override
@@ -68,6 +71,11 @@ class GroundMap extends PositionComponent with FlameIsolate
     else
     {
       calculateSnacksForWeb();
+    }
+
+    if(player.position.distanceTo(speedUp.position)< 60)
+    {
+      player.speedBuff = 6;
     }
   }
 
@@ -137,6 +145,14 @@ class GroundMap extends PositionComponent with FlameIsolate
     {
       addSnack(i);
     }
+  }
+
+  void addSpeedItem()
+  {
+    speedUp = SpeedUpItem(itemSize: 64, groundMap: this, index: 0);
+    speedUp.position =  Vector2.all(400);
+    world.world.add(speedUp);
+
   }
 
   Snack addSnack(int index)

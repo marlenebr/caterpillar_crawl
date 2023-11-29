@@ -31,26 +31,6 @@ class CaterpillarSegment extends CaterpillarElement
     initSegment();
     // updateAngleQueue();
   }
-
-  void initSegment()
-  {
-    if(isInitializing && timeSinceInit > caterpillar.segmentTravelTime)
-    {
-      //kommt einmal vor
-      isInitializing =false;
-      if(debugMode)
-      {
-        var queueListLength = angleQueue.length;
-        print("init of segment done $index");
-        print("listLen $queueListLength");
-
-      }
-      if(segemntAddRequest)
-      {
-        addCaterPillarSegment(caterpillar);
-      }
-    }
-  }
   
 
   Future<void> addSegmentSprite()

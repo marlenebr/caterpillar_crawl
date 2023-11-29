@@ -41,8 +41,9 @@ class CaterpillarSegmentData
 
 class MovementTransferData
 {
-  final double angle;
+  final Vector2 orientation;
   final Vector2 position;
+  final double angle;
 
-  const MovementTransferData({required this.angle,required this.position});
+  const MovementTransferData({required this.orientation,required this.position,required this.angle});
 }

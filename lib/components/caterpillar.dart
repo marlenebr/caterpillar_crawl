@@ -3,13 +3,10 @@ import 'dart:isolate';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
-// import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 
 class CaterpillarElement extends PositionComponent
 {
@@ -30,12 +27,31 @@ class CaterpillarElement extends PositionComponent
   bool segemntAddRequest =false;
   late Vector2 finalSize;
 
+  Vector2 orientation = Vector2.zero();
+  late double fixedDistToSegment;
+  late Vector2 initPosition;
+
+
   CaterpillarElement(this.caterpillardata, this.gameWorld);
 
   @override
   void update(double dt) {
     super.update(dt);
+    orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
+    initSegment();
     timeSinceInit +=dt;
+  }
+
+  @override
+  Future<void> onLoad() async {
+    fixedDistToSegment = caterpillardata.refinedSegmentDistance * caterpillardata.caterpillarSegment.finalSize.y;
+  }
+
+  @override
+  void onMount()
+  {
+    super.onMount();
+    initPosition = Vector2(position.x, position.y);
   }
 
   bool caterPillarFixedUpdate(double dt,double frameDuration)
@@ -51,7 +67,7 @@ class CaterpillarElement extends PositionComponent
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
     nextSegment = CaterpillarSegment(caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
-    //nextSegment?.position = angleQueue.last.position;
+    nextSegment?.position = angleQueue.last.position;
     gameWorld.world.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
@@ -61,21 +77,52 @@ class CaterpillarElement extends PositionComponent
     
   }
 
-  void updateAngleQueue()
+  double speedBuff  =0;
+
+  void updateAngleQueue(double dt)
   {
-    angleQueue.addFirst(MovementTransferData(angle: angle, position: absolutePositionOfAnchor(anchor)));
+    //position += orientation * dt * caterpillardata.movingspeed; //length per frame
+
+    angleQueue.addFirst(MovementTransferData(orientation: orientation, position: absolutePositionOfAnchor(anchor),angle: angle));
+    position += orientation * speedBuff;
+
     if(!isInitializing)
     {
-      nextSegment?.angle = angleQueue.last.angle;
-      nextSegment?.position  = angleQueue.last.position;
+      //nextSegment?.position = position - angleQueue.last.orientation * fixedDistToSegment;
+      nextSegment?.position = angleQueue.last.position;
+      nextSegment?.lookAt(position);
       angleQueue.removeLast();
     }
 
     if(nextSegment !=null)
     {
-      nextSegment!.updateAngleQueue();
+      nextSegment!.updateAngleQueue(dt);
     }
   }
+
+  void initSegment()
+  {
+    if(isInitializing && initPosition.distanceTo(position)>fixedDistToSegment)
+    {
+      //kommt einmal vor
+      isInitializing =false;
+      print("init of segment done $index");
+    }
+  }
+
+Vector2 FindNearestPointOnLine(Vector2 origin, Vector2 end, Vector2 point)
+{
+    //Get heading
+    Vector2 heading = (end - origin);
+    double magnitudeMax = origin.distanceTo(end);
+    heading.normalize();
+
+    //Do projection from the point but clamp it
+    Vector2 lhs = point - origin;
+    double dotP = lhs.dot(heading);
+    dotP = dotP.clamp(0, magnitudeMax);
+    return origin + heading * dotP;
+}
 }
 
 class CaterPillar extends CaterpillarElement
@@ -88,10 +135,6 @@ class CaterPillar extends CaterpillarElement
   late Vector2 velocity;
   late double scaledAnchorYPos;
 
-  late Vector2 initPosition;
-  late double segmentTravelTime;
-
-
   CaterpillarSegment? lastSegment;
 
 
@@ -101,7 +144,7 @@ class CaterPillar extends CaterpillarElement
 
   @override
   Future<void> onLoad() async {
-    segmentTravelTime = _calcTimeForSegmentTravel();
+    super.onLoad();
     size = caterpillardata.finalSize;
     finalSize = caterpillardata.finalSize;
     final data = SpriteAnimationData.sequenced(
@@ -129,69 +172,47 @@ class CaterPillar extends CaterpillarElement
   void onMount()
   {
     super.onMount();
-    print('Mount with pos: -> $position');     
-
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if(timeSinceInit >= segmentTravelTime)
+    if(!isInitializing)
     {
-      isInitializing = false;
       if(segemntAddRequest)
       {
         addSegment();
       }
     }
-    if(debugMode && caterPillarFixedUpdate(dt,3))
-    {
-      //Create Segemtns Faster
-      addCaterpillarSegemntRequest();
-    }
     updateLerpToAngle(dt);
-    updateMoveOn(dt);
-
-    angle = angle%(fullCircle);
-    if(angle <0)
-    {
-      angle = fullCircle+(angle%(fullCircle));
-    }
+    //updateMoveOn(dt);
+    position += orientation * dt * caterpillardata.movingspeed;
     //TODO: fix startIsolateSegmentCalculation to run as isolate
-    updateAngleQueue();  
+    updateAngleQueue(dt);
+    print("ORIENT: $orientation");  
   }
 
   bool startIolateSegments  =false;
 
-  Future<void> startIsolateSegmentCalculation()
-  async {
-    startIolateSegments  =true;
-    final receivePort = ReceivePort();
-    Isolate isolate = await Isolate.spawn(updateCaterpillarsegmentMovement, [receivePort.sendPort, this]);
+  // Future<void> startIsolateSegmentCalculation()
+  // async {
+  //   startIolateSegments  =true;
+  //   final receivePort = ReceivePort();
+  //   Isolate isolate = await Isolate.spawn(updateCaterpillarsegmentMovement, [receivePort.sendPort, this]);
 
-    receivePort.listen((caterpillarDone) {
-    print(caterpillarDone);
-    receivePort.close();
-    isolate.kill();
-    startIolateSegments  =false;
-  });
-  }
+  //   receivePort.listen((caterpillarDone) {
+  //   print(caterpillarDone);
+  //   receivePort.close();
+  //   isolate.kill();
+  //   startIolateSegments  =false;
+  // });
+  // }
 
   @override
   void onGameResize(Vector2 gameSize) {
     super.onGameResize(gameSize);
     position = gameSize / 2;
   }
-
-// @override
-//   void onCollision(Set<Vector2> points, PositionComponent other) {
-//     super.onCollision(points,other);
-
-//     if (other is Snack) {
-//       snackCount++;
-//       addCaterpillarSegemntRequest();
-//     }
-//   }
 
   void updateLerpToAngle(double dt)
   {
@@ -209,6 +230,13 @@ class CaterPillar extends CaterpillarElement
 
     double lerpSpeedDt = dt*rotationSpeed*direction;
     transform.angle += lerpSpeedDt;
+
+    //fix error from 0 to 360 degrees
+    angle = angle%(fullCircle);
+    if(angle <0)
+    {
+      angle = fullCircle+(angle%(fullCircle));
+    }
    
   }
 
@@ -223,8 +251,7 @@ class CaterPillar extends CaterpillarElement
   void updateMoveOn(double dt)
   { 
     //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
-    Vector2 direction = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
-    velocity = direction * dt  *caterpillardata.movingspeed;
+    velocity = orientation * dt  *caterpillardata.movingspeed;
     position += velocity;
   }
 
@@ -250,43 +277,38 @@ class CaterPillar extends CaterpillarElement
       super.addCaterPillarSegment(this);   
     }
   }
-
-    double _calcTimeForSegmentTravel()
-  {
-    return (caterpillardata.refinedSegmentDistance * caterpillardata.caterpillarSegment.finalSize.y)/caterpillardata.movingspeed;
-  }
     
 }
 
-void updateCaterpillarsegmentMovement(List<dynamic> arguments)
-{
-  bool caterpillarDone = false;
-  CaterpillarElement caterpillarElement = arguments[1] as CaterpillarElement;
-  caterpillarElement.angleQueue.addFirst(MovementTransferData(angle: caterpillarElement.angle, position: caterpillarElement.position));
+// void updateCaterpillarsegmentMovement(List<dynamic> arguments)
+// {
+//   bool caterpillarDone = false;
+//   CaterpillarElement caterpillarElement = arguments[1] as CaterpillarElement;
+//   caterpillarElement.angleQueue.addFirst(MovementTransferData(angle: caterpillarElement.angle, position: caterpillarElement.position));
   
-  if(!caterpillarElement.isInitializing)
-  {
-    caterpillarElement.nextSegment?.angle = caterpillarElement.angleQueue.last.angle;
-    caterpillarElement.nextSegment?.position = caterpillarElement.angleQueue.last.position;
-    caterpillarElement.angleQueue.removeLast();
-  }
+//   if(!caterpillarElement.isInitializing)
+//   {
+//     caterpillarElement.nextSegment?.angle = caterpillarElement.angleQueue.last.angle;
+//     caterpillarElement.nextSegment?.position = caterpillarElement.angleQueue.last.position;
+//     caterpillarElement.angleQueue.removeLast();
+//   }
 
-  if(caterpillarElement.nextSegment !=null)
-  {
-    updateCaterpillarsegmentMovement([arguments[0],caterpillarElement.nextSegment ]);
-  }
-  else
-  {
-    caterpillarDone = true;
-    SendPort sendport = arguments[0] as SendPort;
-    sendport.send(caterpillarDone);
-  }
-}
+//   if(caterpillarElement.nextSegment !=null)
+//   {
+//     updateCaterpillarsegmentMovement([arguments[0],caterpillarElement.nextSegment ]);
+//   }
+//   else
+//   {
+//     caterpillarDone = true;
+//     SendPort sendport = arguments[0] as SendPort;
+//     sendport.send(caterpillarDone);
+//   }
+// }
 
-class IsolateSegmentArgs
-{
-  final SendPort sendPort;
-  final CaterpillarElement caterpillarelement;
+// class IsolateSegmentArgs
+// {
+//   final SendPort sendPort;
+//   final CaterpillarElement caterpillarelement;
 
-  IsolateSegmentArgs({required this.sendPort, required this.caterpillarelement});
-}
+//   IsolateSegmentArgs({required this.sendPort, required this.caterpillarelement});
+// }
