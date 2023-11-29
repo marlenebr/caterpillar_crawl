@@ -18,7 +18,10 @@ class GroundMap extends PositionComponent with FlameIsolate
   double secondCounter = 0;
 
   CaterpillarCrawlMain world;
+
   late SpeedUpItem speedUp;
+  late SpeedUpItem speedDown;
+
 
   bool hasEnemies = false;
   bool calcDist  =false;
@@ -52,8 +55,8 @@ class GroundMap extends PositionComponent with FlameIsolate
   }
 
   @override
-  Future onMount() {
-    return super.onMount();
+  Future onMount() async{
+    await super.onMount();
   }
 
   @override
@@ -73,10 +76,7 @@ class GroundMap extends PositionComponent with FlameIsolate
       calculateSnacksForWeb();
     }
 
-    if(player.position.distanceTo(speedUp.position)< 60)
-    {
-      player.speedBuff = 6;
-    }
+    updateSpeedItems();
   }
 
   @override
@@ -96,6 +96,27 @@ class GroundMap extends PositionComponent with FlameIsolate
                 updatePlayOnSnackEaten(v);
               }
       });     
+    }
+  }
+
+  bool coolDownForNextSpeedChange = false;
+
+  void updateSpeedItems()
+  {
+    if(player.position.distanceTo(speedUp.position)< 5)
+    {
+      if(player.speedMultiplier< 8)
+      {
+        player.speedMultiplier += 1;
+      }
+    }
+
+    else if(player.position.distanceTo(speedDown.position)< 5)
+    {
+      if(player.speedMultiplier> 1)
+      {
+        player.speedMultiplier -= 1;
+      }
     }
   }
 
@@ -153,6 +174,9 @@ class GroundMap extends PositionComponent with FlameIsolate
     speedUp.position =  Vector2.all(400);
     world.world.add(speedUp);
 
+    speedDown = SpeedUpItem(itemSize: 64, groundMap: this, index: 1);
+    speedDown.position =  Vector2.all(-400);
+    world.world.add(speedDown);
   }
 
   Snack addSnack(int index)
@@ -227,7 +251,7 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
    @override
    void update(double dt) {   
     super.update(dt);
-    parallax?.baseVelocity = player.velocity; 
+    parallax?.baseVelocity = player.orientation * player.velocity; 
    }
 }
 

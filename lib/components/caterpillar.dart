@@ -28,6 +28,9 @@ class CaterpillarElement extends PositionComponent
   late Vector2 finalSize;
 
   Vector2 orientation = Vector2.zero();
+  double velocity = 1;
+  double speedMultiplier = 1;
+
   late double fixedDistToSegment;
   late Vector2 initPosition;
 
@@ -37,8 +40,10 @@ class CaterpillarElement extends PositionComponent
   @override
   void update(double dt) {
     super.update(dt);
-    orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
+    velocity = dt *caterpillardata.movingspeed * speedMultiplier;
+
     initSegment();
+
     timeSinceInit +=dt;
   }
 
@@ -52,6 +57,7 @@ class CaterpillarElement extends PositionComponent
   {
     super.onMount();
     initPosition = Vector2(position.x, position.y);
+    orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
   }
 
   bool caterPillarFixedUpdate(double dt,double frameDuration)
@@ -67,7 +73,7 @@ class CaterpillarElement extends PositionComponent
   CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
   {
     nextSegment = CaterpillarSegment(caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
-    nextSegment?.position = angleQueue.last.position;
+    nextSegment?.position = position;
     gameWorld.world.add(nextSegment!);
     caterpillar.lastSegment = nextSegment;
     nextSegment?.previousSegment = this; 
@@ -77,27 +83,30 @@ class CaterpillarElement extends PositionComponent
     
   }
 
-  double speedBuff  =0;
-
   void updateAngleQueue(double dt)
   {
-    //position += orientation * dt * caterpillardata.movingspeed; //length per frame
-
-    angleQueue.addFirst(MovementTransferData(orientation: orientation, position: absolutePositionOfAnchor(anchor),angle: angle));
-    position += orientation * speedBuff;
+    angleQueue.addFirst(MovementTransferData(orientation: orientation,position: position, angle: angle));
 
     if(!isInitializing)
     {
-      //nextSegment?.position = position - angleQueue.last.orientation * fixedDistToSegment;
-      nextSegment?.position = angleQueue.last.position;
-      nextSegment?.lookAt(position);
-      angleQueue.removeLast();
-    }
+      if(nextSegment !=null)
+      {
+       // nextSegment?.lookAt(position - orientation *fixedDistToSegment);
+        nextSegment?.lookAt(position);
 
+        orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
+
+      }
+
+      angleQueue.removeLast();
+    }      
     if(nextSegment !=null)
-    {
-      nextSegment!.updateAngleQueue(dt);
-    }
+      {
+
+        nextSegment!.updateAngleQueue(dt);
+        nextSegment?.position = position - nextSegment!.orientation * fixedDistToSegment;
+
+      }
   }
 
   void initSegment()
@@ -132,7 +141,6 @@ class CaterPillar extends CaterpillarElement
   double rotationSpeed;
 
   late double angleToLerpTo;
-  late Vector2 velocity;
   late double scaledAnchorYPos;
 
   CaterpillarSegment? lastSegment;
@@ -162,7 +170,6 @@ class CaterPillar extends CaterpillarElement
    final double anchorPos = (caterpillardata.anchorPosY/caterpillardata.spriteSize.y);
    anchor = Anchor(0.5,anchorPos);
     angleToLerpTo = angle;
-    velocity = Vector2(0, 0);
     add(animation);
     priority = 10000;
     index  =0;
@@ -182,14 +189,13 @@ class CaterPillar extends CaterpillarElement
       if(segemntAddRequest)
       {
         addSegment();
+
       }
     }
-    updateLerpToAngle(dt);
-    //updateMoveOn(dt);
-    position += orientation * dt * caterpillardata.movingspeed;
     //TODO: fix startIsolateSegmentCalculation to run as isolate
+    updateLerpToAngle(dt);
+    position += orientation * velocity;
     updateAngleQueue(dt);
-    print("ORIENT: $orientation");  
   }
 
   bool startIolateSegments  =false;
@@ -228,7 +234,7 @@ class CaterPillar extends CaterpillarElement
       direction = -1;
     }
 
-    double lerpSpeedDt = dt*rotationSpeed*direction;
+    double lerpSpeedDt = dt*rotationSpeed * speedMultiplier *direction;
     transform.angle += lerpSpeedDt;
 
     //fix error from 0 to 360 degrees
@@ -248,12 +254,12 @@ class CaterPillar extends CaterpillarElement
   //onMounted is not giving the correct position - too early?
   // bool initOnUpdate = false;
 
-  void updateMoveOn(double dt)
-  { 
-    //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
-    velocity = orientation * dt  *caterpillardata.movingspeed;
-    position += velocity;
-  }
+  // void updateMoveOn(double dt)
+  // { 
+  //   //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
+  //   velocity = orientation * dt  *caterpillardata.movingspeed;
+  //   position += velocity;
+  // }
 
   void addCaterpillarSegemntRequest()
   {
@@ -276,6 +282,7 @@ class CaterPillar extends CaterpillarElement
     else{
       super.addCaterPillarSegment(this);   
     }
+    segemntAddRequest = false;
   }
     
 }

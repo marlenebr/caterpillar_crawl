@@ -36,7 +36,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  int snackCount = 5800;
+  int snackCount = 800;
   double mapSize = 2000;
   bool usingIsolates = false;
 
@@ -136,7 +136,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     _groundMap = GroundMap(mapSize, _caterPillar,this,snackCount);
     world.add(_groundMap);
     world.add(_caterPillar);
-    //spawnEnemy();
+    spawnEnemy();
   }
 
   void spawnEnemy()
