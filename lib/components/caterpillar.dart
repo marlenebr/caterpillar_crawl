@@ -82,20 +82,34 @@ class CaterpillarElement extends PositionComponent
     
   }
 
-  void updateAngleQueue(double dt)
+  void updateAngleQueue(int entriesNeeded)
   {
     angleQueue.addFirst(MovementTransferData(orientation: orientation,position: absolutePositionOfAnchor(anchor), angle: angle));
-
-    if(!isInitializing)
-    {
-      nextSegment?.angle = angleQueue.last.angle;
-      nextSegment?.position = angleQueue.last.position;
-      angleQueue.removeLast();
-    }
+    nextSegment?.angle = angleQueue.last.angle;
+    nextSegment?.position = angleQueue.last.position;
+    correctListLength(3,entriesNeeded);
 
     if(nextSegment !=null)
     {
-      nextSegment?.updateAngleQueue(dt);
+      nextSegment?.updateAngleQueue(entriesNeeded);
+    }
+  }
+
+  void correctListLength(int iterationPerFrame, int entriesNeeded)
+  {
+
+    for(int i =0;i<3;i++)
+    {
+      if(angleQueue.length > entriesNeeded)
+      {
+        // for(int i = debugLeN; i >entriesNeeded; i--)
+        // {
+        angleQueue.removeLast();
+        //}
+      }
+      else {
+        return;
+      }
     }
   }
 
@@ -107,6 +121,24 @@ class CaterpillarElement extends PositionComponent
       isInitializing =false;
       print("init of segment done $index");
     }
+  }
+
+  //the size the queue has to be right now
+  int calcSteptToReachDistance(double dt)
+  {
+    double finalTimeInSec = fixedDistToSegment/(caterpillardata.movingspeed*speedMultiplier);
+    if(dt==0)
+    {
+      return 0;
+    }
+    double fps =1/dt;
+    print("FPS: $fps");
+    print("timeInSecs: $finalTimeInSec");
+
+    int timeToReach  =(finalTimeInSec * fps).toInt();
+    print("time to reach whole segment lentgh: $timeToReach");
+
+    return (finalTimeInSec * fps).toInt();
   }
 
 Vector2 FindNearestPointOnLine(Vector2 origin, Vector2 end, Vector2 point)
@@ -134,6 +166,8 @@ class CaterPillar extends CaterpillarElement
   late double scaledAnchorYPos;
 
   CaterpillarSegment? lastSegment;
+  late int entriesNeeded;
+
 
 
   int snackCount = 0;
@@ -179,14 +213,14 @@ class CaterPillar extends CaterpillarElement
       if(segemntAddRequest)
       {
         addSegment();
-
       }
     }
     //TODO: fix startIsolateSegmentCalculation to run as isolate
     updateLerpToAngle(dt);
     orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
-    position += orientation * velocity;
-    updateAngleQueue(dt);
+    position += orientation * velocity * speedMultiplier;
+    entriesNeeded = calcSteptToReachDistance(dt);
+    updateAngleQueue(entriesNeeded);
   }
 
   bool startIolateSegments  =false;
@@ -225,7 +259,7 @@ class CaterPillar extends CaterpillarElement
       direction = -1;
     }
 
-    double lerpSpeedDt = dt*rotationSpeed *direction;
+    double lerpSpeedDt = dt*rotationSpeed *direction * speedMultiplier;
     transform.angle += lerpSpeedDt;
 
     //fix error from 0 to 360 degrees

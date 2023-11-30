@@ -30,7 +30,7 @@ class CaterpillarSegment extends CaterpillarElement
     super.update(dt); 
     initSegment();
     // updateAngleQueue();
-    updateApplySpeedUp();
+    //updateApplySpeedUp();
   }
   
 
