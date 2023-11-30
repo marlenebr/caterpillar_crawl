@@ -30,6 +30,7 @@ class CaterpillarSegment extends CaterpillarElement
     super.update(dt); 
     initSegment();
     // updateAngleQueue();
+    updateApplySpeedUp();
   }
   
 
@@ -77,6 +78,11 @@ class CaterpillarSegment extends CaterpillarElement
 
     double lerpSpeedDt = dt*rotationSpeed*direction;
     transform.angle += lerpSpeedDt;   
+  }
+
+  updateApplySpeedUp()
+  {
+    position += orientation * speedMultiplier;
   }
 
   void addCaterpillarSegemntRequest()

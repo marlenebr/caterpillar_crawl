@@ -103,15 +103,15 @@ class GroundMap extends PositionComponent with FlameIsolate
 
   void updateSpeedItems()
   {
-    if(player.position.distanceTo(speedUp.position)< 5)
+    if(player.position.distanceTo(speedUp.position)< 20)
     {
       if(player.speedMultiplier< 8)
       {
-        player.speedMultiplier += 1;
+        player.speedMultiplier += 6;
       }
     }
 
-    else if(player.position.distanceTo(speedDown.position)< 5)
+    else if(player.position.distanceTo(speedDown.position)< 20)
     {
       if(player.speedMultiplier> 1)
       {

@@ -40,7 +40,7 @@ class CaterpillarElement extends PositionComponent
   @override
   void update(double dt) {
     super.update(dt);
-    velocity = dt *caterpillardata.movingspeed * speedMultiplier;
+    velocity = dt *caterpillardata.movingspeed;
 
     initSegment();
 
@@ -57,7 +57,6 @@ class CaterpillarElement extends PositionComponent
   {
     super.onMount();
     initPosition = Vector2(position.x, position.y);
-    orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
   }
 
   bool caterPillarFixedUpdate(double dt,double frameDuration)
@@ -85,28 +84,19 @@ class CaterpillarElement extends PositionComponent
 
   void updateAngleQueue(double dt)
   {
-    angleQueue.addFirst(MovementTransferData(orientation: orientation,position: position, angle: angle));
+    angleQueue.addFirst(MovementTransferData(orientation: orientation,position: absolutePositionOfAnchor(anchor), angle: angle));
 
     if(!isInitializing)
     {
-      if(nextSegment !=null)
-      {
-       // nextSegment?.lookAt(position - orientation *fixedDistToSegment);
-        nextSegment?.lookAt(position);
-
-        orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
-
-      }
-
+      nextSegment?.angle = angleQueue.last.angle;
+      nextSegment?.position = angleQueue.last.position;
       angleQueue.removeLast();
-    }      
+    }
+
     if(nextSegment !=null)
-      {
-
-        nextSegment!.updateAngleQueue(dt);
-        nextSegment?.position = position - nextSegment!.orientation * fixedDistToSegment;
-
-      }
+    {
+      nextSegment?.updateAngleQueue(dt);
+    }
   }
 
   void initSegment()
@@ -194,6 +184,7 @@ class CaterPillar extends CaterpillarElement
     }
     //TODO: fix startIsolateSegmentCalculation to run as isolate
     updateLerpToAngle(dt);
+    orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     position += orientation * velocity;
     updateAngleQueue(dt);
   }
@@ -234,7 +225,7 @@ class CaterPillar extends CaterpillarElement
       direction = -1;
     }
 
-    double lerpSpeedDt = dt*rotationSpeed * speedMultiplier *direction;
+    double lerpSpeedDt = dt*rotationSpeed *direction;
     transform.angle += lerpSpeedDt;
 
     //fix error from 0 to 360 degrees
@@ -251,15 +242,6 @@ class CaterPillar extends CaterpillarElement
     angleToLerpTo = FlameGameUtils.getAngleFromUp(pointToMoveTo);
   }
 
-  //onMounted is not giving the correct position - too early?
-  // bool initOnUpdate = false;
-
-  // void updateMoveOn(double dt)
-  // { 
-  //   //based on rotation implementation but without the x part (start calculate from up vector where x is 0)
-  //   velocity = orientation * dt  *caterpillardata.movingspeed;
-  //   position += velocity;
-  // }
 
   void addCaterpillarSegemntRequest()
   {
