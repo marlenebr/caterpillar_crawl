@@ -82,25 +82,25 @@ class CaterpillarElement extends PositionComponent
     
   }
 
-  void updateAngleQueue(int entriesNeeded)
+  void updateAngleQueue(int fixIterations, int entriesNeeded)
   {
     angleQueue.addFirst(MovementTransferData(orientation: orientation,position: absolutePositionOfAnchor(anchor), angle: angle));
-    nextSegment?.angle = angleQueue.last.angle;
-    nextSegment?.position = angleQueue.last.position;
-    correctListLength(3,entriesNeeded);
+    correctListLength(fixIterations, entriesNeeded);
 
     if(nextSegment !=null)
     {
-      nextSegment?.updateAngleQueue(entriesNeeded);
+      nextSegment?.angle = angleQueue.last.angle;
+      nextSegment?.position = angleQueue.last.position;
+      nextSegment?.updateAngleQueue(fixIterations, entriesNeeded);
     }
   }
 
-  void correctListLength(int iterationPerFrame, int entriesNeeded)
+  void correctListLength(int fixIt, int entriesNeeded)
   {
 
-    for(int i =0;i<3;i++)
+    for(int i =0;i<fixIt;i++)
     {
-      if(angleQueue.length > entriesNeeded)
+      if(angleQueue.length > entriesNeeded+1)
       {
         // for(int i = debugLeN; i >entriesNeeded; i--)
         // {
@@ -132,28 +132,8 @@ class CaterpillarElement extends PositionComponent
       return 0;
     }
     double fps =1/dt;
-    print("FPS: $fps");
-    print("timeInSecs: $finalTimeInSec");
-
-    int timeToReach  =(finalTimeInSec * fps).toInt();
-    print("time to reach whole segment lentgh: $timeToReach");
-
     return (finalTimeInSec * fps).toInt();
   }
-
-Vector2 FindNearestPointOnLine(Vector2 origin, Vector2 end, Vector2 point)
-{
-    //Get heading
-    Vector2 heading = (end - origin);
-    double magnitudeMax = origin.distanceTo(end);
-    heading.normalize();
-
-    //Do projection from the point but clamp it
-    Vector2 lhs = point - origin;
-    double dotP = lhs.dot(heading);
-    dotP = dotP.clamp(0, magnitudeMax);
-    return origin + heading * dotP;
-}
 }
 
 class CaterPillar extends CaterpillarElement
@@ -167,6 +147,9 @@ class CaterPillar extends CaterpillarElement
 
   CaterpillarSegment? lastSegment;
   late int entriesNeeded;
+  int fixIterationPerFrame =1; //how much need to be fixed - the higher the more
+  double tolerance = 20; //how tolerant should be segment distance differnces?
+
 
 
 
@@ -217,10 +200,34 @@ class CaterPillar extends CaterpillarElement
     }
     //TODO: fix startIsolateSegmentCalculation to run as isolate
     updateLerpToAngle(dt);
+    startUpdateAngleQueue(dt);
+  }
+
+  void startUpdateAngleQueue(double dt)
+  {
     orientation = Vector2( 1 * sin(angle), -1 * cos(angle)).normalized();
     position += orientation * velocity * speedMultiplier;
     entriesNeeded = calcSteptToReachDistance(dt);
-    updateAngleQueue(entriesNeeded);
+    Vector2 currentPos = absolutePositionOfAnchor(anchor);
+    angleQueue.addFirst(MovementTransferData(orientation: orientation,position: currentPos, angle: angle));
+    correctListLength(fixIterationPerFrame, entriesNeeded);
+    if(nextSegment !=null)
+    {
+      if(currentPos.distanceTo(nextSegment!.absolutePositionOfAnchor(nextSegment!.anchor)) > fixedDistToSegment + tolerance)
+      {
+        fixIterationPerFrame  = 3;
+        //print("!!!!!!!!!!!!!!!!!!!!!!!!!!! $position");
+        //print(angleQueue.length);
+
+      }
+      else
+      {
+        fixIterationPerFrame  = 1;
+      }
+      nextSegment?.updateAngleQueue(fixIterationPerFrame, entriesNeeded);
+      nextSegment?.angle = angleQueue.last.angle;
+      nextSegment?.position = angleQueue.last.position;
+    }
   }
 
   bool startIolateSegments  =false;

@@ -93,7 +93,7 @@ class GroundMap extends PositionComponent with FlameIsolate
               {
                 removeSnack(snacks[i]!);
                 addSnack(i);
-                updatePlayOnSnackEaten(v);
+                updatePlayOnSnackEaten(k,v);
               }
       });     
     }
@@ -107,7 +107,7 @@ class GroundMap extends PositionComponent with FlameIsolate
     {
       if(player.speedMultiplier< 4)
       {
-        player.speedMultiplier += 0.5;
+        player.speedMultiplier += 0.2;
       }
     }
 
@@ -115,18 +115,25 @@ class GroundMap extends PositionComponent with FlameIsolate
     {
       if(player.speedMultiplier> 1)
       {
-        player.speedMultiplier -= 0.5;
+        player.speedMultiplier -= 0.2;
       }
     }
   }
 
-  void updatePlayOnSnackEaten(CaterPillar caterpillar)
+  void updatePlayOnSnackEaten(int cIndex, CaterPillar caterpillar)
   {
     caterpillar.snackCount++;
     caterpillar.addCaterpillarSegemntRequest();
     if(caterpillar.lastSegment!=null)
     {
-      world.onSegmentAddedToPlayer(caterpillar.lastSegment!.index);
+      if(cIndex==0) //its the main plaxer
+      {
+        world.onSegmentAddedToPlayer(caterpillar.lastSegment!.index);
+      }
+      else
+      {
+        world.onSegmentAddedToEnemy(caterpillar.lastSegment!.index);
+      }
     }
   }
 
@@ -146,7 +153,7 @@ class GroundMap extends PositionComponent with FlameIsolate
   result.forEach((key, value) {
       removeSnack(snacks[value]!);
       addSnack(value);
-      updatePlayOnSnackEaten(caterpillars[key]!);
+      updatePlayOnSnackEaten(key,caterpillars[key]!);
   });
   }
 
