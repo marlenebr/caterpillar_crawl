@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/caterpillarData.dart';
 import 'package:flame/components.dart';
 
 ///The body segments to be added behind the previous one (or the head)
@@ -29,8 +28,6 @@ class CaterpillarSegment extends CaterpillarElement
   void update(double dt) {
     super.update(dt); 
     initSegment();
-    // updateAngleQueue();
-    //updateApplySpeedUp();
   }
   
 

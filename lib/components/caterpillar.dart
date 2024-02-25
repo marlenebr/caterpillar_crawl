@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:isolate';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillarSegment.dart';
@@ -69,8 +68,12 @@ class CaterpillarElement extends PositionComponent
     }
     return false;
   } 
-  CaterpillarSegment addCaterPillarSegment(CaterPillar caterpillar)
+  void addCaterPillarSegment(CaterPillar caterpillar)
   {
+    if(caterpillardata.maxElementCount <= index)
+    {
+      return;
+    }
     nextSegment = CaterpillarSegment(caterpillardata, gameWorld, previousSegment: this, caterpillar: caterpillar);
     nextSegment?.position = position;
     gameWorld.world.add(nextSegment!);
@@ -78,7 +81,7 @@ class CaterpillarElement extends PositionComponent
     nextSegment?.previousSegment = this; 
     nextSegment?.priority = priority-1;
     nextSegment?.index = index+1;
-    return nextSegment!;
+    return;
     
   }
 
@@ -198,7 +201,6 @@ class CaterPillar extends CaterpillarElement
         addSegment();
       }
     }
-    //TODO: fix startIsolateSegmentCalculation to run as isolate
     updateLerpToAngle(dt);
     startUpdateAngleQueue(dt);
   }
@@ -216,9 +218,6 @@ class CaterPillar extends CaterpillarElement
       if(currentPos.distanceTo(nextSegment!.absolutePositionOfAnchor(nextSegment!.anchor)) > fixedDistToSegment + tolerance)
       {
         fixIterationPerFrame  = 3;
-        //print("!!!!!!!!!!!!!!!!!!!!!!!!!!! $position");
-        //print(angleQueue.length);
-
       }
       else
       {
@@ -229,22 +228,6 @@ class CaterPillar extends CaterpillarElement
       nextSegment?.position = angleQueue.last.position;
     }
   }
-
-  bool startIolateSegments  =false;
-
-  // Future<void> startIsolateSegmentCalculation()
-  // async {
-  //   startIolateSegments  =true;
-  //   final receivePort = ReceivePort();
-  //   Isolate isolate = await Isolate.spawn(updateCaterpillarsegmentMovement, [receivePort.sendPort, this]);
-
-  //   receivePort.listen((caterpillarDone) {
-  //   print(caterpillarDone);
-  //   receivePort.close();
-  //   isolate.kill();
-  //   startIolateSegments  =false;
-  // });
-  // }
 
   @override
   void onGameResize(Vector2 gameSize) {
@@ -309,36 +292,3 @@ class CaterPillar extends CaterpillarElement
   }
     
 }
-
-// void updateCaterpillarsegmentMovement(List<dynamic> arguments)
-// {
-//   bool caterpillarDone = false;
-//   CaterpillarElement caterpillarElement = arguments[1] as CaterpillarElement;
-//   caterpillarElement.angleQueue.addFirst(MovementTransferData(angle: caterpillarElement.angle, position: caterpillarElement.position));
-  
-//   if(!caterpillarElement.isInitializing)
-//   {
-//     caterpillarElement.nextSegment?.angle = caterpillarElement.angleQueue.last.angle;
-//     caterpillarElement.nextSegment?.position = caterpillarElement.angleQueue.last.position;
-//     caterpillarElement.angleQueue.removeLast();
-//   }
-
-//   if(caterpillarElement.nextSegment !=null)
-//   {
-//     updateCaterpillarsegmentMovement([arguments[0],caterpillarElement.nextSegment ]);
-//   }
-//   else
-//   {
-//     caterpillarDone = true;
-//     SendPort sendport = arguments[0] as SendPort;
-//     sendport.send(caterpillarDone);
-//   }
-// }
-
-// class IsolateSegmentArgs
-// {
-//   final SendPort sendPort;
-//   final CaterpillarElement caterpillarelement;
-
-//   IsolateSegmentArgs({required this.sendPort, required this.caterpillarelement});
-// }

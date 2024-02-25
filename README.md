@@ -26,6 +26,5 @@ First rough implementation: a simple Bug navigated over Tap-input on a small env
 results of first Performance Test - much better than before. Instead of Collision detection the distance from caterpillar head to snack will be calculated in snacks update:
     - Caterpillar with 600 segments and 200 Snacks in the Scene: 48 FPS
 
-Experimenting with Isolates: Calculate the distance of 5500 Snacks (Vector2 position) distance and the player pos and recalculate everytime the preveious calculation: More performant wothout Isolates!
 
 

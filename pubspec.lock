@@ -73,14 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.16.0"
-  flame_isolate:
-    dependency: "direct main"
-    description:
-      name: flame_isolate
-      sha256: "7ee6aabeb9b511be1f5bc55b57a80667303c117f186de2eabbf588f6f8e219e7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0+3"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -107,14 +99,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.2"
-  integral_isolates:
-    dependency: transitive
-    description:
-      name: integral_isolates
-      sha256: "969ada03ae9f125bd5e631afacca47ea1d00f134778884152527f643d47b03a4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0+2"
   lints:
     dependency: transitive
     description:

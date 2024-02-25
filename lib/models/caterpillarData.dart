@@ -11,6 +11,7 @@ class CaterpillarData
   final int animationSprites;
   final CaterpillarSegmentData caterpillarSegment;
   final Vector2 finalSize;
+  final int maxElementCount;
 
 
   const CaterpillarData({
@@ -21,7 +22,8 @@ class CaterpillarData
     required this.refinedSegmentDistance,
     required this.animationSprites,
     required this.caterpillarSegment,
-    required this.finalSize
+    required this.finalSize,
+    required this.maxElementCount
     });
 }
 

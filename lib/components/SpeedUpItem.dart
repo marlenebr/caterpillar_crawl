@@ -1,9 +1,7 @@
 
 import 'dart:math';
 
-import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
 class SpeedUpItem extends SpriteComponent

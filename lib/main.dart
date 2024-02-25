@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
@@ -36,10 +35,8 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
-  int snackCount = 800;
+  int snackCount = 300;
   double mapSize = 2000;
-  bool usingIsolates = false;
-
   CaterpillarCrawlMain();
 
 
@@ -103,7 +100,8 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
         spriteSize: Vector2.all(64),
         finalSize: Vector2(64,64)
 ),
-      finalSize: Vector2(64,64)
+      finalSize: Vector2(64,64),
+      maxElementCount: 150
     );
   }
 
@@ -123,7 +121,8 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
         spriteSize: Vector2.all(128),
         finalSize: Vector2(64,64)
 ),
-      finalSize: Vector2(64,64)
+      finalSize: Vector2(64,64),
+      maxElementCount: 10
     );
   }
 
