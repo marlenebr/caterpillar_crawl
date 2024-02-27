@@ -8,9 +8,11 @@ import 'package:flame/components.dart';
 
 import 'caterpillarElement.dart';
 
+enum CaterpillarState {crawling, onHold}
+
+
 class CaterPillar extends CaterpillarElement {
   bool isMoving = true;
-  bool isOnHold = false;
   bool isRemovingSegment = false;
 
   static const double fullCircle = 2 * pi;
@@ -30,6 +32,14 @@ class CaterPillar extends CaterpillarElement {
 
   int snackCount = 0;
 
+  late SpriteAnimationGroupComponent<CaterpillarState> caterPillarAnimations;
+
+  late SpriteAnimation headAnimation;
+  late SpriteAnimation wobbleAnimation;
+
+  CaterpillarState currentState = CaterpillarState.crawling;
+
+
   CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed);
 
   @override
@@ -37,21 +47,23 @@ class CaterPillar extends CaterpillarElement {
     super.onLoad();
     size = caterpillardata.finalSize;
     finalSize = caterpillardata.finalSize;
-    final data = SpriteAnimationData.sequenced(
-      textureSize: caterpillardata.spriteSize,
-      amount: caterpillardata.animationSprites,
-      stepTime: 0.1,
-    );
-    animation = SpriteAnimationComponent.fromFrameData(
-        await imageLoader.load(caterpillardata.imagePath), data,
-        scale: Vector2(finalSize.x / caterpillardata.spriteSize.x,
-            finalSize.y / caterpillardata.spriteSize.y));
+    headAnimation =  await _createCaterpillarAnimation(caterpillardata.imagePath,caterpillardata.animationSprites);
+    wobbleAnimation = await _createCaterpillarAnimation(caterpillardata.wobbleAnimImagePath,caterpillardata.wobbleAnimationSprites);
 
+    caterPillarAnimations =  SpriteAnimationGroupComponent<CaterpillarState>(
+    animations: {
+    CaterpillarState.crawling: headAnimation,
+    CaterpillarState.onHold: wobbleAnimation,
+  },
+     scale: Vector2(finalSize.x / caterpillardata.spriteSize.x,
+             finalSize.y / caterpillardata.spriteSize.y),
+  current: currentState
+);
     final double anchorPos =
         (caterpillardata.anchorPosY / caterpillardata.spriteSize.y);
     anchor = Anchor(0.5, anchorPos);
     angleToLerpTo = angle;
-    add(animation);
+    add(caterPillarAnimations);
     priority = 10000;
     index = 0;
   }
@@ -76,9 +88,23 @@ class CaterPillar extends CaterpillarElement {
     updateOnHold();
   }
 
+  Future<SpriteAnimation> _createCaterpillarAnimation(String path,int amount)
+  async {
+    final data = SpriteAnimationData.sequenced(
+      textureSize: caterpillardata.spriteSize,
+      amount: amount,
+      stepTime: 0.1,
+    );
+    SpriteAnimationComponent caterPillarAnim = SpriteAnimationComponent.fromFrameData(
+        await imageLoader.load(path), data,
+    );
+
+    return caterPillarAnim.animation!;
+  }
+
   void startUpdateAngleQueue(double dt) {
     orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
-    if (!isOnHold) {
+    if (currentState == CaterpillarState.crawling) {
       position += orientation * velocity * speedMultiplier;
     }
     entriesNeeded = calcSteptToReachDistance(dt);
@@ -102,7 +128,7 @@ class CaterPillar extends CaterpillarElement {
 
   ///Checks the Position with the Previous Segment if Caterpillar is on Hold and marks it Ready For Deletion
   void updateOnHold() {
-    if (!isOnHold || nextSegment == null || isRemovingSegment) {
+    if (currentState == CaterpillarState.crawling || nextSegment == null || isRemovingSegment) {
       return;
     }
     if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
@@ -170,17 +196,12 @@ class CaterPillar extends CaterpillarElement {
     segemntAddRequest = false;
   }
 
-  void setSegmentToRemove() {}
-
   void removeSegment(CaterpillarSegment segment) {
     if(lastSegment!.index == segment.index)
     {
        lastSegment = null;
     }
     if (segment.nextSegment != null)
-      print(
-          "CURRENT ${nextSegment!.index} NEXT: ${segment.nextSegment!.index}");
-
     nextSegment = segment.nextSegment;
     if (nextSegment != null) {
       nextSegment!.previousSegment = this;
@@ -189,5 +210,12 @@ class CaterPillar extends CaterpillarElement {
     }
     isRemovingSegment = true;
     gameWorld.world.remove(segment);
+    snackCount--;
+  }
+
+  void OnSetHold()
+  {
+    currentState == CaterpillarState.crawling? currentState = CaterpillarState.onHold: currentState = CaterpillarState.crawling;
+    caterPillarAnimations.current = currentState;
   }
 }

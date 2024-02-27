@@ -12,8 +12,6 @@ class CaterpillarElement extends PositionComponent
   CaterpillarData caterpillardata;
   CaterpillarCrawlMain gameWorld;
 
-  late SpriteAnimationComponent animation;
-
   Queue<MovementTransferData> angleQueue = Queue<MovementTransferData>(); // ListQueue() by default
   bool isInitializing = true;
   late int index;
@@ -27,7 +25,7 @@ class CaterpillarElement extends PositionComponent
 
   Vector2 orientation = Vector2.zero();
   double velocity = 1;
-  double speedMultiplier = 0.2;
+  double speedMultiplier = 0.5;
 
   late double fixedDistToSegment;
   late Vector2 initPosition;

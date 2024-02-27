@@ -10,7 +10,9 @@ class CaterpillarSegment extends CaterpillarElement
 {
   CaterPillar caterpillar;
   CaterpillarElement previousSegment;
-  late int index;
+
+  late SpriteAnimationComponent animation;
+
 
   bool segemntOnHold = false;
 
@@ -23,7 +25,7 @@ class CaterpillarSegment extends CaterpillarElement
     finalSize = caterpillardata.caterpillarSegment.finalSize;
     size = previousSegment.size;
     anchor = Anchor(0.5,0.5);
-    addSegmentSprite2();
+    addSegmentSprite();
 
   }
 

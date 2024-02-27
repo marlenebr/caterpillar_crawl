@@ -4,11 +4,13 @@ import 'package:flame/game.dart';
 class CaterpillarData
 {
   final String imagePath;
+  final String wobbleAnimImagePath;
   final Vector2 spriteSize;
   final double anchorPosY;
   final double movingspeed;
   final double refinedSegmentDistance; //value to slightly change the segment distance - depends on how the sprite design looks the best with
   final int animationSprites;
+  final int wobbleAnimationSprites;
   final CaterpillarSegmentData caterpillarSegment;
   final Vector2 finalSize;
   final int maxElementCount;
@@ -16,11 +18,13 @@ class CaterpillarData
 
   const CaterpillarData({
     required this.imagePath,
+    required this.wobbleAnimImagePath,
     required this.spriteSize,
     required this.anchorPosY,
     required this.movingspeed,
     required this.refinedSegmentDistance,
     required this.animationSprites,
+    required this.wobbleAnimationSprites,
     required this.caterpillarSegment,
     required this.finalSize,
     required this.maxElementCount

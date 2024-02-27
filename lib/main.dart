@@ -89,15 +89,17 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     //Data for first Caterpillar - Green Wobbly
     return  CaterpillarData(
       imagePath: 'caterPillar_head.png', 
+      wobbleAnimImagePath: 'caterpillar_wobble.png' ,
       spriteSize: Vector2.all(128), 
       anchorPosY: 75, 
       movingspeed: 120,
       refinedSegmentDistance: 0.45,
       animationSprites: 4,
+      wobbleAnimationSprites: 5,
       caterpillarSegment: 
       CaterpillarSegmentData(
-        imagePath: 'segment_single64.png',
-        spriteSize: Vector2.all(64),
+        imagePath: 'caterPillar_segment.png',
+        spriteSize: Vector2.all(128),
         finalSize: Vector2(64,64)
 ),
       finalSize: Vector2(64,64),
@@ -110,11 +112,13 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     //Data for enemy Caterpillar - Orange horned
     return  CaterpillarData(
       imagePath: 'enemy_head_anim.png', 
+      wobbleAnimImagePath: 'enemy_head_anim.png',
       spriteSize: Vector2.all(128), 
       anchorPosY: 106, 
       movingspeed: 60,
       refinedSegmentDistance: 0.3,
       animationSprites: 3,
+      wobbleAnimationSprites: 3,
       caterpillarSegment: 
       CaterpillarSegmentData(
         imagePath: 'enemy_segment.png',
@@ -154,7 +158,7 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
 
   void caterpillarOnHold()
   {
-    _caterPillar.isOnHold = !_caterPillar.isOnHold;
+    _caterPillar.OnSetHold();
   }
 
   void onSegmentAddedToPlayer(int segmentCount)
