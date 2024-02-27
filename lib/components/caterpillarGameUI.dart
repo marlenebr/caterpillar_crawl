@@ -1,6 +1,8 @@
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
+import 'package:flame/input.dart';
 import 'package:flame/palette.dart';
+import 'package:flame/widgets.dart';
 import 'package:flutter/material.dart';
 
 ///The body segments to be added behind the previous one (or the head)
@@ -42,6 +44,7 @@ class CaterpillarGameUI extends PositionComponent
       align: Anchor.topRight,
       text: "-1");
     add(_enemySegmentCounterText!);
+    add(caterpillarLoadUpButton());
   }
 
   void setSegmentCountUi(int segmentCount)
@@ -62,6 +65,24 @@ class CaterpillarGameUI extends PositionComponent
           color: BasicPalette.white.color,
         ),
       );
+  }
+
+  HudButtonComponent caterpillarLoadUpButton()
+  {
+    return HudButtonComponent(
+      onPressed: ()  => OnCaterpillarLoadUp(),
+      button: CircleComponent(
+        radius: 50, 
+        position: Vector2.all(70), 
+        anchor: Anchor.center, 
+        paint: BasicPalette.darkGreen.paint())
+  );
+  }
+  
+  void OnCaterpillarLoadUp()
+  {
+        print('Hold Up');
+        mainGame.caterpillarOnHold();
   }
 
 }

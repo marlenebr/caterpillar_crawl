@@ -1,6 +1,7 @@
 import 'dart:math';
 
-import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
 
@@ -10,6 +11,8 @@ class CaterpillarSegment extends CaterpillarElement
   CaterPillar caterpillar;
   CaterpillarElement previousSegment;
   late int index;
+
+  bool segemntOnHold = false;
 
 
   CaterpillarSegment(super.caterpillardata, super.gameWorld, {required this.previousSegment, required this.caterpillar});
@@ -92,6 +95,26 @@ class CaterpillarSegment extends CaterpillarElement
     {
       segemntAddRequest  =true;
     }
+  }
+
+  @override
+  void onRemove()
+  {
+      //TODO: Still wrong index
+      // segment.previousSegment.setMovementQueue(segment.angleQueue); //segment.nextSegment!.setMovementQueue(segment.angleQueue);
+
+
+
+
+      //segment not known anymore
+      //  segment.previousSegment.setMovementQueue(segment.angleQueue);
+
+
+      // segment.nextSegment!.position = segment.previousSegment.angleQueue.last.position;
+
+    
+    caterpillar.isRemovingSegment = false;
+
   }
 
 }

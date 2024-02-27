@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
@@ -150,6 +150,11 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     {
       _interval.stop();
     }
+  }
+
+  void caterpillarOnHold()
+  {
+    _caterPillar.isOnHold = !_caterPillar.isOnHold;
   }
 
   void onSegmentAddedToPlayer(int segmentCount)

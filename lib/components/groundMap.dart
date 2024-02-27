@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
