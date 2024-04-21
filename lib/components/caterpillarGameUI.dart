@@ -1,5 +1,6 @@
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
+import 'package:flame/input.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,8 @@ class CaterpillarGameUI extends PositionComponent
   late TextPaint regularTextPaint;
 
   CaterpillarCrawlMain mainGame;
+
+  late HudButtonComponent loadUpButton;
 
   CaterpillarGameUI({required this.mainGame, super.priority});
 
@@ -42,6 +45,8 @@ class CaterpillarGameUI extends PositionComponent
       align: Anchor.topRight,
       text: "-1");
     add(_enemySegmentCounterText!);
+    loadUpButton  =caterpillarLoadUpButton();
+    add(loadUpButton);
   }
 
   void setSegmentCountUi(int segmentCount)
@@ -62,6 +67,40 @@ class CaterpillarGameUI extends PositionComponent
           color: BasicPalette.white.color,
         ),
       );
+  }
+
+  HudButtonComponent caterpillarLoadUpButton()
+  {
+    return HudButtonComponent(
+      onPressed: ()  => OnCaterPillarFatRoundButtonClick(),
+      button: CreateCircleLoadUpButton(BasicPalette.darkGreen.paint())
+  );
+  }
+
+  CircleComponent CreateCircleLoadUpButton(Paint color)
+  {
+    return CircleComponent(
+        radius: 50, 
+        position: Vector2.all(70), 
+        anchor: Anchor.center, 
+        paint:color);
+  }
+  
+  void OnCaterPillarFatRoundButtonClick()
+  {
+        print('Fat Round Button');
+        mainGame.onFatRounButtonClick();
+
+  }
+
+  void OnCaterpillarCrawling()
+  {
+    loadUpButton.button = CreateCircleLoadUpButton(BasicPalette.darkGreen.paint());
+  }
+
+    void OnCaterpillarReadyToEgg()
+  {
+    loadUpButton.button = CreateCircleLoadUpButton(BasicPalette.darkRed.paint());  
   }
 
 }

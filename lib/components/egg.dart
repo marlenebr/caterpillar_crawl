@@ -1,0 +1,86 @@
+import 'dart:math';
+
+import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/models/animationData.dart';
+import 'package:caterpillar_crawl/models/eggData.dart';
+import 'package:caterpillar_crawl/utils/utils.dart';
+import 'package:flame/components.dart';
+import 'package:flutter/gestures.dart';
+
+class Egg extends PositionComponent {
+  CaterpillarCrawlMain gameWorld;
+  EggData eggData;
+  double shootingSpeed;
+  late Vector2 finalSize;
+  late SpriteAnimation _eggAnimation;
+  late SpriteAnimation _eggExplodingAnimation;
+
+  late SpriteAnimationGroupComponent eggAnimations;
+  // late SpriteAnimation eggAfterExplodingAnimation;
+
+  EggState currentState = EggState.inShoot;
+
+  bool istShooting = false;
+  double shootTime = 1.2;
+  double currentShootTime = 0.0;
+  Vector2 orientation = Vector2.zero();
+
+  Egg(
+      {required this.eggData,
+      required this.gameWorld,
+      required this.shootingSpeed});
+
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+    // size = eggData.explodingEgg.spriteSize;
+    // finalSize = eggData.explodingEgg.finalSize;
+    _eggAnimation = await CaterpillarCrawlUtils.createAnimation(
+        animationData: eggData.idleEgg);
+    _eggExplodingAnimation = await CaterpillarCrawlUtils.createAnimation(
+        animationData: eggData.explodingEgg, loopAnimation: false);
+    anchor = Anchor.center;
+    // add(SpriteAnimationComponent(animation: eggAnimation));
+    eggAnimations = SpriteAnimationGroupComponent<EggState>(animations: {
+      EggState.inShoot: _eggAnimation,
+      EggState.exploding: _eggExplodingAnimation,
+    }, anchor: Anchor.center, current: currentState);
+    add(eggAnimations);
+    priority = 100;
+    // scale = Vector2(finalSize.x / eggData.explodingEgg.spriteSize.x,
+    //     finalSize.y / eggData.explodingEgg.spriteSize.y);
+  }
+
+  @override
+  void update(double dt) {
+    _updateShoot(dt);
+  }
+
+  void shoot() {
+    istShooting = true;
+    currentShootTime = shootTime;
+  }
+
+  void _updateShoot(double dt) {
+    if (istShooting) {
+      orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
+      position +=
+          orientation * (1 / 2) * pow(currentShootTime, 2).toDouble() * 13;
+      currentShootTime -= dt;
+      if (currentShootTime <= 0) {
+        istShooting = false;
+        setCurrentEggState(EggState.exploding);
+      }
+    }
+  }
+
+  void setCurrentEggState(EggState eggState) {
+    currentState = eggState;
+    eggAnimations.current = currentState;
+  }
+}
+
+enum EggState {
+  inShoot,
+  exploding,
+}

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:caterpillar_crawl/components/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillarData.dart';
@@ -11,27 +11,22 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-
 final Images imageLoader = Images();
 
 void main() {
-
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
-  runApp(
-    GameWidget(
-      game: CaterpillarCrawlMain(),
-    )
-  );
+  runApp(GameWidget(
+    game: CaterpillarCrawlMain(),
+  ));
 }
 
-class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDetection {
-
+class CaterpillarCrawlMain extends FlameGame
+    with TapCallbacks, HasCollisionDetection {
   late CaterPillar _caterPillar;
   late GroundMap _groundMap;
   late CaterpillarGameUI _gameUI;
   late Timer _interval;
-
 
   double angleToLerpTo = 0;
   double rotationSpeed = 2;
@@ -39,10 +34,9 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
   double mapSize = 2000;
   CaterpillarCrawlMain();
 
-
   @override
   Future<void> onLoad() async {
-    await super.onLoad();  
+    await super.onLoad();
     world = World();
     add(FpsTextComponent());
     _gameUI = CaterpillarGameUI(mainGame: this);
@@ -51,20 +45,19 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
     debugMode = false;
-    if(debugMode)
-    {
+    if (debugMode) {
       print("DEBUG IS ON");
     }
+    world.debugMode = debugMode;
     //  _interval = Timer(6, repeat: true, onTick: spawnEnemy)
     //   ..start();
-  }  
+  }
 
   @override
   void update(double dt) {
     // TODO: implement update
     //_interval.update(dt);
     super.update(dt);
-
   }
 
   @override
@@ -78,87 +71,85 @@ class CaterpillarCrawlMain extends FlameGame with TapCallbacks, HasCollisionDete
     moveCaterpillarOnTap(event.localPosition);
   }
 
-  void moveCaterpillarOnTap(Vector2 tapPosition)
-  {
-        Vector2 tapDirection = size/2 - tapPosition;
-        _caterPillar.onMoveDirectionChange(tapDirection);
+  void moveCaterpillarOnTap(Vector2 tapPosition) {
+    Vector2 tapDirection = size / 2 - tapPosition;
+    _caterPillar.onMoveDirectionChange(tapDirection);
   }
 
-  CaterpillarData createCaterpillarData()
-  {
+  CaterpillarData createCaterpillarData() {
     //Data for first Caterpillar - Green Wobbly
-    return  CaterpillarData(
-      imagePath: 'caterPillar_head.png', 
-      spriteSize: Vector2.all(128), 
-      anchorPosY: 75, 
-      movingspeed: 120,
-      refinedSegmentDistance: 0.45,
-      animationSprites: 4,
-      caterpillarSegment: 
-      CaterpillarSegmentData(
-        imagePath: 'segment_single64.png',
-        spriteSize: Vector2.all(64),
-        finalSize: Vector2(64,64)
-),
-      finalSize: Vector2(64,64),
-      maxElementCount: 150
-    );
-  }
-
-    CaterpillarData createEnemyData()
-  {
-    //Data for enemy Caterpillar - Orange horned
-    return  CaterpillarData(
-      imagePath: 'enemy_head_anim.png', 
-      spriteSize: Vector2.all(128), 
-      anchorPosY: 106, 
-      movingspeed: 60,
-      refinedSegmentDistance: 0.3,
-      animationSprites: 3,
-      caterpillarSegment: 
-      CaterpillarSegmentData(
-        imagePath: 'enemy_segment.png',
+    return CaterpillarData(
+        imagePath: 'caterPillar_head.png',
+        wobbleAnimImagePath: 'caterpillar_wobble.png',
         spriteSize: Vector2.all(128),
-        finalSize: Vector2(64,64)
-),
-      finalSize: Vector2(64,64),
-      maxElementCount: 10
-    );
+        anchorPosY: 75,
+        movingspeed: 120,
+        refinedSegmentDistance: 0.45,
+        animationSprites: 4,
+        wobbleAnimationSprites: 5,
+        caterpillarSegment: CaterpillarSegmentData(
+            imagePath: 'caterPillar_segment.png',
+            spriteSize: Vector2.all(128),
+            finalSize: Vector2(64, 64)),
+        finalSize: Vector2(64, 64),
+        maxElementCount: 150);
   }
 
-  void createAndAddCaterillar(double mapSize)
-  {
-    CaterpillarData mainPlayerCaterpillar = createCaterpillarData();
-    _caterPillar = CaterPillar(mainPlayerCaterpillar, this,rotationSpeed);
-    _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50,50);
+  CaterpillarData createEnemyData() {
+    //Data for enemy Caterpillar - Orange horned
+    return CaterpillarData(
+        imagePath: 'enemy_head_anim.png',
+        wobbleAnimImagePath: 'enemy_head_anim.png',
+        spriteSize: Vector2.all(128),
+        anchorPosY: 106,
+        movingspeed: 60,
+        refinedSegmentDistance: 0.3,
+        animationSprites: 1,
+        wobbleAnimationSprites: 1,
+        caterpillarSegment: CaterpillarSegmentData(
+            imagePath: 'enemy_segment.png',
+            spriteSize: Vector2.all(128),
+            finalSize: Vector2(64, 64)),
+        finalSize: Vector2(64, 64),
+        maxElementCount: 10);
+  }
 
-    _groundMap = GroundMap(mapSize, _caterPillar,this,snackCount);
+  void createAndAddCaterillar(double mapSize) {
+    CaterpillarData mainPlayerCaterpillar = createCaterpillarData();
+    _caterPillar = CaterPillar(mainPlayerCaterpillar, this, rotationSpeed);
+    _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50, 50);
+
+    _groundMap = GroundMap(mapSize, _caterPillar, this, snackCount);
     world.add(_groundMap);
     world.add(_caterPillar);
-    spawnEnemy();
+    //spawnEnemy();
   }
 
-  void spawnEnemy()
-  {
+  void spawnEnemy() {
     print("Spawn enemy");
     CaterpillarData enemyCaterpillar = createEnemyData();
-    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this,rotationSpeed);
-     world.add(_enemy);
+    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this, rotationSpeed);
+    world.add(_enemy);
     _groundMap.addEnemy(_enemy);
 
-    if(_groundMap.enemyIndexer > 4)
-    {
+    if (_groundMap.enemyIndexer > 4) {
       _interval.stop();
     }
   }
 
-  void onSegmentAddedToPlayer(int segmentCount)
-  {
-      _gameUI.setSegmentCountUi(segmentCount);
+  void onFatRounButtonClick() {
+    _caterPillar.onFatRoundButtonClick();
   }
 
-    void onSegmentAddedToEnemy(int segmentCount)
-  {
-      _gameUI.setEnemySegmentCountUi(segmentCount);
+  void onSegmentAddedToPlayer(int segmentCount) {
+    _gameUI.setSegmentCountUi(segmentCount);
+  }
+
+  void onSegmentAddedToEnemy(int segmentCount) {
+    _gameUI.setEnemySegmentCountUi(segmentCount);
+  }
+
+  void onCaterPillarReadyToEgg() {
+    _gameUI.OnCaterpillarReadyToEgg();
   }
 }
