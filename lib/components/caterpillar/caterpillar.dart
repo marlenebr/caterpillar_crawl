@@ -2,9 +2,8 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/egg.dart';
-import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/caterpillarData.dart';
-import 'package:caterpillar_crawl/models/eggData.dart';
+import 'package:caterpillar_crawl/models/caterpillar_data.dart';
+import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
@@ -47,24 +46,23 @@ class CaterPillar extends CaterpillarElement {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    size = caterpillardata.finalSize;
-    finalSize = caterpillardata.finalSize;
-    headAnimation = await _createCaterpillarAnimation(
-        caterpillardata.imagePath, caterpillardata.animationSprites);
-    wobbleAnimation = await _createCaterpillarAnimation(
-        caterpillardata.wobbleAnimImagePath,
-        caterpillardata.wobbleAnimationSprites);
+    size = caterpillardata.idleAnimation.finalSize;
+    finalSize = caterpillardata.idleAnimation.finalSize;
+    headAnimation = await CaterpillarCrawlUtils.createAnimation(
+        animationData: caterpillardata.idleAnimation);
+    wobbleAnimation = await CaterpillarCrawlUtils.createAnimation(
+        animationData: caterpillardata.wobbleAnimation!);
 
     caterPillarAnimations = SpriteAnimationGroupComponent<CaterpillarState>(
         animations: {
           CaterpillarState.crawling: headAnimation,
           CaterpillarState.onHold: wobbleAnimation,
         },
-        scale: Vector2(finalSize.x / caterpillardata.spriteSize.x,
-            finalSize.y / caterpillardata.spriteSize.y),
+        scale: Vector2(finalSize.x / caterpillardata.idleAnimation.spriteSize.x,
+            finalSize.y / caterpillardata.idleAnimation.spriteSize.y),
         current: currentState);
-    final double anchorPos =
-        (caterpillardata.anchorPosY / caterpillardata.spriteSize.y);
+    final double anchorPos = (caterpillardata.anchorPosY /
+        caterpillardata.idleAnimation.spriteSize.y);
     anchor = Anchor(0.5, anchorPos);
     angleToLerpTo = angle;
     add(caterPillarAnimations);
@@ -96,21 +94,21 @@ class CaterPillar extends CaterpillarElement {
     updateOnHold();
   }
 
-  Future<SpriteAnimation> _createCaterpillarAnimation(
-      String path, int amount) async {
-    final data = SpriteAnimationData.sequenced(
-      textureSize: caterpillardata.spriteSize,
-      amount: amount,
-      stepTime: 0.1,
-    );
-    SpriteAnimationComponent caterPillarAnim =
-        SpriteAnimationComponent.fromFrameData(
-      await imageLoader.load(path),
-      data,
-    );
+  // Future<SpriteAnimation> _createCaterpillarAnimation(
+  //     String path, int amount) async {
+  //   final data = SpriteAnimationData.sequenced(
+  //     textureSize: caterpillardata.spriteSize,
+  //     amount: amount,
+  //     stepTime: 0.1,
+  //   );
+  //   SpriteAnimationComponent caterPillarAnim =
+  //       SpriteAnimationComponent.fromFrameData(
+  //     await imageLoader.load(path),
+  //     data,
+  //   );
 
-    return caterPillarAnim.animation!;
-  }
+  //   return caterPillarAnim.animation!;
+  // }
 
   void startUpdateAngleQueue(double dt) {
     orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();

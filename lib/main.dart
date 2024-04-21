@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
-import 'package:caterpillar_crawl/components/caterpillarGameUI.dart';
+import 'package:caterpillar_crawl/components/caterpillar_game_ui.dart';
+import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
-import 'package:caterpillar_crawl/models/caterpillarData.dart';
+import 'package:caterpillar_crawl/models/caterpillar_data.dart';
+import 'package:caterpillar_crawl/models/enemy_data.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -76,46 +78,9 @@ class CaterpillarCrawlMain extends FlameGame
     _caterPillar.onMoveDirectionChange(tapDirection);
   }
 
-  CaterpillarData createCaterpillarData() {
-    //Data for first Caterpillar - Green Wobbly
-    return CaterpillarData(
-        imagePath: 'caterPillar_head.png',
-        wobbleAnimImagePath: 'caterpillar_wobble.png',
-        spriteSize: Vector2.all(128),
-        anchorPosY: 75,
-        movingspeed: 120,
-        refinedSegmentDistance: 0.45,
-        animationSprites: 4,
-        wobbleAnimationSprites: 5,
-        caterpillarSegment: CaterpillarSegmentData(
-            imagePath: 'caterPillar_segment.png',
-            spriteSize: Vector2.all(128),
-            finalSize: Vector2(64, 64)),
-        finalSize: Vector2(64, 64),
-        maxElementCount: 150);
-  }
-
-  CaterpillarData createEnemyData() {
-    //Data for enemy Caterpillar - Orange horned
-    return CaterpillarData(
-        imagePath: 'enemy_head_anim.png',
-        wobbleAnimImagePath: 'enemy_head_anim.png',
-        spriteSize: Vector2.all(128),
-        anchorPosY: 106,
-        movingspeed: 60,
-        refinedSegmentDistance: 0.3,
-        animationSprites: 1,
-        wobbleAnimationSprites: 1,
-        caterpillarSegment: CaterpillarSegmentData(
-            imagePath: 'enemy_segment.png',
-            spriteSize: Vector2.all(128),
-            finalSize: Vector2(64, 64)),
-        finalSize: Vector2(64, 64),
-        maxElementCount: 10);
-  }
-
   void createAndAddCaterillar(double mapSize) {
-    CaterpillarData mainPlayerCaterpillar = createCaterpillarData();
+    CaterpillarData mainPlayerCaterpillar =
+        CaterpillarData.createCaterpillarData();
     _caterPillar = CaterPillar(mainPlayerCaterpillar, this, rotationSpeed);
     _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50, 50);
 
@@ -127,8 +92,8 @@ class CaterpillarCrawlMain extends FlameGame
 
   void spawnEnemy() {
     print("Spawn enemy");
-    CaterpillarData enemyCaterpillar = createEnemyData();
-    CaterPillar _enemy = CaterPillar(enemyCaterpillar, this, rotationSpeed);
+    EnemyData enemyCaterpillar = EnemyData.createEnemeyData();
+    Enemy _enemy = Enemy(enemyData: enemyCaterpillar);
     world.add(_enemy);
     _groundMap.addEnemy(_enemy);
 

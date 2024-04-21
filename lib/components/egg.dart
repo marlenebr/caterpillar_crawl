@@ -1,11 +1,9 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/animationData.dart';
-import 'package:caterpillar_crawl/models/eggData.dart';
+import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/gestures.dart';
 
 class Egg extends PositionComponent {
   CaterpillarCrawlMain gameWorld;

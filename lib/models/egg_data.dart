@@ -1,4 +1,4 @@
-import 'package:caterpillar_crawl/models/animationData.dart';
+import 'package:caterpillar_crawl/models/animation_data.dart';
 import 'package:flame/components.dart';
 
 class EggData {

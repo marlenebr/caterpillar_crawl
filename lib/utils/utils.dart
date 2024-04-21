@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/animationData.dart';
+import 'package:caterpillar_crawl/models/animation_data.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -51,6 +51,20 @@ class CaterpillarCrawlUtils {
     );
 
     return eggAnim.animation!;
+  }
+
+  static Future<SpriteAnimationComponent> createAnimationComponent(
+      AnimationData animationData) async {
+    final data = SpriteAnimationData.sequenced(
+      textureSize: animationData.spriteSize,
+      amount: animationData.animationstepCount,
+      stepTime: 0.1,
+    );
+
+    return SpriteAnimationComponent.fromFrameData(
+        await imageLoader.load(animationData.imagePath), data,
+        scale: Vector2(animationData.finalSize.x / animationData.spriteSize.x,
+            animationData.finalSize.y / animationData.spriteSize.y));
   }
 }
 
