@@ -16,7 +16,7 @@ class EggData {
           imagePath: 'bombanim.png',
           spriteSize: Vector2.all(64),
           finalSize: Vector2.all(64),
-          animationstepCount: 3),
+          animationstepCount: 4),
       explodingEgg: AnimationData(
           imagePath: 'explodeanimall.png',
           spriteSize: Vector2.all(128),
