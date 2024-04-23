@@ -8,6 +8,11 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 
 class CaterpillarCrawlUtils {
+
+  //---Constants---
+  static const double fullCircle = 2 * pi;
+
+
   ///Gets the angle from a point and the up vector
   static double getAngleFromUp(Vector2 point) {
     double radiansOfTap = atan2(point.y, point.x);
@@ -66,7 +71,31 @@ class CaterpillarCrawlUtils {
         scale: Vector2(animationData.finalSize.x / animationData.spriteSize.x,
             animationData.finalSize.y / animationData.spriteSize.y));
   }
+
+  ///updates the angle of the transform. returns true if angle is reached.
+  static bool updateLerpToAngle(double dt, Transform2D transformToRotate, double angleToLerpTo, double rotationSpeed) {
+    double diff = transformToRotate.angle - angleToLerpTo;
+    if (diff.abs() < 0.1) {
+      transformToRotate.angle = angleToLerpTo;
+      return true;
+    }
+    int direction = 1;
+    if ((diff > 0 && diff < pi) || diff < -pi) {
+      direction = -1;
+    }
+
+    double lerpSpeedDt = dt * rotationSpeed * direction * 0.5;
+    transformToRotate.angle += lerpSpeedDt;
+
+    //fix error from 0 to 360 degrees
+    transformToRotate.angle = transformToRotate.angle % (fullCircle);
+    if (transformToRotate.angle < 0) {
+      transformToRotate.angle = fullCircle + (transformToRotate.angle % (fullCircle));
+    }
+    return false;
+  }
 }
+
 
 // extension PositionComponentExtensions on PositionComponent {
 //     void setChildToAnchorPosition(PositionComponent child)

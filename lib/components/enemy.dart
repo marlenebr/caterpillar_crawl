@@ -9,12 +9,14 @@ import 'package:flame/components.dart';
 class Enemy extends PositionComponent {
   EnemyData enemyData;
   late SpriteAnimation enemyAnimation;
-  double secondCounter = 0;
-  int moveToPosIndex = 0;
   double velocity = 1;
-  late Vector2 initPos;
+  late Vector2 _lastPointPos;
+  late int angleIndex = 0;
 
-  static const double fullCircle = 2 * pi;
+  EnemyMovementStatus _enemyMovementStatus = EnemyMovementStatus.rotating;
+
+  late int wayIndex;
+
   double rotationSpeed = 4;
 
   Enemy({required this.enemyData});
@@ -28,6 +30,7 @@ class Enemy extends PositionComponent {
     SpriteAnimationComponent animation =
         await CaterpillarCrawlUtils.createAnimationComponent(
             enemyData.idleAnimation);
+    //animation.anchor = Anchor.center;
     add(animation);
     // angleToLerpTo = angle;
     priority = 10000;
@@ -36,64 +39,51 @@ class Enemy extends PositionComponent {
   @override
   Future<void> onMount() async {
     super.onMount();
-    initPos = position;
+    Vector2.copy(position);
+    _lastPointPos = Vector2(position.x,position.y);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    updateLerpToAngle(dt);
-    velocity = dt * enemyData.movingspeed;
+    switch (_enemyMovementStatus) {
+      case EnemyMovementStatus.rotating:
+        bool hasReachedAngle = CaterpillarCrawlUtils.updateLerpToAngle(
+            dt, transform, enemyData.angleList[angleIndex], 2);
+        if (hasReachedAngle) {
+          _enemyMovementStatus = EnemyMovementStatus.movingForward;
+        }
+      case EnemyMovementStatus.movingForward:
+        velocity = dt * enemyData.movingspeed;
+        Vector2 orientation =
+            Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
+        position += orientation * velocity * 56.5;
+        if(position.distanceTo(_lastPointPos) >= enemyData.wayDistance)
+        {
+          _lastPointPos = Vector2(position.x,position.y);
+          angleIndex++;
+          if(angleIndex>enemyData.angleList.length-1)
+          {
+            angleIndex = 0;
+          }
+          print(angleIndex);
+          _enemyMovementStatus = EnemyMovementStatus.rotating;
+        }
+    }
 
-    Vector2 orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
-    position += orientation * velocity * 56.5;
-    if (position
+    // TODO: Handle this case.
+    /*  if (position
             .distanceTo(initPos + enemyData.moveToPositions[moveToPosIndex]) <
         0.5) {
       moveToPosIndex++;
       if (moveToPosIndex > enemyData.moveToPositions.length) {
         moveToPosIndex = 0;
       }
-    }
+    } */
   }
+}
 
-  void updateLerpToAngle(double dt) {
-    double angleToLerpTo = CaterpillarCrawlUtils.getAngleFromUp(
-        enemyData.moveToPositions[moveToPosIndex]);
-
-    double diff = transform.angle - angleToLerpTo;
-    if (diff.abs() < 0.1) {
-      transform.angle = angleToLerpTo;
-      return;
-    }
-    int direction = 1;
-    if ((diff > 0 && diff < pi) || diff < -pi) {
-      direction = -1;
-    }
-
-    double lerpSpeedDt = dt * rotationSpeed * direction * 0.5;
-    transform.angle += lerpSpeedDt;
-
-    //fix error from 0 to 360 degrees
-    angle = angle % (fullCircle);
-    if (angle < 0) {
-      angle = fullCircle + (angle % (fullCircle));
-    }
-
-    // bool updateEnemydirection(double dt, double frameDuration) {
-
-    //     secondCounter += dt;
-    //     if (secondCounter >= frameDuration) {
-    //       secondCounter = 0;
-    //       .forEach((key, value) {
-    //         if (key > 0) //0 is player
-    //         enem{
-    //           value.onMoveDirectionChange(player.position);
-    //         }
-    //       });
-    //     }
-
-    //   return false;
-    // }
-  }
+enum EnemyMovementStatus {
+  rotating,
+  movingForward,
 }

@@ -84,7 +84,7 @@ class CaterPillar extends CaterpillarElement {
         addSegment();
       }
     }
-    updateLerpToAngle(dt);
+    CaterpillarCrawlUtils.updateLerpToAngle(dt, transform,angleToLerpTo,2);
     if (currentState == CaterpillarState.readyToEgg) {
       return;
     }
@@ -166,27 +166,6 @@ class CaterPillar extends CaterpillarElement {
   void onGameResize(Vector2 gameSize) {
     super.onGameResize(gameSize);
     position = gameSize / 2;
-  }
-
-  void updateLerpToAngle(double dt) {
-    double diff = transform.angle - angleToLerpTo;
-    if (diff.abs() < 0.1) {
-      transform.angle = angleToLerpTo;
-      return;
-    }
-    int direction = 1;
-    if ((diff > 0 && diff < pi) || diff < -pi) {
-      direction = -1;
-    }
-
-    double lerpSpeedDt = dt * rotationSpeed * direction * speedMultiplier;
-    transform.angle += lerpSpeedDt;
-
-    //fix error from 0 to 360 degrees
-    angle = angle % (fullCircle);
-    if (angle < 0) {
-      angle = fullCircle + (angle % (fullCircle));
-    }
   }
 
   void onMoveDirectionChange(Vector2 pointToMoveTo) {

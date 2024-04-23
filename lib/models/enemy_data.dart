@@ -5,13 +5,15 @@ class EnemyData {
   final AnimationData idleAnimation;
   final AnimationData? wobbleAnimation;
   final double movingspeed;
-  final List<Vector2> moveToPositions;
+  final List<double> angleList;
+  final double wayDistance;
 
   const EnemyData({
     required this.idleAnimation,
     required this.wobbleAnimation,
     required this.movingspeed,
-    required this.moveToPositions,
+    required this.angleList,
+    required this.wayDistance
   });
 
   static EnemyData createEnemeyData() {
@@ -24,11 +26,12 @@ class EnemyData {
       ),
       movingspeed: 0.5,
       wobbleAnimation: null,
-      moveToPositions: <Vector2>[
-        Vector2(-60, -10),
-        Vector2(0, 60),
-        Vector2(60, 60),
+      angleList: <double>[
+        0,
+        2.094395,
+        -2.094395,
       ],
+      wayDistance: 60,
     );
   }
 }

@@ -41,9 +41,8 @@ class GroundMap extends PositionComponent {
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
     await fillWithSnacks(snackCount);
-    await fillWithEnemies(12);
+    await fillWithEnemies(18);
   }
-
   @override
   Future onMount() async {}
 
