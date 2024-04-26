@@ -41,8 +41,9 @@ class GroundMap extends PositionComponent {
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
     await fillWithSnacks(snackCount);
-    await fillWithEnemies(18);
+    await fillWithEnemies(110);
   }
+
   @override
   Future onMount() async {}
 
@@ -72,11 +73,10 @@ class GroundMap extends PositionComponent {
   bool coolDownForNextSpeedChange = false;
 
   void updatePlayOnSnackEaten() {
-    player.snackCount++;
     player.addCaterpillarSegemntRequest();
-    if (player.lastSegment != null) {
-      world.onSegmentAddedToPlayer(player.lastSegment!.index);
-    }
+    // if (player.lastSegment != null) {
+    //   world.onSegmentAddedToPlayer(player.lastSegment!.index);
+    // }
   }
 
   void resetPlayerOnMapEnd() {
@@ -94,7 +94,7 @@ class GroundMap extends PositionComponent {
 
   Future<void> fillWithEnemies(int enemyCount) async {
     for (int i = 0; i < enemyCount; i++) {
-      addEnemy(Enemy(enemyData: EnemyData.createEnemeyData()));
+      addEnemy(Enemy(enemyData: EnemyData.createEnemeyData(), map: this));
     }
   }
 

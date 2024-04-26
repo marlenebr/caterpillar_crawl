@@ -8,10 +8,8 @@ import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart';
 
 class CaterpillarCrawlUtils {
-
   //---Constants---
   static const double fullCircle = 2 * pi;
-
 
   ///Gets the angle from a point and the up vector
   static double getAngleFromUp(Vector2 point) {
@@ -73,7 +71,8 @@ class CaterpillarCrawlUtils {
   }
 
   ///updates the angle of the transform. returns true if angle is reached.
-  static bool updateLerpToAngle(double dt, Transform2D transformToRotate, double angleToLerpTo, double rotationSpeed) {
+  static bool updateLerpToAngle(double dt, Transform2D transformToRotate,
+      double angleToLerpTo, double rotationSpeed) {
     double diff = transformToRotate.angle - angleToLerpTo;
     if (diff.abs() < 0.1) {
       transformToRotate.angle = angleToLerpTo;
@@ -90,9 +89,16 @@ class CaterpillarCrawlUtils {
     //fix error from 0 to 360 degrees
     transformToRotate.angle = transformToRotate.angle % (fullCircle);
     if (transformToRotate.angle < 0) {
-      transformToRotate.angle = fullCircle + (transformToRotate.angle % (fullCircle));
+      transformToRotate.angle =
+          fullCircle + (transformToRotate.angle % (fullCircle));
     }
     return false;
+  }
+
+  static void updatePosition(
+      double dt, Transform2D transformToMove, double speed, double angle) {
+    transformToMove.position +=
+        (Vector2(1 * sin(angle), -1 * cos(angle)).normalized()) * dt * speed;
   }
 }
 

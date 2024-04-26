@@ -26,7 +26,7 @@ void main() {
 class CaterpillarCrawlMain extends FlameGame
     with TapCallbacks, HasCollisionDetection {
   late CaterPillar _caterPillar;
-  late GroundMap _groundMap;
+  late GroundMap groundMap;
   late CaterpillarGameUI _gameUI;
   late Timer _interval;
 
@@ -84,37 +84,41 @@ class CaterpillarCrawlMain extends FlameGame
     _caterPillar = CaterPillar(mainPlayerCaterpillar, this, rotationSpeed);
     _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50, 50);
 
-    _groundMap = GroundMap(mapSize, _caterPillar, this, snackCount);
-    world.add(_groundMap);
+    groundMap = GroundMap(mapSize, _caterPillar, this, snackCount);
+    world.add(groundMap);
     world.add(_caterPillar);
     //spawnEnemy();
   }
 
-  void spawnEnemy() {
-    print("Spawn enemy");
-    EnemyData enemyCaterpillar = EnemyData.createEnemeyData();
-    Enemy _enemy = Enemy(enemyData: enemyCaterpillar);
-    world.add(_enemy);
-    _groundMap.addEnemy(_enemy);
+  // void spawnEnemy() {
+  //   print("Spawn enemy");
+  //   EnemyData enemyCaterpillar = EnemyData.createEnemeyData();
+  //   Enemy _enemy = Enemy(enemyData: enemyCaterpillar);
+  //   world.add(_enemy);
+  //   groundMap.addEnemy(_enemy);
 
-    if (_groundMap.enemyIndexer > 4) {
-      _interval.stop();
-    }
-  }
+  //   if (groundMap.enemyIndexer > 4) {
+  //     _interval.stop();
+  //   }
+  // }
 
   void onFatRounButtonClick() {
     _caterPillar.onFatRoundButtonClick();
+  }
+
+  void onPewPewButtonclicked() {
+    _caterPillar.onPewPew();
   }
 
   void onSegmentAddedToPlayer(int segmentCount) {
     _gameUI.setSegmentCountUi(segmentCount);
   }
 
-  void onSegmentAddedToEnemy(int segmentCount) {
-    _gameUI.setEnemySegmentCountUi(segmentCount);
+  void onEnemyKilled(int enemyKilled) {
+    _gameUI.setEnemyKilledUi(enemyKilled);
   }
 
   void onCaterPillarReadyToEgg() {
-    _gameUI.OnCaterpillarReadyToEgg();
+    _gameUI.onCaterpillarReadyToEgg();
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -67,10 +68,21 @@ class Egg extends PositionComponent {
       currentShootTime -= dt;
       if (currentShootTime <= 0) {
         istShooting = false;
-        setCurrentEggState(EggState.exploding);
+        explode();
       }
     }
   }
+
+  void explode() {
+    setCurrentEggState(EggState.exploding);
+    for (Enemy enemy in gameWorld.groundMap.enemies.values) {
+      if (enemy.position.distanceTo(position) < 140) {
+        enemy.onEnemyHit(5);
+      }
+    }
+  }
+
+  void onExploded() {}
 
   void setCurrentEggState(EggState eggState) {
     currentState = eggState;

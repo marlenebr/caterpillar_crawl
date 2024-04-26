@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/egg.dart';
+import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/pellet.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -31,6 +33,7 @@ class CaterPillar extends CaterpillarElement {
   List<CaterpillarSegment> segmentsToRemove = List.empty();
 
   int snackCount = 0;
+  int enemyKilled = 0;
   int loadToEgg = 1;
   late int loadToEggCount; //How many segments should me removed untill egg
 
@@ -84,7 +87,7 @@ class CaterPillar extends CaterpillarElement {
         addSegment();
       }
     }
-    CaterpillarCrawlUtils.updateLerpToAngle(dt, transform,angleToLerpTo,2);
+    CaterpillarCrawlUtils.updateLerpToAngle(dt, transform, angleToLerpTo, 2);
     if (currentState == CaterpillarState.readyToEgg) {
       return;
     }
@@ -92,6 +95,7 @@ class CaterPillar extends CaterpillarElement {
       startUpdateAngleQueue(dt);
     }
     updateOnHold();
+    updateEnemyNearBy();
   }
 
   // Future<SpriteAnimation> _createCaterpillarAnimation(
@@ -150,15 +154,27 @@ class CaterPillar extends CaterpillarElement {
     }
     if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
       if (nextSegment!.parent == null) return;
-      print(
-          "DIST ${position.distanceTo(nextSegment!.position).abs()} from segment ${nextSegment!.index}");
-      print("POS ${position} from segment pos ${nextSegment!.position}");
-
       nextSegment!.segemntOnHold = true;
-      print("NEXT ${nextSegment!.index}");
       //TODO: Refine removement
       removeSegment(nextSegment!);
       return;
+    }
+  }
+
+  void updateEnemyNearBy() {
+    for (Enemy enemy in gameWorld.groundMap.enemies.values) {
+      if (enemy.position.distanceTo(position) < 200) {
+        //ROTATE TOWARDS
+        enemy.followCaterpillar(position);
+        if (enemy.position.distanceTo(position) < 20 &&
+            enemy.enemyMovementStatus != EnemyMovementStatus.dead) {
+          print("DEAD");
+          position = Vector2.zero(); //DEBUG
+        }
+      } else if (enemy.enemyMovementStatus ==
+          EnemyMovementStatus.moveToCaterpillar) {
+        enemy.disfollowCaterpillar();
+      }
     }
   }
 
@@ -185,6 +201,7 @@ class CaterPillar extends CaterpillarElement {
       lastSegment?.addCaterpillarSegemntRequest();
     } else {
       super.addCaterPillarSegment(this);
+      onChangeSegmentCount(1);
     }
     segemntAddRequest = false;
   }
@@ -201,7 +218,7 @@ class CaterPillar extends CaterpillarElement {
     }
     isRemovingSegment = true;
     gameWorld.world.remove(segment);
-    snackCount--;
+    onChangeSegmentCount(-1);
     loadToEggCount--;
   }
 
@@ -232,9 +249,27 @@ class CaterPillar extends CaterpillarElement {
     Egg egg = Egg(eggData: eggData, gameWorld: gameWorld, shootingSpeed: 4);
     gameWorld.world.add(egg);
     egg.position = absolutePositionOfAnchor(anchor);
-    print("EGG: ${egg.position}");
-    print("POS CATER: ${position}");
     egg.angle = angle;
     egg.shoot();
+  }
+
+  void onPewPew() {
+    Pellet pellet = Pellet(
+        forwardAngle: angle,
+        gameWorld: gameWorld,
+        lifeTime: 1.5,
+        shootingSpeed: 300);
+    gameWorld.world.add(pellet);
+    pellet.position = Vector2(position.x, position.y);
+  }
+
+  void onChangeSegmentCount(int changeCount) {
+    snackCount += changeCount;
+    gameWorld.onSegmentAddedToPlayer(snackCount);
+  }
+
+  void onEnemyKilled() {
+    enemyKilled += 1;
+    gameWorld.onEnemyKilled(enemyKilled);
   }
 }
