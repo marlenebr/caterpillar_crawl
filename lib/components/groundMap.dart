@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 class GroundMap extends PositionComponent {
   double mapSize;
   int snackCount;
+  int enemyCount;
   int enemyIndexer = 1;
   // double secondCounter = 0;
 
@@ -28,7 +29,12 @@ class GroundMap extends PositionComponent {
 
   bool isCalculatingSnacks = false;
 
-  GroundMap(this.mapSize, this.player, this.world, this.snackCount)
+  GroundMap(
+      {required this.mapSize,
+      required this.player,
+      required this.world,
+      required this.snackCount,
+      required this.enemyCount})
       : super(size: Vector2.all(mapSize));
 
   @override
@@ -41,7 +47,7 @@ class GroundMap extends PositionComponent {
     anchor = Anchor.center;
     player.transform.position = Vector2.all(0);
     await fillWithSnacks(snackCount);
-    await fillWithEnemies(110);
+    await fillWithEnemies(enemyCount);
   }
 
   @override
@@ -169,6 +175,6 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
   @override
   void update(double dt) {
     super.update(dt);
-    parallax?.baseVelocity = player.orientation * player.velocity;
+    parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
   }
 }

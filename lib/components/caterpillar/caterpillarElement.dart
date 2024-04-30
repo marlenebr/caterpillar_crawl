@@ -11,6 +11,8 @@ class CaterpillarElement extends PositionComponent {
   CaterpillarData caterpillardata;
   CaterpillarCrawlMain gameWorld;
 
+  double distToCollide = 20;
+
   Queue<MovementTransferData> angleQueue =
       Queue<MovementTransferData>(); // ListQueue() by default
   bool isInitializing = true;
@@ -23,8 +25,6 @@ class CaterpillarElement extends PositionComponent {
   late Vector2 finalSize;
 
   Vector2 orientation = Vector2.zero();
-  double velocity = 1;
-  double speedMultiplier = 0.5;
 
   late double fixedDistToSegment;
   late Vector2 initPosition;
@@ -34,8 +34,6 @@ class CaterpillarElement extends PositionComponent {
   @override
   void update(double dt) {
     super.update(dt);
-    velocity = dt * caterpillardata.movingspeed;
-
     initSegment();
 
     timeSinceInit += dt;
@@ -74,49 +72,47 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.previousSegment = this;
     nextSegment?.priority = priority - 1;
     nextSegment?.index = index + 1;
+    caterpillar.onChangeSegmentCount(1);
     return;
   }
 
-  void updateAngleQueue(int fixIterations, int entriesNeeded) {
+  void updateAngleQueue(int entriesNeeded) {
     angleQueue.addFirst(MovementTransferData(
         orientation: orientation,
         position: absolutePositionOfAnchor(anchor),
         angle: angle));
-    correctListLength(fixIterations, entriesNeeded);
+    correctListLength(entriesNeeded);
 
     if (nextSegment != null) {
       nextSegment?.angle = angleQueue.last.angle;
       nextSegment?.position = angleQueue.last.position;
-      nextSegment?.updateAngleQueue(fixIterations, entriesNeeded);
+      nextSegment?.updateAngleQueue(entriesNeeded);
     }
   }
 
-  void correctListLength(int fixIt, int entriesNeeded) {
-    for (int i = 0; i < fixIt; i++) {
-      if (angleQueue.length > entriesNeeded + 1) {
-        // for(int i = debugLeN; i >entriesNeeded; i--)
-        // {
-        angleQueue.removeLast();
-        //}
-      } else {
-        return;
-      }
+  void correctListLength(int entriesNeeded) {
+    if (angleQueue.length > entriesNeeded) {
+      // for(int i = debugLeN; i >entriesNeeded; i--)
+      // {
+      angleQueue.removeLast();
+      //}
+    } else {
+      return;
     }
   }
 
   void initSegment() {
     if (isInitializing &&
         initPosition.distanceTo(position) > fixedDistToSegment) {
-      //kommt einmal vor
       isInitializing = false;
-      // print("init of segment done $index");
     }
   }
 
   //the size the queue has to be right now
   int calcSteptToReachDistance(double dt) {
-    double finalTimeInSec =
-        fixedDistToSegment / (caterpillardata.movingspeed * speedMultiplier);
+    double finalTimeInSec = fixedDistToSegment /
+        (caterpillardata.movingspeed *
+            gameWorld.groundMap.player.speedMultiplier);
     if (dt == 0) {
       return 0;
     }

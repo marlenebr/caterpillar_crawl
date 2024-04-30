@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar_game_ui.dart';
-import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
-import 'package:caterpillar_crawl/models/enemy_data.dart';
+import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
@@ -28,11 +28,12 @@ class CaterpillarCrawlMain extends FlameGame
   late CaterPillar _caterPillar;
   late GroundMap groundMap;
   late CaterpillarGameUI _gameUI;
-  late Timer _interval;
 
   double angleToLerpTo = 0;
-  double rotationSpeed = 2;
-  int snackCount = 300;
+  double rotationSpeed = 5;
+  int snackCount = 400;
+  int enemyCount = 60;
+
   double mapSize = 2000;
   CaterpillarCrawlMain();
 
@@ -43,7 +44,7 @@ class CaterpillarCrawlMain extends FlameGame
     add(FpsTextComponent());
     _gameUI = CaterpillarGameUI(mainGame: this);
     add(_gameUI);
-    createAndAddCaterillar(mapSize);
+    createAndAddCaterillar(mapSize, _gameUI.joystick);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
     debugMode = false;
@@ -51,14 +52,10 @@ class CaterpillarCrawlMain extends FlameGame
       print("DEBUG IS ON");
     }
     world.debugMode = debugMode;
-    //  _interval = Timer(6, repeat: true, onTick: spawnEnemy)
-    //   ..start();
   }
 
   @override
   void update(double dt) {
-    // TODO: implement update
-    //_interval.update(dt);
     super.update(dt);
   }
 
@@ -68,23 +65,37 @@ class CaterpillarCrawlMain extends FlameGame
     super.render(canvas);
   }
 
-  @override
-  void onTapDown(TapDownEvent event) {
-    moveCaterpillarOnTap(event.localPosition);
+  void zoomOut() {
+    final effect = ScaleEffect.by(
+      camera.viewfinder.transform.scale * 0.9,
+      EffectController(duration: 0.6),
+    );
+    camera.viewfinder.add(effect);
   }
 
-  void moveCaterpillarOnTap(Vector2 tapPosition) {
-    Vector2 tapDirection = size / 2 - tapPosition;
-    _caterPillar.onMoveDirectionChange(tapDirection);
-  }
+  // @override
+  // void onTapDown(TapDownEvent event) {
+  //   moveCaterpillarOnTap(event.localPosition);
+  // }
 
-  void createAndAddCaterillar(double mapSize) {
+  // void moveCaterpillarOnTap(Vector2 tapPosition) {
+  //   Vector2 tapDirection = size / 2 - tapPosition;
+  //   _caterPillar.onMoveDirectionChange(tapDirection);
+  // }
+
+  void createAndAddCaterillar(double mapSiz, CaterpillarJoystick joystick) {
     CaterpillarData mainPlayerCaterpillar =
         CaterpillarData.createCaterpillarData();
-    _caterPillar = CaterPillar(mainPlayerCaterpillar, this, rotationSpeed);
+    _caterPillar = CaterPillar(
+        mainPlayerCaterpillar, this, rotationSpeed, _gameUI.joystick);
     _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50, 50);
 
-    groundMap = GroundMap(mapSize, _caterPillar, this, snackCount);
+    groundMap = GroundMap(
+        mapSize: mapSize,
+        player: _caterPillar,
+        world: this,
+        snackCount: snackCount,
+        enemyCount: enemyCount);
     world.add(groundMap);
     world.add(_caterPillar);
     //spawnEnemy();

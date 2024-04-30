@@ -6,12 +6,15 @@ import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/components/pellet.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
+import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flame/input.dart';
 
 import 'caterpillarElement.dart';
 
-enum CaterpillarState { crawling, onHold, readyToEgg, shooting }
+enum CaterpillarState { crawling, onHold, readyToEgg, shooting, grow }
 
 class CaterPillar extends CaterpillarElement {
   bool isMoving = true;
@@ -20,21 +23,29 @@ class CaterPillar extends CaterpillarElement {
   static const double fullCircle = 2 * pi;
 
   double rotationSpeed;
+  double speedMultiplier = 0.5;
+  double baseSpeed = 1;
 
   late double angleToLerpTo;
   late double scaledAnchorYPos;
+
+  CaterpillarJoystick joystick;
 
   CaterpillarSegment? lastSegment;
   late int entriesNeeded;
   int fixIterationPerFrame =
       1; //how much need to be fixed - the higher the more
-  double tolerance = 20; //how tolerant should be segment distance differnces?
+  double tolerance = 3; //how tolerant should be segment distance differnces?
 
   List<CaterpillarSegment> segmentsToRemove = List.empty();
 
   int snackCount = 0;
   int enemyKilled = 0;
   int loadToEgg = 1;
+
+  int lengthToCollapse = 30;
+  int collapseIndex = 3;
+
   late int loadToEggCount; //How many segments should me removed untill egg
 
   late SpriteAnimationGroupComponent<CaterpillarState> caterPillarAnimations;
@@ -44,11 +55,13 @@ class CaterPillar extends CaterpillarElement {
 
   CaterpillarState currentState = CaterpillarState.crawling;
 
-  CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed);
+  CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed,
+      this.joystick);
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+
     size = caterpillardata.idleAnimation.finalSize;
     finalSize = caterpillardata.idleAnimation.finalSize;
     headAnimation = await CaterpillarCrawlUtils.createAnimation(
@@ -72,6 +85,7 @@ class CaterPillar extends CaterpillarElement {
     priority = 10000;
     index = 0;
     loadToEggCount = loadToEgg;
+    baseSpeed = caterpillardata.movingspeed;
   }
 
   @override
@@ -87,7 +101,12 @@ class CaterPillar extends CaterpillarElement {
         addSegment();
       }
     }
-    CaterpillarCrawlUtils.updateLerpToAngle(dt, transform, angleToLerpTo, 2);
+    CaterpillarCrawlUtils.updateLerpToAngle(
+        dt,
+        transform,
+        CaterpillarCrawlUtils.getAngleFromUp(joystick.currentDelta),
+        rotationSpeed);
+    // angle = joystick.delta.screenAngle();
     if (currentState == CaterpillarState.readyToEgg) {
       return;
     }
@@ -96,6 +115,7 @@ class CaterPillar extends CaterpillarElement {
     }
     updateOnHold();
     updateEnemyNearBy();
+    //updateCollapse();
   }
 
   // Future<SpriteAnimation> _createCaterpillarAnimation(
@@ -117,22 +137,25 @@ class CaterPillar extends CaterpillarElement {
   void startUpdateAngleQueue(double dt) {
     orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
     if (currentState == CaterpillarState.crawling) {
-      position += orientation * velocity * speedMultiplier;
+      position += orientation * baseSpeed * dt * speedMultiplier;
     }
     entriesNeeded = calcSteptToReachDistance(dt);
     Vector2 currentPos = absolutePositionOfAnchor(anchor);
     angleQueue.addFirst(MovementTransferData(
         orientation: orientation, position: currentPos, angle: angle));
-    correctListLength(fixIterationPerFrame, entriesNeeded);
+    correctListLength(entriesNeeded);
+    // angleQueue.removeLast();
+
     if (nextSegment != null) {
-      if (currentPos.distanceTo(
-              nextSegment!.absolutePositionOfAnchor(nextSegment!.anchor)) >
-          fixedDistToSegment + tolerance) {
-        fixIterationPerFrame = 3;
-      } else {
-        fixIterationPerFrame = 1;
-      }
-      nextSegment?.updateAngleQueue(fixIterationPerFrame, entriesNeeded);
+      // if (currentPos.distanceTo(
+      //         nextSegment!.absolutePositionOfAnchor(nextSegment!.anchor)) >
+      //     fixedDistToSegment + tolerance) {
+      //   fixIterationPerFrame = 3;
+      // } else {
+      //   fixIterationPerFrame = 1;
+      // }
+      nextSegment?.absolutePositionOfAnchor(nextSegment!.anchor);
+      nextSegment?.updateAngleQueue(entriesNeeded);
       nextSegment?.angle = angleQueue.last.angle;
       nextSegment?.position = angleQueue.last.position;
     }
@@ -140,7 +163,9 @@ class CaterPillar extends CaterpillarElement {
 
   ///Checks the Position with the Previous Segment if Caterpillar is on Hold and marks it Ready For Deletion
   void updateOnHold() {
-    if (currentState != CaterpillarState.onHold || isRemovingSegment) {
+    if ((currentState != CaterpillarState.onHold &&
+            currentState != CaterpillarState.grow) ||
+        isRemovingSegment) {
       return;
     }
     if (nextSegment == null) {
@@ -148,9 +173,11 @@ class CaterPillar extends CaterpillarElement {
       return;
     }
     if (loadToEggCount < 1) {
-      currentState = CaterpillarState.readyToEgg;
-      gameWorld.onCaterPillarReadyToEgg();
-      return;
+      if (currentState != CaterpillarState.grow) {
+        currentState = CaterpillarState.readyToEgg;
+        gameWorld.onCaterPillarReadyToEgg();
+        return;
+      }
     }
     if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
       if (nextSegment!.parent == null) return;
@@ -161,6 +188,53 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
+  void updateCollapse() {
+    if (snackCount >= lengthToCollapse) {
+      if (collapseIndex <= 0) {
+        return;
+      }
+      currentState = CaterpillarState.grow;
+    }
+    if (nextSegment == null) {
+      if (currentState == CaterpillarState.grow) {
+        //GROW!!!!!!!!!!!!!!!
+        grow();
+        collapseIndex--;
+      }
+      return;
+    }
+  }
+
+  void grow() {
+    final effect = ScaleEffect.by(
+      Vector2.all(1.2),
+      EffectController(duration: 0.2),
+    );
+    add(effect);
+    baseSpeed += 0.2;
+    gameWorld.zoomOut();
+
+    // scale = scale * 1.2;
+  }
+
+  // void setState(CaterpillarState caterPillarState) {
+  //   if(currentState == CaterpillarState.grow)
+  //   {
+  //     if(caterPillarState == CaterpillarState.crawling)
+  //     {
+  //       caterPillarState = CaterpillarState.crawling;
+  //     }
+  //     return;
+  //   }
+  //   if(currentState == CaterpillarState.readyToEgg)
+  //   {
+  //     gameWorld.onCaterPillarReadyToEgg();
+  //   }
+
+  //   currentState = caterPillarState;
+  //   //when GROW dann kann nicht mehr gewechselt werden
+  // }
+
   void updateEnemyNearBy() {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < 200) {
@@ -168,14 +242,18 @@ class CaterPillar extends CaterpillarElement {
         enemy.followCaterpillar(position);
         if (enemy.position.distanceTo(position) < 20 &&
             enemy.enemyMovementStatus != EnemyMovementStatus.dead) {
-          print("DEAD");
-          position = Vector2.zero(); //DEBUG
+          dead();
         }
       } else if (enemy.enemyMovementStatus ==
           EnemyMovementStatus.moveToCaterpillar) {
         enemy.disfollowCaterpillar();
       }
     }
+  }
+
+  void dead() {
+    print("DEAD");
+    position = Vector2.zero(); //DEBUG
   }
 
   @override
@@ -201,7 +279,6 @@ class CaterPillar extends CaterpillarElement {
       lastSegment?.addCaterpillarSegemntRequest();
     } else {
       super.addCaterPillarSegment(this);
-      onChangeSegmentCount(1);
     }
     segemntAddRequest = false;
   }
@@ -225,6 +302,9 @@ class CaterPillar extends CaterpillarElement {
   void onFatRoundButtonClick() {
     //stop rotatiing head
     angleToLerpTo = angle;
+    if (currentState == CaterpillarState.grow) {
+      return;
+    }
     //After Button click eg.
     if (currentState == CaterpillarState.crawling) {
       currentState = CaterpillarState.onHold;
@@ -265,6 +345,7 @@ class CaterPillar extends CaterpillarElement {
 
   void onChangeSegmentCount(int changeCount) {
     snackCount += changeCount;
+    speedMultiplier = 0.5 + (snackCount / 400);
     gameWorld.onSegmentAddedToPlayer(snackCount);
   }
 

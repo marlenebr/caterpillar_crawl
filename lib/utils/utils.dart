@@ -95,6 +95,31 @@ class CaterpillarCrawlUtils {
     return false;
   }
 
+  ///updates the angle of the transform. returns true if angle is reached.
+  static bool updateLerpToAngle2(double dt, Transform2D transformToRotate,
+      double angleToLerpTo, double rotationSpeed) {
+    double diff = transformToRotate.angle - angleToLerpTo;
+    // if (diff.abs() < 0.1) {
+    //   transformToRotate.angle = angleToLerpTo;
+    //   return true;
+    // }
+    int direction = 1;
+    if ((diff > 0 && diff < pi) || diff < -pi) {
+      direction = -1;
+    }
+
+    double lerpSpeedDt = dt * rotationSpeed * 1 * 0.5;
+    transformToRotate.angle += lerpSpeedDt;
+
+    //fix error from 0 to 360 degrees
+    // transformToRotate.angle = transformToRotate.angle % (fullCircle);
+    // if (transformToRotate.angle < 0) {
+    //   transformToRotate.angle =
+    //       fullCircle + (transformToRotate.angle % (fullCircle));
+
+    return false;
+  }
+
   static void updatePosition(
       double dt, Transform2D transformToMove, double speed, double angle) {
     transformToMove.position +=

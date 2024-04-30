@@ -45,6 +45,7 @@ class Enemy extends PositionComponent {
           EnemyMovementStatus.movingForward: _idleAnimation,
           EnemyMovementStatus.rotating: _idleAnimation,
           EnemyMovementStatus.dead: _deadAnimation,
+          EnemyMovementStatus.moveToCaterpillar: _idleAnimation,
         },
         scale: Vector2(size.x / enemyData.idleAnimation.spriteSize.x,
             size.y / enemyData.idleAnimation.spriteSize.y),
@@ -99,7 +100,7 @@ class Enemy extends PositionComponent {
   void onEnemyHit(int damage) {
     hitPoints -= damage;
     if (hitPoints <= 0) {
-      setCurrentEggState(EnemyMovementStatus.dead);
+      setEnemyState(EnemyMovementStatus.dead);
     }
   }
 
@@ -111,10 +112,10 @@ class Enemy extends PositionComponent {
     }
   }
 
-  void setCurrentEggState(EnemyMovementStatus enemyState) {
-    enemyMovementStatus = enemyState;
-    _enemyAnimations.current = enemyMovementStatus;
-  }
+  // void setCurrentEnemyState(EnemyMovementStatus enemyState) {
+  //   enemyMovementStatus = enemyState;
+  //   _enemyAnimations.current = enemyMovementStatus;
+  // }
 
   void followCaterpillar(Vector2 headPos) {
     setEnemyState(EnemyMovementStatus.moveToCaterpillar);
@@ -129,6 +130,10 @@ class Enemy extends PositionComponent {
       return;
     }
     enemyMovementStatus = state;
+    if (state == EnemyMovementStatus.moveToCaterpillar) {
+      return;
+    }
+    _enemyAnimations.current = enemyMovementStatus;
   }
 
   // TODO: Handle this case.

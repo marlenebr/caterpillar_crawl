@@ -37,13 +37,13 @@ class CaterpillarData {
             finalSize: Vector2.all(64)),
         anchorPosY: 75,
         movingspeed: 120,
-        refinedSegmentDistance: 0.45,
+        refinedSegmentDistance: 0.18,
         segmentAnimation: AnimationData(
             imagePath: 'caterPillar_segment.png',
             spriteSize: Vector2.all(128),
             finalSize: Vector2(64, 64),
             animationstepCount: 4),
-        maxElementCount: 150);
+        maxElementCount: 800);
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
+import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
@@ -22,6 +23,7 @@ class CaterpillarSegment extends CaterpillarElement {
     super.onLoad();
     finalSize = caterpillardata.segmentAnimation.finalSize;
     size = previousSegment.size;
+    scale = caterpillar.scale;
     anchor = Anchor.center;
     SpriteAnimationComponent animation =
         await CaterpillarCrawlUtils.createAnimationComponent(
@@ -32,7 +34,28 @@ class CaterpillarSegment extends CaterpillarElement {
   @override
   void update(double dt) {
     super.update(dt);
-    initSegment();
+    //initSegment();
+    //updateHCollisionWithSelf();
+    updateEnemyCollision();
+  }
+
+  void updateHCollisionWithSelf() {
+    if (position.distanceTo(caterpillar.position) < distToCollide) {
+      if (caterpillar.nextSegment!.index == index) {
+        return;
+      }
+      caterpillar.dead();
+    }
+  }
+
+  void updateEnemyCollision() {
+    //??????????????
+    for (Enemy enemy in gameWorld.groundMap.enemies.values) {
+      if (enemy.position.distanceTo(position) < caterpillar.distToCollide) {
+        //ENEMY DEAD
+        enemy.onEnemyHit(5);
+      }
+    }
   }
 
   // Future<void> addSegmentSprite() async {
@@ -76,10 +99,6 @@ class CaterpillarSegment extends CaterpillarElement {
 
     double lerpSpeedDt = dt * rotationSpeed * direction;
     transform.angle += lerpSpeedDt;
-  }
-
-  updateApplySpeedUp() {
-    position += orientation * speedMultiplier;
   }
 
   void addCaterpillarSegemntRequest() {
