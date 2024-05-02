@@ -72,7 +72,8 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.previousSegment = this;
     nextSegment?.priority = priority - 1;
     nextSegment?.index = index + 1;
-    caterpillar.onChangeSegmentCount(1);
+    caterpillar.segmentCount++;
+    caterpillar.onChangePlayerPoints();
     return;
   }
 
@@ -108,16 +109,15 @@ class CaterpillarElement extends PositionComponent {
     }
   }
 
-  //the size the queue has to be right now
-  int calcSteptToReachDistance(double dt) {
-    double finalTimeInSec = fixedDistToSegment /
+  //the length of angeleQue based on speed
+  int calcSteptToReachDistance() {
+    double fixedDt = 1 / 60;
+    double distPerFrame = fixedDt *
         (caterpillardata.movingspeed *
             gameWorld.groundMap.player.speedMultiplier);
-    if (dt == 0) {
-      return 0;
-    }
-    double fps = 1 / dt;
-    return (finalTimeInSec * fps).toInt();
+
+    double stepsToReachDist = fixedDistToSegment / distPerFrame;
+    return (stepsToReachDist).toInt();
   }
 
   void setMovementQueue(Queue<MovementTransferData> newMovementQueue) {

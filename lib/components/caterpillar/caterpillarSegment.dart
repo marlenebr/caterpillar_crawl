@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
 import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
@@ -14,6 +15,7 @@ class CaterpillarSegment extends CaterpillarElement {
   late SpriteAnimationComponent animation;
 
   bool segemntOnHold = false;
+  bool isFallenOff = false;
 
   CaterpillarSegment(super.caterpillardata, super.gameWorld,
       {required this.previousSegment, required this.caterpillar});
@@ -35,13 +37,18 @@ class CaterpillarSegment extends CaterpillarElement {
   void update(double dt) {
     super.update(dt);
     //initSegment();
-    //updateHCollisionWithSelf();
+    updateHCollisionWithSelf();
     updateEnemyCollision();
   }
 
   void updateHCollisionWithSelf() {
+    if (caterpillar.currentState == CaterpillarState.onHold ||
+        caterpillar.currentState == CaterpillarState.readyToEgg) {
+      return;
+    }
+
     if (position.distanceTo(caterpillar.position) < distToCollide) {
-      if (caterpillar.nextSegment!.index == index) {
+      if (caterpillar.nextSegment?.index == index) {
         return;
       }
       caterpillar.dead();
@@ -53,7 +60,7 @@ class CaterpillarSegment extends CaterpillarElement {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < caterpillar.distToCollide) {
         //ENEMY DEAD
-        enemy.onEnemyHit(5);
+        enemy.onEnemyHit(5, true);
       }
     }
   }
@@ -107,6 +114,28 @@ class CaterpillarSegment extends CaterpillarElement {
     } else {
       segemntAddRequest = true;
     }
+  }
+
+  void falloff(bool isLevelUp) {
+    if (isFallenOff) {
+      return;
+    }
+    isFallenOff = true;
+    nextSegment?.falloff(isLevelUp);
+    if (isLevelUp) {
+      gameWorld.groundMap.obstacleSnapshot.addObstacle<LevelUpObstacle>(
+          Vector2(transform.position.x, transform.position.y),
+          size,
+          angle,
+          null);
+    } else {
+      gameWorld.groundMap.obstacleSnapshot.addObstacle<PlayerHurtObstacle>(
+          Vector2(transform.position.x, transform.position.y),
+          size,
+          angle,
+          null);
+    }
+    removeFromParent();
   }
 
   @override

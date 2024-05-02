@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
-import 'package:caterpillar_crawl/components/caterpillar_game_ui.dart';
+import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/groundMap.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:flame/cache.dart';
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -17,6 +18,7 @@ final Images imageLoader = Images();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  Flame.device.setLandscape();
   Flame.device.fullScreen();
   runApp(GameWidget(
     game: CaterpillarCrawlMain(),
@@ -31,10 +33,15 @@ class CaterpillarCrawlMain extends FlameGame
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
-  int snackCount = 400;
-  int enemyCount = 60;
+  int snackCount = 300;
+  int enemyCount = 220;
 
   double mapSize = 2000;
+
+  late Timer interval;
+  //Frame Ticks to reset at 10
+  int frameTicks = 0;
+
   CaterpillarCrawlMain();
 
   @override
@@ -57,6 +64,11 @@ class CaterpillarCrawlMain extends FlameGame
   @override
   void update(double dt) {
     super.update(dt);
+    updateFrameTicks();
+  }
+
+  void updateFrameTicks() {
+    frameTicks = (frameTicks + 1) % 10;
   }
 
   @override
@@ -65,9 +77,10 @@ class CaterpillarCrawlMain extends FlameGame
     super.render(canvas);
   }
 
-  void zoomOut() {
+  void zoomOut(growCounter) {
+    double zoomRatio = 1.0 - (growCounter / 8) / 20;
     final effect = ScaleEffect.by(
-      camera.viewfinder.transform.scale * 0.9,
+      Vector2.all(zoomRatio),
       EffectController(duration: 0.6),
     );
     camera.viewfinder.add(effect);
@@ -127,6 +140,11 @@ class CaterpillarCrawlMain extends FlameGame
 
   void onEnemyKilled(int enemyKilled) {
     _gameUI.setEnemyKilledUi(enemyKilled);
+    _gameUI.setRemainingEnemiesdUi(groundMap.enemies.values.length);
+  }
+
+  void onLevelUp(int level) {
+    _gameUI.setLevelUp(level);
   }
 
   void onCaterPillarReadyToEgg() {

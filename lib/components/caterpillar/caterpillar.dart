@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
-import 'package:caterpillar_crawl/components/egg.dart';
+import 'package:caterpillar_crawl/components/weapons/egg.dart';
 import 'package:caterpillar_crawl/components/enemy.dart';
-import 'package:caterpillar_crawl/components/pellet.dart';
+import 'package:caterpillar_crawl/components/weapons/pellet.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
@@ -14,17 +14,21 @@ import 'package:flame/input.dart';
 
 import 'caterpillarElement.dart';
 
-enum CaterpillarState { crawling, onHold, readyToEgg, shooting, grow }
+enum CaterpillarState { crawling, onHold, readyToEgg, grow }
 
 class CaterPillar extends CaterpillarElement {
   bool isMoving = true;
   bool isRemovingSegment = false;
+
+  bool isHurt = false;
 
   static const double fullCircle = 2 * pi;
 
   double rotationSpeed;
   double speedMultiplier = 0.5;
   double baseSpeed = 1;
+  double dieCoolDownTime = 1.2;
+  double dieCoolDownTimer = 0;
 
   late double angleToLerpTo;
   late double scaledAnchorYPos;
@@ -40,11 +44,16 @@ class CaterPillar extends CaterpillarElement {
   List<CaterpillarSegment> segmentsToRemove = List.empty();
 
   int snackCount = 0;
+  int segmentCount = 0;
   int enemyKilled = 0;
   int loadToEgg = 1;
+  int countToGrow = 30;
 
-  int lengthToCollapse = 30;
-  int collapseIndex = 3;
+  int playerPoints = 0;
+  int growIndex = 0;
+
+  // int lengthToCollapse = 30;
+  int growCounter = 8;
 
   late int loadToEggCount; //How many segments should me removed untill egg
 
@@ -61,7 +70,7 @@ class CaterPillar extends CaterpillarElement {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
+    entriesNeeded = calcSteptToReachDistance();
     size = caterpillardata.idleAnimation.finalSize;
     finalSize = caterpillardata.idleAnimation.finalSize;
     headAnimation = await CaterpillarCrawlUtils.createAnimation(
@@ -114,8 +123,19 @@ class CaterPillar extends CaterpillarElement {
       startUpdateAngleQueue(dt);
     }
     updateOnHold();
+    updateCoolDownDead(dt);
+    updateGrowth();
     updateEnemyNearBy();
     //updateCollapse();
+  }
+
+  void updateGrowth() {
+    if (growCounter == 0) {
+      return;
+    }
+    if (segmentCount == countToGrow) {
+      grow();
+    }
   }
 
   // Future<SpriteAnimation> _createCaterpillarAnimation(
@@ -139,7 +159,6 @@ class CaterPillar extends CaterpillarElement {
     if (currentState == CaterpillarState.crawling) {
       position += orientation * baseSpeed * dt * speedMultiplier;
     }
-    entriesNeeded = calcSteptToReachDistance(dt);
     Vector2 currentPos = absolutePositionOfAnchor(anchor);
     angleQueue.addFirst(MovementTransferData(
         orientation: orientation, position: currentPos, angle: angle));
@@ -155,7 +174,9 @@ class CaterPillar extends CaterpillarElement {
       //   fixIterationPerFrame = 1;
       // }
       nextSegment?.absolutePositionOfAnchor(nextSegment!.anchor);
-      nextSegment?.updateAngleQueue(entriesNeeded);
+      if (!isDroppingsegments) {
+        nextSegment?.updateAngleQueue(entriesNeeded);
+      }
       nextSegment?.angle = angleQueue.last.angle;
       nextSegment?.position = angleQueue.last.position;
     }
@@ -168,7 +189,7 @@ class CaterPillar extends CaterpillarElement {
         isRemovingSegment) {
       return;
     }
-    if (nextSegment == null) {
+    if (nextSegment == null || lastSegment == null) {
       startCrawling();
       return;
     }
@@ -179,6 +200,7 @@ class CaterPillar extends CaterpillarElement {
         return;
       }
     }
+
     if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
       if (nextSegment!.parent == null) return;
       nextSegment!.segemntOnHold = true;
@@ -188,52 +210,60 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
-  void updateCollapse() {
-    if (snackCount >= lengthToCollapse) {
-      if (collapseIndex <= 0) {
-        return;
-      }
-      currentState = CaterpillarState.grow;
-    }
-    if (nextSegment == null) {
-      if (currentState == CaterpillarState.grow) {
-        //GROW!!!!!!!!!!!!!!!
-        grow();
-        collapseIndex--;
-      }
-      return;
-    }
-  }
+  // void updateCollapse() {
+  //   if (snackCount >= lengthToCollapse) {
+  //     if (collapseIndex <= 0) {
+  //       return;
+  //     }
+  //   }
+  //   if (nextSegment == null) {
+  //     //GROW!!!!!!!!!!!!!!!
+  //     grow();
+  //     collapseIndex--;
+
+  //     return;
+  //   }
+  // }
+
+  bool didGrow = false;
 
   void grow() {
+    if (didGrow) {
+      return;
+    }
+    didGrow = true;
+    playerPoints += segmentCount;
     final effect = ScaleEffect.by(
-      Vector2.all(1.2),
+      Vector2.all(1.05),
       EffectController(duration: 0.2),
     );
     add(effect);
     baseSpeed += 0.2;
-    gameWorld.zoomOut();
+    gameWorld.zoomOut(growCounter);
+    growCounter--;
+    fallOffAllSegments(true);
+    growIndex++;
+    gameWorld.onLevelUp(growIndex);
 
     // scale = scale * 1.2;
   }
 
-  // void setState(CaterpillarState caterPillarState) {
-  //   if(currentState == CaterpillarState.grow)
-  //   {
-  //     if(caterPillarState == CaterpillarState.crawling)
-  //     {
-  //       caterPillarState = CaterpillarState.crawling;
-  //     }
-  //     return;
-  //   }
-  //   if(currentState == CaterpillarState.readyToEgg)
-  //   {
-  //     gameWorld.onCaterPillarReadyToEgg();
-  //   }
+  bool isDroppingsegments = false;
 
-  //   currentState = caterPillarState;
-  //   //when GROW dann kann nicht mehr gewechselt werden
-  // }
+  void fallOffAllSegments(bool turnToSnack) {
+    if (!isDroppingsegments && nextSegment != null) {
+      isDroppingsegments = true;
+      nextSegment!.falloff(turnToSnack);
+      lastSegment = null;
+      segmentCount = 0;
+      onChangePlayerPoints();
+      if (!turnToSnack) {
+        gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
+      }
+      nextSegment = null;
+      isDroppingsegments = false;
+    }
+  }
 
   void updateEnemyNearBy() {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
@@ -251,9 +281,24 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
+  void updateCoolDownDead(double dt) {
+    if (isHurt) {
+      dieCoolDownTimer += dt;
+      if (dieCoolDownTimer > dieCoolDownTime) {
+        dieCoolDownTimer = 0;
+        isHurt = false;
+      }
+    }
+  }
+
   void dead() {
+    if (isHurt) {
+      return;
+    }
+    isHurt = true;
     print("DEAD");
-    position = Vector2.zero(); //DEBUG
+    //position = Vector2.zero(); //DEBUG
+    fallOffAllSegments(false);
   }
 
   @override
@@ -284,6 +329,9 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void removeSegment(CaterpillarSegment segment) {
+    if (segment.isFallenOff) {
+      return;
+    }
     if (lastSegment!.index == segment.index) {
       lastSegment = null;
     }
@@ -295,7 +343,8 @@ class CaterPillar extends CaterpillarElement {
     }
     isRemovingSegment = true;
     gameWorld.world.remove(segment);
-    onChangeSegmentCount(-1);
+    segmentCount--;
+    onChangePlayerPoints();
     loadToEggCount--;
   }
 
@@ -334,23 +383,45 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void onPewPew() {
-    Pellet pellet = Pellet(
-        forwardAngle: angle,
-        gameWorld: gameWorld,
-        lifeTime: 1.5,
-        shootingSpeed: 300);
-    gameWorld.world.add(pellet);
-    pellet.position = Vector2(position.x, position.y);
+    Pellet.shootMultiplePellets(gameWorld, position, angle, growIndex + 1);
+
+    // Pellet pellet = Pellet(
+    //     forwardAngle: angle,
+    //     gameWorld: gameWorld,
+    //     lifeTime: 1.5,
+    //     shootingSpeed: 300);
+    // gameWorld.world.add(pellet);
+    // pellet.position = Vector2(position.x, position.y);
+    // if (growIndex > 3) {
+    // Pellet pellet1 = Pellet(
+    //     forwardAngle: angle - 0.2,
+    //     gameWorld: gameWorld,
+    //     lifeTime: 1.5,
+    //     shootingSpeed: 300);
+    // gameWorld.world.add(pellet1);
+    // pellet1.position = Vector2(position.x, position.y);
+
+    // Pellet pellet2 = Pellet(
+    //     forwardAngle: angle + 0.2,
+    //     gameWorld: gameWorld,
+    //     lifeTime: 1.5,
+    //     shootingSpeed: 300);
+    // gameWorld.world.add(pellet2);
+    // pellet2.position = Vector2(position.x, position.y);
+    // }
   }
 
-  void onChangeSegmentCount(int changeCount) {
-    snackCount += changeCount;
+  void onChangePlayerPoints() {
+    didGrow = false;
     speedMultiplier = 0.5 + (snackCount / 400);
-    gameWorld.onSegmentAddedToPlayer(snackCount);
+    gameWorld.onSegmentAddedToPlayer(playerPoints + segmentCount);
   }
 
-  void onEnemyKilled() {
+  void onEnemyKilled(bool spawnNewEnemy) {
     enemyKilled += 1;
+    if (spawnNewEnemy) {
+      gameWorld.groundMap.addEnemy();
+    }
     gameWorld.onEnemyKilled(enemyKilled);
   }
 }

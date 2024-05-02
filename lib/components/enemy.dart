@@ -8,6 +8,7 @@ import 'package:flame/components.dart';
 class Enemy extends PositionComponent {
   EnemyData enemyData;
   GroundMap map;
+  int index;
   late SpriteAnimation _idleAnimation;
   late SpriteAnimation _deadAnimation;
   late SpriteAnimationGroupComponent _enemyAnimations;
@@ -17,6 +18,7 @@ class Enemy extends PositionComponent {
   late double _fractionAngle;
   late double _goToAngle;
   double _timeToDie = 3;
+  bool respawnOnKill = true;
 
   int hitPoints = 5;
 
@@ -26,7 +28,7 @@ class Enemy extends PositionComponent {
 
   double rotationSpeed = 4;
 
-  Enemy({required this.enemyData, required this.map});
+  Enemy({required this.enemyData, required this.map, required this.index});
 
   @override
   Future<void> onLoad() async {
@@ -97,9 +99,13 @@ class Enemy extends PositionComponent {
     }
   }
 
-  void onEnemyHit(int damage) {
+  void onEnemyHit(int damage, bool respaOnOnKill) {
+    if (enemyMovementStatus == EnemyMovementStatus.dead) {
+      return;
+    }
     hitPoints -= damage;
     if (hitPoints <= 0) {
+      respawnOnKill = respaOnOnKill;
       setEnemyState(EnemyMovementStatus.dead);
     }
   }
@@ -107,8 +113,9 @@ class Enemy extends PositionComponent {
   void updateDying(double dt) {
     _timeToDie -= dt;
     if (_timeToDie < 0) {
+      map.enemies.remove(index);
       removeFromParent();
-      map.player.onEnemyKilled();
+      map.player.onEnemyKilled(respawnOnKill);
     }
   }
 

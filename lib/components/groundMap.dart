@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/enemy_data.dart';
@@ -17,6 +18,7 @@ class GroundMap extends PositionComponent {
   // double secondCounter = 0;
 
   CaterpillarCrawlMain world;
+  late ObstacleSnapshot obstacleSnapshot;
 
   bool hasEnemies = false;
   bool calcDist = false;
@@ -48,6 +50,12 @@ class GroundMap extends PositionComponent {
     player.transform.position = Vector2.all(0);
     await fillWithSnacks(snackCount);
     await fillWithEnemies(enemyCount);
+    obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
+    world.world.add(obstacleSnapshot);
+    // //DEBUG: 55FPS
+    // for (int i = 0; i < 1600; i++) {
+    //   obstacleSnapshot.addObstacle(getRandomPositionInMap(), 0, i);
+    // }
   }
 
   @override
@@ -88,7 +96,9 @@ class GroundMap extends PositionComponent {
   void resetPlayerOnMapEnd() {
     if (player.transform.position.x.abs() > mapSize / 2 ||
         player.transform.position.y.abs() > mapSize / 2) {
-      player.transform.position = Vector2.all(0);
+      player.dead();
+      player.angle = (player.angle + pi) % (2 * pi);
+      player.angleToLerpTo = player.angle;
     }
   }
 
@@ -100,21 +110,31 @@ class GroundMap extends PositionComponent {
 
   Future<void> fillWithEnemies(int enemyCount) async {
     for (int i = 0; i < enemyCount; i++) {
-      addEnemy(Enemy(enemyData: EnemyData.createEnemeyData(), map: this));
+      addEnemy();
     }
   }
 
   Snack addSnack(int index) {
+    return addSnackOnPosition(getRandomPositionInMap(), index);
+  }
+
+  Snack addSnackOnPosition(Vector2 pos, int? index) {
+    int newIndex;
+    if (index == null) {
+      newIndex = snackData.length;
+    } else {
+      newIndex = index;
+    }
     double randomSize = (Random().nextDouble() + 8) * 2;
     double randomAngle = Random().nextDouble() * 360;
     Snack newSnack = Snack(
         snackSize: randomSize,
         snackAngle: randomAngle,
-        snackPosition: getRandomPositionInMap(),
+        snackPosition: pos,
         groundMap: this,
-        index: index);
-    snacks[index] = newSnack;
-    snackData[index] = newSnack.position;
+        index: newIndex);
+    snacks[newIndex] = newSnack;
+    snackData[newIndex] = newSnack.position;
     world.world.add(newSnack);
     return newSnack;
   }
@@ -128,29 +148,21 @@ class GroundMap extends PositionComponent {
     snack.removeFromParent();
   }
 
-  void addEnemy(Enemy enemy) {
+  void addEnemy() {
+    Vector2 randomPos = getRandomPositionInMap();
+    while (randomPos.distanceTo(player.position) < 20) {
+      randomPos = getRandomPositionInMap();
+    }
+    Enemy enemy = Enemy(
+        enemyData: EnemyData.createEnemeyData(),
+        map: this,
+        index: enemyIndexer);
     enemies[enemyIndexer] = enemy;
-    enemies[enemyIndexer]!.transform.position = getRandomPositionInMap();
+    enemies[enemyIndexer]!.transform.position = randomPos;
     hasEnemies = true;
     enemyIndexer++;
     world.world.add(enemy);
   }
-
-//   bool updateEnemydirection(double dt, double frameDuration) {
-//     if (hasEnemies) {
-//       secondCounter += dt;
-//       if (secondCounter >= frameDuration) {
-//         secondCounter = 0;
-//         enem.forEach((key, value) {
-//           if (key > 0) //0 is player
-//           {
-//             value.onMoveDirectionChange(player.position);
-//           }
-//         });
-//       }
-//     }
-//     return false;
-//   }
 }
 
 class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
@@ -176,5 +188,77 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
   void update(double dt) {
     super.update(dt);
     parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
+  }
+}
+
+class ObstacleSnapshot extends PositionComponent with Snapshot {
+  double mapSize;
+  CaterpillarCrawlMain world;
+  bool renderSnapshot = false;
+
+  Map<int, Obstacle> obstacles = {};
+
+  ObstacleSnapshot({required this.mapSize, required this.world});
+
+  @override
+  Future<void> onLoad() async {
+    priority = 2;
+    anchor = Anchor.center;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    updateRenderSnapshot();
+  }
+
+  Obstacle addObstacle<T extends Obstacle>(
+    Vector2 position,
+    Vector2 size,
+    double angle,
+    int? index,
+  ) {
+    int newIndex = 0;
+    if (index == null) {
+      newIndex = obstacles.length;
+    } else {
+      newIndex = index;
+    }
+
+    Obstacle? obstacle;
+    if (T == LevelUpObstacle) {
+      obstacle = LevelUpObstacle(
+          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+    } else if (T == BombObstacle) {
+      obstacle = BombObstacle(
+          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+    } else if (T == PlayerHurtObstacle) {
+      obstacle = PlayerHurtObstacle(
+          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+    }
+
+    obstacle!.position = position;
+    obstacle.angle = angle;
+    obstacles[newIndex] = obstacle;
+    add(obstacle);
+
+    return obstacle;
+  }
+
+  void addObstacleAndRenderSnapshot<T extends Obstacle>(
+      Vector2 position, Vector2 size, double angle, bool isDead) {
+    addObstacle<T>(position, size, angle, null);
+    renderSnapshotOnNextFrame();
+  }
+
+  void renderSnapshotOnNextFrame() {
+    renderSnapshot = true;
+  }
+
+  void updateRenderSnapshot() {
+    if (renderSnapshot) {
+      takeSnapshot();
+      renderSnapshot = false;
+    }
   }
 }

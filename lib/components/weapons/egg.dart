@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -10,7 +11,6 @@ class Egg extends PositionComponent {
   CaterpillarCrawlMain gameWorld;
   EggData eggData;
   double shootingSpeed;
-  late Vector2 finalSize;
   late SpriteAnimation _eggAnimation;
   late SpriteAnimation _eggExplodingAnimation;
 
@@ -23,6 +23,8 @@ class Egg extends PositionComponent {
   double shootTime = 1.2;
   double currentShootTime = 0.0;
   Vector2 orientation = Vector2.zero();
+
+  double explosionTimer = 2;
 
   Egg(
       {required this.eggData,
@@ -53,6 +55,7 @@ class Egg extends PositionComponent {
   @override
   void update(double dt) {
     _updateShoot(dt);
+    _updateExplosion(dt);
   }
 
   void shoot() {
@@ -77,12 +80,22 @@ class Egg extends PositionComponent {
     setCurrentEggState(EggState.exploding);
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < 140) {
-        enemy.onEnemyHit(5);
+        enemy.onEnemyHit(5, false); //FALSE
       }
     }
   }
 
-  void onExploded() {}
+  void _updateExplosion(double dt) {
+    if (currentState == EggState.exploding) {
+      explosionTimer -= dt;
+      if (explosionTimer < 0) {
+        gameWorld.groundMap.obstacleSnapshot
+            .addObstacleAndRenderSnapshot<BombObstacle>(
+                position, eggData.explodingEgg.spriteSize, angle, true);
+        removeFromParent();
+      }
+    }
+  }
 
   void setCurrentEggState(EggState eggState) {
     currentState = eggState;
