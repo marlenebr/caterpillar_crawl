@@ -1,5 +1,6 @@
 import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
 class Obstacle extends PositionComponent {
@@ -52,7 +53,7 @@ class Obstacle extends PositionComponent {
 
   void updateHurtPlayer() {
     if (position.distanceTo(playerPosition) < size.x / 2) {
-      caterpillarWorld.groundMap.player.dead();
+      caterpillarWorld.groundMap.player.hurt();
     }
   }
 }
@@ -74,8 +75,13 @@ class BombObstacle extends Obstacle {
 }
 
 class LevelUpObstacle extends Obstacle {
+  bool stoppedMoving = false;
+  double shootingSpeed = 350;
+  double flyTime;
+
   LevelUpObstacle(
-      {required super.caterpillarWorld,
+      {required this.flyTime,
+      required super.caterpillarWorld,
       super.spritePath = "",
       required super.obstacleSize,
       required super.index}) {
@@ -88,6 +94,15 @@ class LevelUpObstacle extends Obstacle {
 
   @override
   void update(double dt) {
+    if (!stoppedMoving) {
+      CaterpillarCrawlUtils.updatePosition(
+          dt, transform, shootingSpeed * flyTime, angle);
+      flyTime -= dt;
+      if (flyTime < 0) {
+        stoppedMoving = true;
+        return;
+      }
+    }
     if (calculateOnTick()) {
       updateHurtEnemies();
     }

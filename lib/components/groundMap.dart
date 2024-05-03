@@ -96,7 +96,7 @@ class GroundMap extends PositionComponent {
   void resetPlayerOnMapEnd() {
     if (player.transform.position.x.abs() > mapSize / 2 ||
         player.transform.position.y.abs() > mapSize / 2) {
-      player.dead();
+      player.hurt();
       player.angle = (player.angle + pi) % (2 * pi);
       player.angleToLerpTo = player.angle;
     }
@@ -228,7 +228,10 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     Obstacle? obstacle;
     if (T == LevelUpObstacle) {
       obstacle = LevelUpObstacle(
-          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+          flyTime: world.timeToUlti,
+          caterpillarWorld: world,
+          index: newIndex,
+          obstacleSize: size);
     } else if (T == BombObstacle) {
       obstacle = BombObstacle(
           caterpillarWorld: world, index: newIndex, obstacleSize: size);

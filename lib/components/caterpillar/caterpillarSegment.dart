@@ -14,7 +14,6 @@ class CaterpillarSegment extends CaterpillarElement {
 
   late SpriteAnimationComponent animation;
 
-  bool segemntOnHold = false;
   bool isFallenOff = false;
 
   CaterpillarSegment(super.caterpillardata, super.gameWorld,
@@ -42,8 +41,7 @@ class CaterpillarSegment extends CaterpillarElement {
   }
 
   void updateHCollisionWithSelf() {
-    if (caterpillar.currentState == CaterpillarState.onHold ||
-        caterpillar.currentState == CaterpillarState.readyToEgg) {
+    if (caterpillar.currentState == CaterpillarState.onHoldForEgg) {
       return;
     }
 
@@ -51,7 +49,7 @@ class CaterpillarSegment extends CaterpillarElement {
       if (caterpillar.nextSegment?.index == index) {
         return;
       }
-      caterpillar.dead();
+      caterpillar.hurt();
     }
   }
 
@@ -125,13 +123,13 @@ class CaterpillarSegment extends CaterpillarElement {
     if (isLevelUp) {
       gameWorld.groundMap.obstacleSnapshot.addObstacle<LevelUpObstacle>(
           Vector2(transform.position.x, transform.position.y),
-          size,
+          size * scale.x,
           angle,
           null);
     } else {
       gameWorld.groundMap.obstacleSnapshot.addObstacle<PlayerHurtObstacle>(
           Vector2(transform.position.x, transform.position.y),
-          size,
+          size * scale.x,
           angle,
           null);
     }

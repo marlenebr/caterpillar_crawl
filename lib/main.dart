@@ -35,6 +35,8 @@ class CaterpillarCrawlMain extends FlameGame
   double rotationSpeed = 5;
   int snackCount = 300;
   int enemyCount = 220;
+  int playerLifeCount = 5;
+  double timeToUlti = 0.6;
 
   double mapSize = 2000;
 
@@ -49,7 +51,8 @@ class CaterpillarCrawlMain extends FlameGame
     await super.onLoad();
     world = World();
     add(FpsTextComponent());
-    _gameUI = CaterpillarGameUI(mainGame: this);
+    _gameUI =
+        CaterpillarGameUI(mainGame: this, playerLifeCount: playerLifeCount);
     add(_gameUI);
     createAndAddCaterillar(mapSize, _gameUI.joystick);
     camera.viewfinder.zoom = 1;
@@ -86,16 +89,6 @@ class CaterpillarCrawlMain extends FlameGame
     camera.viewfinder.add(effect);
   }
 
-  // @override
-  // void onTapDown(TapDownEvent event) {
-  //   moveCaterpillarOnTap(event.localPosition);
-  // }
-
-  // void moveCaterpillarOnTap(Vector2 tapPosition) {
-  //   Vector2 tapDirection = size / 2 - tapPosition;
-  //   _caterPillar.onMoveDirectionChange(tapDirection);
-  // }
-
   void createAndAddCaterillar(double mapSiz, CaterpillarJoystick joystick) {
     CaterpillarData mainPlayerCaterpillar =
         CaterpillarData.createCaterpillarData();
@@ -111,23 +104,10 @@ class CaterpillarCrawlMain extends FlameGame
         enemyCount: enemyCount);
     world.add(groundMap);
     world.add(_caterPillar);
-    //spawnEnemy();
   }
 
-  // void spawnEnemy() {
-  //   print("Spawn enemy");
-  //   EnemyData enemyCaterpillar = EnemyData.createEnemeyData();
-  //   Enemy _enemy = Enemy(enemyData: enemyCaterpillar);
-  //   world.add(_enemy);
-  //   groundMap.addEnemy(_enemy);
-
-  //   if (groundMap.enemyIndexer > 4) {
-  //     _interval.stop();
-  //   }
-  // }
-
   void onFatRounButtonClick() {
-    _caterPillar.onFatRoundButtonClick();
+    _caterPillar.toggleEggAndCrawl();
   }
 
   void onPewPewButtonclicked() {
@@ -147,7 +127,7 @@ class CaterpillarCrawlMain extends FlameGame
     _gameUI.setLevelUp(level);
   }
 
-  void onCaterPillarReadyToEgg() {
-    _gameUI.onCaterpillarReadyToEgg();
+  void onLifeCountChanged(int lifeCount) {
+    _gameUI.onLifeCountChanged(lifeCount);
   }
 }

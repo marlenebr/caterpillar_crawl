@@ -10,17 +10,21 @@ import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame/input.dart';
 
 import 'caterpillarElement.dart';
 
-enum CaterpillarState { crawling, onHold, readyToEgg, grow }
+enum CaterpillarState { crawling, onHoldForEgg }
 
 class CaterPillar extends CaterpillarElement {
-  bool isMoving = true;
   bool isRemovingSegment = false;
 
   bool isHurt = false;
+
+  bool readyToEgg = false;
+  int segmentToRemoveBeforeEgg = 1;
+  int segmentToEggCounter = 0; //How many segments should me removed untill egg
+
+  double ultiTimer = 0;
 
   static const double fullCircle = 2 * pi;
 
@@ -46,16 +50,31 @@ class CaterPillar extends CaterpillarElement {
   int snackCount = 0;
   int segmentCount = 0;
   int enemyKilled = 0;
-  int loadToEgg = 1;
   int countToGrow = 30;
 
   int playerPoints = 0;
   int growIndex = 0;
 
+  int _lives = 0;
+  int get lives {
+    return _lives;
+  }
+
+  set lives(int value) {
+    _lives = value;
+    if (value <= 0) {
+      print("DEAD");
+      _lives = 0;
+    }
+    if (value > caterpillardata.lives) {
+      print("CANT ADD MORE LIVES");
+      _lives = caterpillardata.lives;
+    }
+    gameWorld.onLifeCountChanged(_lives);
+  }
+
   // int lengthToCollapse = 30;
   int growCounter = 8;
-
-  late int loadToEggCount; //How many segments should me removed untill egg
 
   late SpriteAnimationGroupComponent<CaterpillarState> caterPillarAnimations;
 
@@ -65,7 +84,9 @@ class CaterPillar extends CaterpillarElement {
   CaterpillarState currentState = CaterpillarState.crawling;
 
   CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed,
-      this.joystick);
+      this.joystick) {
+    _lives = caterpillardata.lives;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -81,7 +102,7 @@ class CaterPillar extends CaterpillarElement {
     caterPillarAnimations = SpriteAnimationGroupComponent<CaterpillarState>(
         animations: {
           CaterpillarState.crawling: headAnimation,
-          CaterpillarState.onHold: wobbleAnimation,
+          CaterpillarState.onHoldForEgg: wobbleAnimation,
         },
         scale: Vector2(finalSize.x / caterpillardata.idleAnimation.spriteSize.x,
             finalSize.y / caterpillardata.idleAnimation.spriteSize.y),
@@ -93,7 +114,6 @@ class CaterPillar extends CaterpillarElement {
     add(caterPillarAnimations);
     priority = 10000;
     index = 0;
-    loadToEggCount = loadToEgg;
     baseSpeed = caterpillardata.movingspeed;
   }
 
@@ -115,18 +135,15 @@ class CaterPillar extends CaterpillarElement {
         transform,
         CaterpillarCrawlUtils.getAngleFromUp(joystick.currentDelta),
         rotationSpeed);
-    // angle = joystick.delta.screenAngle();
-    if (currentState == CaterpillarState.readyToEgg) {
+    if (readyToEgg) {
       return;
     }
-    if (isMoving) {
-      startUpdateAngleQueue(dt);
-    }
+    startUpdateAngleQueue(dt);
     updateOnHold();
     updateCoolDownDead(dt);
     updateGrowth();
     updateEnemyNearBy();
-    //updateCollapse();
+    updateUlti(dt);
   }
 
   void updateGrowth() {
@@ -138,22 +155,6 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
-  // Future<SpriteAnimation> _createCaterpillarAnimation(
-  //     String path, int amount) async {
-  //   final data = SpriteAnimationData.sequenced(
-  //     textureSize: caterpillardata.spriteSize,
-  //     amount: amount,
-  //     stepTime: 0.1,
-  //   );
-  //   SpriteAnimationComponent caterPillarAnim =
-  //       SpriteAnimationComponent.fromFrameData(
-  //     await imageLoader.load(path),
-  //     data,
-  //   );
-
-  //   return caterPillarAnim.animation!;
-  // }
-
   void startUpdateAngleQueue(double dt) {
     orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
     if (currentState == CaterpillarState.crawling) {
@@ -163,16 +164,8 @@ class CaterPillar extends CaterpillarElement {
     angleQueue.addFirst(MovementTransferData(
         orientation: orientation, position: currentPos, angle: angle));
     correctListLength(entriesNeeded);
-    // angleQueue.removeLast();
 
     if (nextSegment != null) {
-      // if (currentPos.distanceTo(
-      //         nextSegment!.absolutePositionOfAnchor(nextSegment!.anchor)) >
-      //     fixedDistToSegment + tolerance) {
-      //   fixIterationPerFrame = 3;
-      // } else {
-      //   fixIterationPerFrame = 1;
-      // }
       nextSegment?.absolutePositionOfAnchor(nextSegment!.anchor);
       if (!isDroppingsegments) {
         nextSegment?.updateAngleQueue(entriesNeeded);
@@ -184,54 +177,31 @@ class CaterPillar extends CaterpillarElement {
 
   ///Checks the Position with the Previous Segment if Caterpillar is on Hold and marks it Ready For Deletion
   void updateOnHold() {
-    if ((currentState != CaterpillarState.onHold &&
-            currentState != CaterpillarState.grow) ||
-        isRemovingSegment) {
+    if (isRemovingSegment) {
       return;
     }
-    if (nextSegment == null || lastSegment == null) {
-      startCrawling();
-      return;
-    }
-    if (loadToEggCount < 1) {
-      if (currentState != CaterpillarState.grow) {
-        currentState = CaterpillarState.readyToEgg;
-        gameWorld.onCaterPillarReadyToEgg();
+    if (currentState == CaterpillarState.onHoldForEgg) {
+      if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
+        if (nextSegment!.parent == null) return;
+        removeSegment(nextSegment!);
+        segmentToEggCounter++;
+      }
+      if (segmentToEggCounter >= segmentToRemoveBeforeEgg) {
+        readyToEgg = true;
         return;
       }
     }
-
-    if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
-      if (nextSegment!.parent == null) return;
-      nextSegment!.segemntOnHold = true;
-      //TODO: Refine removement
-      removeSegment(nextSegment!);
-      return;
-    }
   }
 
-  // void updateCollapse() {
-  //   if (snackCount >= lengthToCollapse) {
-  //     if (collapseIndex <= 0) {
-  //       return;
-  //     }
-  //   }
-  //   if (nextSegment == null) {
-  //     //GROW!!!!!!!!!!!!!!!
-  //     grow();
-  //     collapseIndex--;
-
-  //     return;
-  //   }
-  // }
-
   bool didGrow = false;
+  bool isInUlti = false;
 
   void grow() {
     if (didGrow) {
       return;
     }
     didGrow = true;
+    isInUlti = true;
     playerPoints += segmentCount;
     final effect = ScaleEffect.by(
       Vector2.all(1.05),
@@ -243,21 +213,33 @@ class CaterPillar extends CaterpillarElement {
     growCounter--;
     fallOffAllSegments(true);
     growIndex++;
+    lives = caterpillardata.lives;
     gameWorld.onLevelUp(growIndex);
-
     // scale = scale * 1.2;
+  }
+
+  void updateUlti(double dt) {
+    if (isInUlti) {
+      ultiTimer += dt;
+      if (ultiTimer > gameWorld.timeToUlti + 1) {
+        isInUlti = false;
+        print("RENDER ULTI");
+        gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
+        ultiTimer = 0;
+      }
+    }
   }
 
   bool isDroppingsegments = false;
 
-  void fallOffAllSegments(bool turnToSnack) {
+  void fallOffAllSegments(bool isLevelUp) {
     if (!isDroppingsegments && nextSegment != null) {
       isDroppingsegments = true;
-      nextSegment!.falloff(turnToSnack);
+      nextSegment!.falloff(isLevelUp);
       lastSegment = null;
       segmentCount = 0;
       onChangePlayerPoints();
-      if (!turnToSnack) {
+      if (!isLevelUp) {
         gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
       }
       nextSegment = null;
@@ -272,7 +254,7 @@ class CaterPillar extends CaterpillarElement {
         enemy.followCaterpillar(position);
         if (enemy.position.distanceTo(position) < 20 &&
             enemy.enemyMovementStatus != EnemyMovementStatus.dead) {
-          dead();
+          hurt();
         }
       } else if (enemy.enemyMovementStatus ==
           EnemyMovementStatus.moveToCaterpillar) {
@@ -291,13 +273,14 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
-  void dead() {
+  void hurt() {
     if (isHurt) {
       return;
     }
     isHurt = true;
-    print("DEAD");
+    print("HURT");
     //position = Vector2.zero(); //DEBUG
+    lives = lives - 1;
     fallOffAllSegments(false);
   }
 
@@ -345,32 +328,27 @@ class CaterPillar extends CaterpillarElement {
     gameWorld.world.remove(segment);
     segmentCount--;
     onChangePlayerPoints();
-    loadToEggCount--;
   }
 
-  void onFatRoundButtonClick() {
+  void toggleEggAndCrawl() {
     //stop rotatiing head
     angleToLerpTo = angle;
-    if (currentState == CaterpillarState.grow) {
-      return;
-    }
     //After Button click eg.
     if (currentState == CaterpillarState.crawling) {
-      currentState = CaterpillarState.onHold;
-    }
-    if (currentState == CaterpillarState.readyToEgg) {
+      if (segmentCount < segmentToRemoveBeforeEgg) {
+        return;
+      }
+      setCaterpillarState(CaterpillarState.onHoldForEgg);
+    } else if (readyToEgg) {
+      ShootEgg();
       startCrawling();
-      //SHOOT EGG
+      readyToEgg = false;
     }
-    caterPillarAnimations.current = currentState;
   }
 
   void startCrawling() {
-    if (currentState == CaterpillarState.readyToEgg) {
-      ShootEgg();
-    }
-    currentState = CaterpillarState.crawling;
-    loadToEggCount = loadToEgg;
+    setCaterpillarState(CaterpillarState.crawling);
+    segmentToEggCounter = 0;
   }
 
   void ShootEgg() {
@@ -384,31 +362,6 @@ class CaterPillar extends CaterpillarElement {
 
   void onPewPew() {
     Pellet.shootMultiplePellets(gameWorld, position, angle, growIndex + 1);
-
-    // Pellet pellet = Pellet(
-    //     forwardAngle: angle,
-    //     gameWorld: gameWorld,
-    //     lifeTime: 1.5,
-    //     shootingSpeed: 300);
-    // gameWorld.world.add(pellet);
-    // pellet.position = Vector2(position.x, position.y);
-    // if (growIndex > 3) {
-    // Pellet pellet1 = Pellet(
-    //     forwardAngle: angle - 0.2,
-    //     gameWorld: gameWorld,
-    //     lifeTime: 1.5,
-    //     shootingSpeed: 300);
-    // gameWorld.world.add(pellet1);
-    // pellet1.position = Vector2(position.x, position.y);
-
-    // Pellet pellet2 = Pellet(
-    //     forwardAngle: angle + 0.2,
-    //     gameWorld: gameWorld,
-    //     lifeTime: 1.5,
-    //     shootingSpeed: 300);
-    // gameWorld.world.add(pellet2);
-    // pellet2.position = Vector2(position.x, position.y);
-    // }
   }
 
   void onChangePlayerPoints() {
@@ -423,5 +376,13 @@ class CaterPillar extends CaterpillarElement {
       gameWorld.groundMap.addEnemy();
     }
     gameWorld.onEnemyKilled(enemyKilled);
+  }
+
+  setCaterpillarState(CaterpillarState state) {
+    currentState = state;
+    if (state == CaterpillarState.crawling ||
+        state == CaterpillarState.onHoldForEgg) {
+      caterPillarAnimations.current = currentState;
+    }
   }
 }

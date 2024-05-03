@@ -11,16 +11,17 @@ class CaterpillarData {
       refinedSegmentDistance; //value to slightly change the segment distance - depends on how the sprite design looks the best with
   final AnimationData segmentAnimation;
   final int maxElementCount;
+  final int lives;
 
-  const CaterpillarData({
-    required this.idleAnimation,
-    required this.wobbleAnimation,
-    required this.anchorPosY,
-    required this.movingspeed,
-    required this.refinedSegmentDistance,
-    required this.segmentAnimation,
-    required this.maxElementCount,
-  });
+  const CaterpillarData(
+      {required this.idleAnimation,
+      required this.wobbleAnimation,
+      required this.anchorPosY,
+      required this.movingspeed,
+      required this.refinedSegmentDistance,
+      required this.segmentAnimation,
+      required this.maxElementCount,
+      required this.lives});
 
   static CaterpillarData createCaterpillarData() {
     //Data for first Caterpillar - Green Wobbly
@@ -43,7 +44,8 @@ class CaterpillarData {
             spriteSize: Vector2.all(128),
             finalSize: Vector2(64, 64),
             animationstepCount: 4),
-        maxElementCount: 800);
+        maxElementCount: 800,
+        lives: 5);
   }
 }
 
