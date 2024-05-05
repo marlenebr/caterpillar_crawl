@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
-import 'package:caterpillar_crawl/components/groundMap.dart';
+import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:flame/cache.dart';
-import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -33,12 +32,17 @@ class CaterpillarCrawlMain extends FlameGame
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
-  int snackCount = 300;
-  int enemyCount = 220;
-  int playerLifeCount = 5;
+  int snackCount = 100; //300
+  int enemyCount = 20; //60
+  int healthUpCount = 3;
+  int remainingEnemiesToLevelUp = 0;
+  int segmentsToUlti = 30; //30
+  int maxLevelCount = 10;
+
+  int playerLifeCount = 8;
   double timeToUlti = 0.6;
 
-  double mapSize = 2000;
+  double mapSize = 1200; //2000
 
   late Timer interval;
   //Frame Ticks to reset at 10
@@ -80,8 +84,9 @@ class CaterpillarCrawlMain extends FlameGame
     super.render(canvas);
   }
 
-  void zoomOut(growCounter) {
-    double zoomRatio = 1.0 - (growCounter / 8) / 20;
+  void zoomOut(level) {
+    double correct = level / maxLevelCount;
+    double zoomRatio = 1.0 - (correct * 0.05);
     final effect = ScaleEffect.by(
       Vector2.all(zoomRatio),
       EffectController(duration: 0.6),
@@ -101,7 +106,8 @@ class CaterpillarCrawlMain extends FlameGame
         player: _caterPillar,
         world: this,
         snackCount: snackCount,
-        enemyCount: enemyCount);
+        enemyCount: enemyCount,
+        healthUpCount: healthUpCount);
     world.add(groundMap);
     world.add(_caterPillar);
   }
@@ -114,17 +120,17 @@ class CaterpillarCrawlMain extends FlameGame
     _caterPillar.onPewPew();
   }
 
-  void onSegmentAddedToPlayer(int segmentCount) {
-    _gameUI.setSegmentCountUi(segmentCount);
+  void onPointsAddedToPlayer() {
+    _gameUI.setSegmentCountUi();
   }
 
-  void onEnemyKilled(int enemyKilled) {
-    _gameUI.setEnemyKilledUi(enemyKilled);
-    _gameUI.setRemainingEnemiesdUi(groundMap.enemies.values.length);
+  void onEnemiesChanged() {
+    _gameUI.setEnemyKilledUi();
+    _gameUI.setRemainingEnemiesdUi();
   }
 
-  void onLevelUp(int level) {
-    _gameUI.setLevelUp(level);
+  void onLevelUp() {
+    _gameUI.setLevelUp();
   }
 
   void onLifeCountChanged(int lifeCount) {

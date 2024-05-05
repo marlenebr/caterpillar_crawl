@@ -44,6 +44,9 @@ class CaterpillarSegment extends CaterpillarElement {
     if (caterpillar.currentState == CaterpillarState.onHoldForEgg) {
       return;
     }
+    if (caterpillar.isInUlti) {
+      return;
+    }
 
     if (position.distanceTo(caterpillar.position) < distToCollide) {
       if (caterpillar.nextSegment?.index == index) {
@@ -58,7 +61,11 @@ class CaterpillarSegment extends CaterpillarElement {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < caterpillar.distToCollide) {
         //ENEMY DEAD
-        enemy.onEnemyHit(5, true);
+        //IS INIT?
+        if (enemy.isLoaded) {
+          enemy.onEnemyHit(5, true);
+        }
+        return;
       }
     }
   }
@@ -114,14 +121,14 @@ class CaterpillarSegment extends CaterpillarElement {
     }
   }
 
-  void falloff(bool isLevelUp) {
+  void falloff(bool isUlti) {
     if (isFallenOff) {
       return;
     }
     isFallenOff = true;
-    nextSegment?.falloff(isLevelUp);
-    if (isLevelUp) {
-      gameWorld.groundMap.obstacleSnapshot.addObstacle<LevelUpObstacle>(
+    nextSegment?.falloff(isUlti);
+    if (isUlti) {
+      gameWorld.groundMap.obstacleSnapshot.addObstacle<UltiObstacle>(
           Vector2(transform.position.x, transform.position.y),
           size * scale.x,
           angle,
@@ -134,6 +141,7 @@ class CaterpillarSegment extends CaterpillarElement {
           null);
     }
     removeFromParent();
+    caterpillar.segmentCount--;
   }
 
   @override

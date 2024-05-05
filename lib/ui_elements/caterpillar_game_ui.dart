@@ -107,20 +107,29 @@ class CaterpillarGameUI extends PositionComponent {
     add(liveBar);
   }
 
-  void setSegmentCountUi(int segmentCount) {
-    _segmentCounterText.text = "Segments: " + segmentCount.toString();
+  @override
+  void onMount() {
+    setSegmentCountUi();
+    setEnemyKilledUi();
+    setRemainingEnemiesdUi();
+    setLevelUp();
   }
 
-  void setEnemyKilledUi(int killCount) {
-    _enemykilledText.text = "Kills: " + killCount.toString();
+  void setSegmentCountUi() {
+    _segmentCounterText.text =
+        "Points:  ${mainGame.groundMap.player.segmentCount}";
   }
 
-  void setRemainingEnemiesdUi(int enemyCount) {
-    _remainingEnemies.text = "Remaining: $enemyCount";
+  void setEnemyKilledUi() {
+    _enemykilledText.text = "Kills: ${mainGame.groundMap.player.enemyKilled}";
   }
 
-  void setLevelUp(int level) {
-    _levelText.text = "Level: $level";
+  void setRemainingEnemiesdUi() {
+    _remainingEnemies.text = "Remaining: ${mainGame.groundMap.enemies.length}";
+  }
+
+  void setLevelUp() {
+    _levelText.text = "Level: ${mainGame.groundMap.level}";
   }
 
   TextPaint createRegularTextStyle(Color color, double fontsize) {

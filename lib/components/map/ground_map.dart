@@ -2,10 +2,14 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
+import 'package:caterpillar_crawl/components/powerups/health_up_item.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/enemy_data.dart';
+import 'package:caterpillar_crawl/models/moving_data.dart';
+import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +18,10 @@ class GroundMap extends PositionComponent {
   double mapSize;
   int snackCount;
   int enemyCount;
+  int healthUpCount;
+
   int enemyIndexer = 1;
-  // double secondCounter = 0;
+  int level = 0;
 
   CaterpillarCrawlMain world;
   late ObstacleSnapshot obstacleSnapshot;
@@ -28,6 +34,8 @@ class GroundMap extends PositionComponent {
 
   CaterPillar player;
   Map<int, Enemy> enemies = {};
+  Map<int, Obstacle> obstacles = {};
+  // Map<int, Pellet> pellets = {};
 
   bool isCalculatingSnacks = false;
 
@@ -36,7 +44,8 @@ class GroundMap extends PositionComponent {
       required this.player,
       required this.world,
       required this.snackCount,
-      required this.enemyCount})
+      required this.enemyCount,
+      required this.healthUpCount})
       : super(size: Vector2.all(mapSize));
 
   @override
@@ -50,6 +59,7 @@ class GroundMap extends PositionComponent {
     player.transform.position = Vector2.all(0);
     await fillWithSnacks(snackCount);
     await fillWithEnemies(enemyCount);
+    await fillWithHealthUpItems(healthUpCount);
     obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
     world.world.add(obstacleSnapshot);
     // //DEBUG: 55FPS
@@ -78,24 +88,16 @@ class GroundMap extends PositionComponent {
     for (int i = 0; i < snacks.length; i++) {
       if (player.position.distanceTo(snacks[i]!.position) < 60) {
         removeSnack(snacks[i]!);
-        addSnack(i);
-        updatePlayOnSnackEaten();
+        _addSnack(i);
+        player.addCaterpillarSegemntRequest();
       }
     }
   }
 
   bool coolDownForNextSpeedChange = false;
 
-  void updatePlayOnSnackEaten() {
-    player.addCaterpillarSegemntRequest();
-    // if (player.lastSegment != null) {
-    //   world.onSegmentAddedToPlayer(player.lastSegment!.index);
-    // }
-  }
-
   void resetPlayerOnMapEnd() {
-    if (player.transform.position.x.abs() > mapSize / 2 ||
-        player.transform.position.y.abs() > mapSize / 2) {
+    if (CaterpillarCrawlUtils.isOnOnMapEnd(player, mapSize)) {
       player.hurt();
       player.angle = (player.angle + pi) % (2 * pi);
       player.angleToLerpTo = player.angle;
@@ -104,17 +106,24 @@ class GroundMap extends PositionComponent {
 
   Future<void> fillWithSnacks(int snackCount) async {
     for (int i = 0; i < snackCount; i++) {
-      addSnack(i);
+      _addSnack(i);
     }
   }
 
   Future<void> fillWithEnemies(int enemyCount) async {
     for (int i = 0; i < enemyCount; i++) {
-      addEnemy();
+      _addEnemy();
+    }
+    world.onEnemiesChanged();
+  }
+
+  Future<void> fillWithHealthUpItems(int itemCount) async {
+    for (int i = 0; i < itemCount; i++) {
+      _addHealthUp();
     }
   }
 
-  Snack addSnack(int index) {
+  Snack _addSnack(int index) {
     return addSnackOnPosition(getRandomPositionInMap(), index);
   }
 
@@ -126,10 +135,8 @@ class GroundMap extends PositionComponent {
       newIndex = index;
     }
     double randomSize = (Random().nextDouble() + 8) * 2;
-    double randomAngle = Random().nextDouble() * 360;
     Snack newSnack = Snack(
         snackSize: randomSize,
-        snackAngle: randomAngle,
         snackPosition: pos,
         groundMap: this,
         index: newIndex);
@@ -148,7 +155,7 @@ class GroundMap extends PositionComponent {
     snack.removeFromParent();
   }
 
-  void addEnemy() {
+  void _addEnemy() {
     Vector2 randomPos = getRandomPositionInMap();
     while (randomPos.distanceTo(player.position) < 20) {
       randomPos = getRandomPositionInMap();
@@ -162,6 +169,45 @@ class GroundMap extends PositionComponent {
     hasEnemies = true;
     enemyIndexer++;
     world.world.add(enemy);
+  }
+
+  // void _removeObstacle(Obstacle obstacle) {
+  //   obstacles.remove(obstacle.index);
+  //   obstacle.rem
+  // }
+
+  void _addHealthUp() {
+    Vector2 randomPos = getRandomPositionInMap();
+    while (randomPos.distanceTo(player.position) < 20) {
+      randomPos = getRandomPositionInMap();
+    }
+    HealthUpItem healthUp = HealthUpItem(
+        iconSize: 32, map: this, movingdata: MovingData.createItemMovingdata());
+    healthUp.position = randomPos;
+    world.world.add(healthUp);
+  }
+
+  Future<void> levelUp() async {
+    level++;
+    player.grow();
+    print("LEVEL UP");
+    await fillWithEnemies(world.enemyCount - world.remainingEnemiesToLevelUp);
+    world.onLevelUp();
+  }
+
+  void killEnemy(Enemy enemy, bool respawnNew) {
+    player.onEnemyKilled();
+    if (respawnNew) {
+      _addEnemy();
+    }
+    enemies.remove(enemy.index);
+    if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
+      levelUp();
+    }
+    if (respawnNew) {
+      _addEnemy();
+    }
+    world.onEnemiesChanged();
   }
 }
 
@@ -188,80 +234,5 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
   void update(double dt) {
     super.update(dt);
     parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
-  }
-}
-
-class ObstacleSnapshot extends PositionComponent with Snapshot {
-  double mapSize;
-  CaterpillarCrawlMain world;
-  bool renderSnapshot = false;
-
-  Map<int, Obstacle> obstacles = {};
-
-  ObstacleSnapshot({required this.mapSize, required this.world});
-
-  @override
-  Future<void> onLoad() async {
-    priority = 2;
-    anchor = Anchor.center;
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    updateRenderSnapshot();
-  }
-
-  Obstacle addObstacle<T extends Obstacle>(
-    Vector2 position,
-    Vector2 size,
-    double angle,
-    int? index,
-  ) {
-    int newIndex = 0;
-    if (index == null) {
-      newIndex = obstacles.length;
-    } else {
-      newIndex = index;
-    }
-
-    Obstacle? obstacle;
-    if (T == LevelUpObstacle) {
-      obstacle = LevelUpObstacle(
-          flyTime: world.timeToUlti,
-          caterpillarWorld: world,
-          index: newIndex,
-          obstacleSize: size);
-    } else if (T == BombObstacle) {
-      obstacle = BombObstacle(
-          caterpillarWorld: world, index: newIndex, obstacleSize: size);
-    } else if (T == PlayerHurtObstacle) {
-      obstacle = PlayerHurtObstacle(
-          caterpillarWorld: world, index: newIndex, obstacleSize: size);
-    }
-
-    obstacle!.position = position;
-    obstacle.angle = angle;
-    obstacles[newIndex] = obstacle;
-    add(obstacle);
-
-    return obstacle;
-  }
-
-  void addObstacleAndRenderSnapshot<T extends Obstacle>(
-      Vector2 position, Vector2 size, double angle, bool isDead) {
-    addObstacle<T>(position, size, angle, null);
-    renderSnapshotOnNextFrame();
-  }
-
-  void renderSnapshotOnNextFrame() {
-    renderSnapshot = true;
-  }
-
-  void updateRenderSnapshot() {
-    if (renderSnapshot) {
-      takeSnapshot();
-      renderSnapshot = false;
-    }
   }
 }

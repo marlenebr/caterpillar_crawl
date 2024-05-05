@@ -11,41 +11,40 @@ class CaterpillarData {
       refinedSegmentDistance; //value to slightly change the segment distance - depends on how the sprite design looks the best with
   final AnimationData segmentAnimation;
   final int maxElementCount;
-  final int lives;
 
-  const CaterpillarData(
-      {required this.idleAnimation,
-      required this.wobbleAnimation,
-      required this.anchorPosY,
-      required this.movingspeed,
-      required this.refinedSegmentDistance,
-      required this.segmentAnimation,
-      required this.maxElementCount,
-      required this.lives});
+  const CaterpillarData({
+    required this.idleAnimation,
+    required this.wobbleAnimation,
+    required this.anchorPosY,
+    required this.movingspeed,
+    required this.refinedSegmentDistance,
+    required this.segmentAnimation,
+    required this.maxElementCount,
+  });
 
   static CaterpillarData createCaterpillarData() {
     //Data for first Caterpillar - Green Wobbly
     return CaterpillarData(
-        idleAnimation: AnimationData(
-            imagePath: 'caterPillar_head.png',
-            spriteSize: Vector2.all(128),
-            animationstepCount: 4,
-            finalSize: Vector2.all(64)),
-        wobbleAnimation: AnimationData(
-            imagePath: 'caterpillar_wobble.png',
-            spriteSize: Vector2.all(128),
-            animationstepCount: 5,
-            finalSize: Vector2.all(64)),
-        anchorPosY: 75,
-        movingspeed: 180,
-        refinedSegmentDistance: 0.35,
-        segmentAnimation: AnimationData(
-            imagePath: 'caterPillar_segment.png',
-            spriteSize: Vector2.all(128),
-            finalSize: Vector2(64, 64),
-            animationstepCount: 4),
-        maxElementCount: 800,
-        lives: 5);
+      idleAnimation: AnimationData(
+          imagePath: 'caterPillar_head.png',
+          spriteSize: Vector2.all(128),
+          animationstepCount: 4,
+          finalSize: Vector2.all(64)),
+      wobbleAnimation: AnimationData(
+          imagePath: 'caterpillar_wobble.png',
+          spriteSize: Vector2.all(128),
+          animationstepCount: 5,
+          finalSize: Vector2.all(64)),
+      anchorPosY: 75,
+      movingspeed: 180,
+      refinedSegmentDistance: 0.35,
+      segmentAnimation: AnimationData(
+          imagePath: 'caterPillar_segment.png',
+          spriteSize: Vector2.all(128),
+          finalSize: Vector2(64, 64),
+          animationstepCount: 4),
+      maxElementCount: 800,
+    );
   }
 }
 

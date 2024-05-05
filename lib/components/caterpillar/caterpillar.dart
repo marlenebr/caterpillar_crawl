@@ -50,7 +50,6 @@ class CaterPillar extends CaterpillarElement {
   int snackCount = 0;
   int segmentCount = 0;
   int enemyKilled = 0;
-  int countToGrow = 30;
 
   int playerPoints = 0;
   int growIndex = 0;
@@ -66,15 +65,13 @@ class CaterPillar extends CaterpillarElement {
       print("DEAD");
       _lives = 0;
     }
-    if (value > caterpillardata.lives) {
+    if (value > gameWorld.playerLifeCount) {
       print("CANT ADD MORE LIVES");
-      _lives = caterpillardata.lives;
     }
     gameWorld.onLifeCountChanged(_lives);
   }
 
-  // int lengthToCollapse = 30;
-  int growCounter = 8;
+  int _growCounter = 8;
 
   late SpriteAnimationGroupComponent<CaterpillarState> caterPillarAnimations;
 
@@ -85,7 +82,7 @@ class CaterPillar extends CaterpillarElement {
 
   CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed,
       this.joystick) {
-    _lives = caterpillardata.lives;
+    _lives = gameWorld.playerLifeCount;
   }
 
   @override
@@ -138,22 +135,17 @@ class CaterPillar extends CaterpillarElement {
     if (readyToEgg) {
       return;
     }
-    startUpdateAngleQueue(dt);
     updateOnHold();
-    updateCoolDownDead(dt);
-    updateGrowth();
-    updateEnemyNearBy();
     updateUlti(dt);
+    startUpdateAngleQueue(dt);
+    updateCoolDownDead(dt);
   }
 
-  void updateGrowth() {
-    if (growCounter == 0) {
-      return;
-    }
-    if (segmentCount == countToGrow) {
-      grow();
-    }
-  }
+  // void updateUlti() {
+  //   if (segmentCount == countToUlti) {
+  //     ulti();
+  //   }
+  // }
 
   void startUpdateAngleQueue(double dt) {
     orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
@@ -180,7 +172,7 @@ class CaterPillar extends CaterpillarElement {
     if (isRemovingSegment) {
       return;
     }
-    if (currentState == CaterpillarState.onHoldForEgg) {
+    if (currentState == CaterpillarState.onHoldForEgg && nextSegment != null) {
       if (position.distanceTo(nextSegment!.position).abs() < 0.01) {
         if (nextSegment!.parent == null) return;
         removeSegment(nextSegment!);
@@ -193,15 +185,15 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
-  bool didGrow = false;
   bool isInUlti = false;
 
-  void grow() {
-    if (didGrow) {
-      return;
-    }
-    didGrow = true;
+  void ulti() {
     isInUlti = true;
+    fallOffAllSegments(true);
+    lives = gameWorld.playerLifeCount;
+  }
+
+  void grow() {
     playerPoints += segmentCount;
     final effect = ScaleEffect.by(
       Vector2.all(1.05),
@@ -209,13 +201,10 @@ class CaterPillar extends CaterpillarElement {
     );
     add(effect);
     baseSpeed += 0.2;
-    gameWorld.zoomOut(growCounter);
-    growCounter--;
-    fallOffAllSegments(true);
     growIndex++;
-    lives = caterpillardata.lives;
-    gameWorld.onLevelUp(growIndex);
-    // scale = scale * 1.2;
+    gameWorld.zoomOut(growIndex);
+
+    //REMOVE ALL FALLEN OFF SEGMENTS
   }
 
   void updateUlti(double dt) {
@@ -232,34 +221,17 @@ class CaterPillar extends CaterpillarElement {
 
   bool isDroppingsegments = false;
 
-  void fallOffAllSegments(bool isLevelUp) {
+  void fallOffAllSegments(bool isUlti) {
     if (!isDroppingsegments && nextSegment != null) {
       isDroppingsegments = true;
-      nextSegment!.falloff(isLevelUp);
-      lastSegment = null;
+      nextSegment!.falloff(isUlti);
       segmentCount = 0;
-      onChangePlayerPoints();
-      if (!isLevelUp) {
+      if (!isUlti) {
         gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
       }
+      lastSegment = null;
       nextSegment = null;
       isDroppingsegments = false;
-    }
-  }
-
-  void updateEnemyNearBy() {
-    for (Enemy enemy in gameWorld.groundMap.enemies.values) {
-      if (enemy.position.distanceTo(position) < 200) {
-        //ROTATE TOWARDS
-        enemy.followCaterpillar(position);
-        if (enemy.position.distanceTo(position) < 20 &&
-            enemy.enemyMovementStatus != EnemyMovementStatus.dead) {
-          hurt();
-        }
-      } else if (enemy.enemyMovementStatus ==
-          EnemyMovementStatus.moveToCaterpillar) {
-        enemy.disfollowCaterpillar();
-      }
     }
   }
 
@@ -279,9 +251,9 @@ class CaterPillar extends CaterpillarElement {
     }
     isHurt = true;
     print("HURT");
-    //position = Vector2.zero(); //DEBUG
     lives = lives - 1;
     fallOffAllSegments(false);
+    startCrawling();
   }
 
   @override
@@ -304,11 +276,16 @@ class CaterPillar extends CaterpillarElement {
 
   void addSegment() {
     if (lastSegment != null) {
-      lastSegment?.addCaterpillarSegemntRequest();
+      lastSegment!.addCaterpillarSegemntRequest();
     } else {
       super.addCaterPillarSegment(this);
     }
     segemntAddRequest = false;
+
+    if (segmentCount >= gameWorld.segmentsToUlti) {
+      ulti();
+    }
+    onSegmentAddedOrRemoved();
   }
 
   void removeSegment(CaterpillarSegment segment) {
@@ -327,7 +304,7 @@ class CaterPillar extends CaterpillarElement {
     isRemovingSegment = true;
     gameWorld.world.remove(segment);
     segmentCount--;
-    onChangePlayerPoints();
+    onSegmentAddedOrRemoved();
   }
 
   void toggleEggAndCrawl() {
@@ -364,18 +341,13 @@ class CaterPillar extends CaterpillarElement {
     Pellet.shootMultiplePellets(gameWorld, position, angle, growIndex + 1);
   }
 
-  void onChangePlayerPoints() {
-    didGrow = false;
-    speedMultiplier = 0.5 + (snackCount / 400);
-    gameWorld.onSegmentAddedToPlayer(playerPoints + segmentCount);
+  void onSegmentAddedOrRemoved() {
+    speedMultiplier = 0.5 + (segmentCount / 400);
+    gameWorld.onPointsAddedToPlayer();
   }
 
-  void onEnemyKilled(bool spawnNewEnemy) {
+  void onEnemyKilled() {
     enemyKilled += 1;
-    if (spawnNewEnemy) {
-      gameWorld.groundMap.addEnemy();
-    }
-    gameWorld.onEnemyKilled(enemyKilled);
   }
 
   setCaterpillarState(CaterpillarState state) {

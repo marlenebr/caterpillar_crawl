@@ -123,7 +123,23 @@ class CaterpillarCrawlUtils {
   static void updatePosition(
       double dt, Transform2D transformToMove, double speed, double angle) {
     transformToMove.position +=
-        (Vector2(1 * sin(angle), -1 * cos(angle)).normalized()) * dt * speed;
+        (Vector2(1 * sin(angle), -1 * cos(angle)).normalized()) *
+            dt *
+            speed *
+            40;
+  }
+
+  static bool isOnOnMapEnd(
+      PositionComponent positionComponent, double mapSize) {
+    if (positionComponent.transform.position.x.abs() > mapSize / 2 ||
+        positionComponent.transform.position.y.abs() > mapSize / 2) {
+      return true;
+    }
+    return false;
+  }
+
+  static double getRandomAngle() {
+    return Random().nextDouble() * 6.2831;
   }
 }
 

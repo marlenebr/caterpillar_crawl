@@ -72,8 +72,8 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.previousSegment = this;
     nextSegment?.priority = priority - 1;
     nextSegment?.index = index + 1;
+    nextSegment?.angle = angle;
     caterpillar.segmentCount++;
-    caterpillar.onChangePlayerPoints();
     return;
   }
 

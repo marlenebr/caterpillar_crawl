@@ -25,6 +25,7 @@ class Pellet extends SpriteComponent {
     sprite = await Sprite.load("snack00$randomInt.png");
     anchor = Anchor.center;
     priority = 1000;
+    size = Vector2.all(16);
   }
 
   @override
@@ -44,6 +45,7 @@ class Pellet extends SpriteComponent {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < 20) {
         enemy.onEnemyHit(1, true);
+        return;
       }
     }
   }
@@ -61,7 +63,7 @@ class Pellet extends SpriteComponent {
           forwardAngle: startAngle + i * rotationAngle,
           gameWorld: gameWorld,
           lifeTime: 1.5,
-          shootingSpeed: 300);
+          shootingSpeed: 10);
       gameWorld.world.add(pellet);
       pellet.position = Vector2(position.x, position.y);
     }

@@ -74,12 +74,12 @@ class BombObstacle extends Obstacle {
   }
 }
 
-class LevelUpObstacle extends Obstacle {
+class UltiObstacle extends Obstacle {
   bool stoppedMoving = false;
-  double shootingSpeed = 350;
+  double shootingSpeed = 8;
   double flyTime;
 
-  LevelUpObstacle(
+  UltiObstacle(
       {required this.flyTime,
       required super.caterpillarWorld,
       super.spritePath = "",
