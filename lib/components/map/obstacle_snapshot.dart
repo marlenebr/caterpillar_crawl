@@ -7,6 +7,7 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
   CaterpillarCrawlMain world;
 
   Map<int, Obstacle> obstacles = {};
+  List<Obstacle> temporaryObstacles = [];
 
   ObstacleSnapshot({required this.mapSize, required this.world});
 
@@ -48,8 +49,8 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     } else if (T == PlayerHurtObstacle) {
       obstacle = PlayerHurtObstacle(
           caterpillarWorld: world, index: newIndex, obstacleSize: size);
+      temporaryObstacles.add(obstacle);
     }
-
     obstacle!.position = position;
     obstacle.angle = angle;
     obstacles[newIndex] = obstacle;
@@ -73,5 +74,14 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
       takeSnapshot();
       renderSnapshot = false;
     }
+  }
+
+  void removeTemporaryObstacles() {
+    for (int i = 0; i < temporaryObstacles.length; i++) {
+      obstacles.remove(temporaryObstacles[i].index);
+      temporaryObstacles[i].removeFromParent();
+    }
+    temporaryObstacles = [];
+    renderSnapshotOnNextFrame();
   }
 }

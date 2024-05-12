@@ -18,20 +18,18 @@ class CaterpillarGameUI extends PositionComponent {
   CaterpillarCrawlMain mainGame;
   int playerLifeCount;
 
-  late HudButtonComponent loadUpButton;
-  late HudButtonComponent pewPewButton;
+  // late HudButtonComponent loadUpButton;
+  // late HudButtonComponent pewPewButton;
 
   late LifeBar liveBar;
 
+  String innerJoystickSpritePath = "joystick_inner_128.png";
+  String outerJoystickSpritePath = "joystick_outer_128.png";
+  double joystickKnobRadius = 35;
+  double jouystickBackgroundRadius = 70;
+
   CaterpillarGameUI(
-      {required this.mainGame, required this.playerLifeCount, super.priority}) {
-    joystick = CaterpillarJoystick(
-      knob: CircleComponent(radius: 30, paint: BasicPalette.yellow.paint()),
-      background:
-          CircleComponent(radius: 80, paint: BasicPalette.green.paint()),
-      margin: const EdgeInsets.only(left: 10, bottom: 10),
-    );
-  }
+      {required this.mainGame, required this.playerLifeCount, super.priority});
 
   @override
   Future<void> onLoad() async {
@@ -41,6 +39,23 @@ class CaterpillarGameUI extends PositionComponent {
 
     double textLength = 250;
     double textHeight = 20;
+
+    Sprite knobSprite = await Sprite.load(innerJoystickSpritePath);
+    SpriteComponent knobSpriteComponent = SpriteComponent(
+        size: Vector2.all(joystickKnobRadius * 2), sprite: knobSprite);
+
+    Sprite joystickOuterSprite = await Sprite.load(outerJoystickSpritePath);
+    SpriteComponent joystickOuterSpriteComponent = SpriteComponent(
+        size: Vector2.all(jouystickBackgroundRadius * 2),
+        sprite: joystickOuterSprite);
+
+    joystick = CaterpillarJoystick(
+      background: joystickOuterSpriteComponent,
+      size: jouystickBackgroundRadius * 2,
+      knob: knobSpriteComponent,
+      knobRadius: joystickKnobRadius * 2,
+      margin: const EdgeInsets.only(left: 10, bottom: 10),
+    );
 
     _segmentCounterText = TextComponent(
         position: Vector2(size.x, 0),
@@ -81,11 +96,11 @@ class CaterpillarGameUI extends PositionComponent {
     PositionComponent buttonContainer = PositionComponent(
       size: Vector2(220, 120),
     );
-    loadUpButton = caterpillarLoadUpButton();
-    pewPewButton = shootButton();
-    buttonContainer.add(loadUpButton);
-    loadUpButton.position += Vector2(0, 50);
-    buttonContainer.add(pewPewButton);
+    // loadUpButton = caterpillarLoadUpButton();
+    // pewPewButton = shootButton();
+    // buttonContainer.add(loadUpButton);
+    // loadUpButton.position += Vector2(0, 50);
+    // buttonContainer.add(pewPewButton);
 
     AlignComponent leftControl = AlignComponent(
       child: joystick,
@@ -109,6 +124,10 @@ class CaterpillarGameUI extends PositionComponent {
 
   @override
   void onMount() {
+    reset();
+  }
+
+  void reset() {
     setSegmentCountUi();
     setEnemyKilledUi();
     setRemainingEnemiesdUi();
@@ -141,19 +160,19 @@ class CaterpillarGameUI extends PositionComponent {
     );
   }
 
-  HudButtonComponent caterpillarLoadUpButton() {
-    return HudButtonComponent(
-        onPressed: () => onCaterPillarFatRoundButtonClick(),
-        position: Vector2(100, 0),
-        button: CreateCircleActionButton(30, BasicPalette.darkGreen.paint()));
-  }
+  // HudButtonComponent caterpillarLoadUpButton() {
+  //   return HudButtonComponent(
+  //       onPressed: () => onCaterPillarFatRoundButtonClick(),
+  //       position: Vector2(100, 0),
+  //       button: CreateCircleActionButton(30, BasicPalette.darkGreen.paint()));
+  // }
 
-  HudButtonComponent shootButton() {
-    return HudButtonComponent(
-        onPressed: () => onPewPewButtonclicked(),
-        position: Vector2(160, 0),
-        button: CreateCircleActionButton(30, BasicPalette.blue.paint()));
-  }
+  // HudButtonComponent shootButton() {
+  //   return HudButtonComponent(
+  //       onPressed: () => onPewPewButtonclicked(),
+  //       position: Vector2(160, 0),
+  //       button: CreateCircleActionButton(30, BasicPalette.blue.paint()));
+  // }
 
   CircleComponent CreateCircleActionButton(double radius, Paint color) {
     return CircleComponent(radius: radius, paint: color);

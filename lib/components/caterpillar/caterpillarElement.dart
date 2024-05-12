@@ -123,4 +123,14 @@ class CaterpillarElement extends PositionComponent {
   void setMovementQueue(Queue<MovementTransferData> newMovementQueue) {
     angleQueue = newMovementQueue;
   }
+
+  void reset() {
+    nextSegment?.reset();
+    angleQueue.clear();
+    isInitializing = true;
+    secondCounter = 0;
+    timeSinceInit = 0;
+    segemntAddRequest = false;
+    orientation = Vector2.zero();
+  }
 }

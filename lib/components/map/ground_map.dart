@@ -34,8 +34,10 @@ class GroundMap extends PositionComponent {
 
   CaterPillar player;
   Map<int, Enemy> enemies = {};
-  Map<int, Obstacle> obstacles = {};
+  Map<int, Obstacle> temporaryOsbstacles = {};
   // Map<int, Pellet> pellets = {};
+
+  List<HealthUpItem> powerUps = [];
 
   bool isCalculatingSnacks = false;
 
@@ -51,17 +53,12 @@ class GroundMap extends PositionComponent {
   @override
   Future<void> onLoad() async {
     priority = 1;
-    add(GroundMapFloorParallax(player, super.size / 6));
-    add(SpriteComponent(
+    await add(GroundMapFloorParallax(player, super.size / 6));
+    await add(SpriteComponent(
         sprite: await Sprite.load('leafGround01.png'),
         size: Vector2.all(mapSize)));
     anchor = Anchor.center;
-    player.transform.position = Vector2.all(0);
-    await fillWithSnacks(snackCount);
-    await fillWithEnemies(enemyCount);
-    await fillWithHealthUpItems(healthUpCount);
-    obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
-    world.world.add(obstacleSnapshot);
+    await _createMapContent();
     // //DEBUG: 55FPS
     // for (int i = 0; i < 1600; i++) {
     //   obstacleSnapshot.addObstacle(getRandomPositionInMap(), 0, i);
@@ -69,7 +66,9 @@ class GroundMap extends PositionComponent {
   }
 
   @override
-  Future onMount() async {}
+  Future onMount() async {
+    player.position = Vector2.zero();
+  }
 
   @override
   void update(double dt) {
@@ -112,7 +111,7 @@ class GroundMap extends PositionComponent {
 
   Future<void> fillWithEnemies(int enemyCount) async {
     for (int i = 0; i < enemyCount; i++) {
-      _addEnemy();
+      await _addEnemy();
     }
     world.onEnemiesChanged();
   }
@@ -155,7 +154,7 @@ class GroundMap extends PositionComponent {
     snack.removeFromParent();
   }
 
-  void _addEnemy() {
+  Future<void> _addEnemy() async {
     Vector2 randomPos = getRandomPositionInMap();
     while (randomPos.distanceTo(player.position) < 20) {
       randomPos = getRandomPositionInMap();
@@ -169,6 +168,7 @@ class GroundMap extends PositionComponent {
     hasEnemies = true;
     enemyIndexer++;
     world.world.add(enemy);
+    await world.enemyIndicatorHUD.onAddEnemy(enemy);
   }
 
   // void _removeObstacle(Obstacle obstacle) {
@@ -185,6 +185,14 @@ class GroundMap extends PositionComponent {
         iconSize: 32, map: this, movingdata: MovingData.createItemMovingdata());
     healthUp.position = randomPos;
     world.world.add(healthUp);
+    powerUps.add(healthUp);
+  }
+
+  void healthUp(HealthUpItem healthUp) {
+    player.lives++;
+    powerUps.remove(healthUp);
+    //Add new one?
+    _addHealthUp();
   }
 
   Future<void> levelUp() async {
@@ -193,6 +201,7 @@ class GroundMap extends PositionComponent {
     print("LEVEL UP");
     await fillWithEnemies(world.enemyCount - world.remainingEnemiesToLevelUp);
     world.onLevelUp();
+    obstacleSnapshot.removeTemporaryObstacles();
   }
 
   void killEnemy(Enemy enemy, bool respawnNew) {
@@ -200,14 +209,56 @@ class GroundMap extends PositionComponent {
     if (respawnNew) {
       _addEnemy();
     }
+    world.enemyIndicatorHUD.onRemoveEnemy(enemy);
     enemies.remove(enemy.index);
     if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
       levelUp();
     }
-    if (respawnNew) {
-      _addEnemy();
-    }
     world.onEnemiesChanged();
+  }
+
+  void cleanUp() {
+    player.removeFromParent();
+    enemyIndexer = 1;
+    level = 0;
+    obstacleSnapshot.removeFromParent();
+    snackData.clear();
+    for (Snack snack in snacks.values) {
+      snack.removeFromParent();
+    }
+    snacks.clear();
+    for (Enemy enemy in enemies.values) {
+      enemy.removeFromParent();
+    }
+    enemies.clear();
+
+    for (Obstacle obstacle in temporaryOsbstacles.values) {
+      obstacle.removeFromParent();
+    }
+    temporaryOsbstacles.clear();
+
+    for (HealthUpItem heart in powerUps) {
+      heart.removeFromParent();
+    }
+    powerUps.clear();
+  }
+
+  void removeComnpletly() {
+    cleanUp();
+    removeFromParent();
+  }
+
+  // void reset(CaterPillar caterpillar) {
+  //   cleanUp();
+  //   _createMapContent();
+  // }
+
+  Future<void> _createMapContent() async {
+    await fillWithSnacks(snackCount);
+    await fillWithEnemies(enemyCount);
+    await fillWithHealthUpItems(healthUpCount);
+    obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
+    world.world.add(obstacleSnapshot);
   }
 }
 

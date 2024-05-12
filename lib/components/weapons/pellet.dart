@@ -44,7 +44,7 @@ class Pellet extends SpriteComponent {
   void updateAllEnemies() {
     for (Enemy enemy in gameWorld.groundMap.enemies.values) {
       if (enemy.position.distanceTo(position) < 20) {
-        enemy.onEnemyHit(1, true);
+        enemy.onEnemyHit(1, false);
         return;
       }
     }

@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/weapons/egg.dart';
-import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/components/weapons/pellet.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/egg_data.dart';
@@ -31,6 +30,7 @@ class CaterPillar extends CaterpillarElement {
   double rotationSpeed;
   double speedMultiplier = 0.5;
   double baseSpeed = 1;
+
   double dieCoolDownTime = 1.2;
   double dieCoolDownTimer = 0;
 
@@ -44,8 +44,6 @@ class CaterPillar extends CaterpillarElement {
   int fixIterationPerFrame =
       1; //how much need to be fixed - the higher the more
   double tolerance = 3; //how tolerant should be segment distance differnces?
-
-  List<CaterpillarSegment> segmentsToRemove = List.empty();
 
   int snackCount = 0;
   int segmentCount = 0;
@@ -82,7 +80,7 @@ class CaterPillar extends CaterpillarElement {
 
   CaterPillar(super.caterpillardata, super.gameWorld, this.rotationSpeed,
       this.joystick) {
-    _lives = gameWorld.playerLifeCount;
+    lives = gameWorld.playerLifeCount;
   }
 
   @override
@@ -203,8 +201,6 @@ class CaterPillar extends CaterpillarElement {
     baseSpeed += 0.2;
     growIndex++;
     gameWorld.zoomOut(growIndex);
-
-    //REMOVE ALL FALLEN OFF SEGMENTS
   }
 
   void updateUlti(double dt) {
@@ -212,7 +208,6 @@ class CaterPillar extends CaterpillarElement {
       ultiTimer += dt;
       if (ultiTimer > gameWorld.timeToUlti + 1) {
         isInUlti = false;
-        print("RENDER ULTI");
         gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
         ultiTimer = 0;
       }
@@ -250,7 +245,6 @@ class CaterPillar extends CaterpillarElement {
       return;
     }
     isHurt = true;
-    print("HURT");
     lives = lives - 1;
     fallOffAllSegments(false);
     startCrawling();
@@ -356,5 +350,10 @@ class CaterPillar extends CaterpillarElement {
         state == CaterpillarState.onHoldForEgg) {
       caterPillarAnimations.current = currentState;
     }
+  }
+
+  void removeCompletly() {
+    super.reset();
+    removeFromParent();
   }
 }

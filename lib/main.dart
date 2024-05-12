@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/ui_elements/action_buttons_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
+import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
+import 'package:caterpillar_crawl/ui_elements/game_over_menu.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -15,13 +18,27 @@ import 'package:flutter/material.dart';
 
 final Images imageLoader = Images();
 
+const String pauseOverlayIdentifier = 'PauseMenu';
+const String actionButtonsOverlayIdentifier = 'ActionButtons';
+const String gameOverOverlayIdentifier = 'GameOverMenu';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.setLandscape();
   Flame.device.fullScreen();
-  runApp(GameWidget(
-    game: CaterpillarCrawlMain(),
-  ));
+  runApp(GameWidget(game: CaterpillarCrawlMain(), overlayBuilderMap: {
+    pauseOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
+      return const Text('A pause menu');
+    },
+    gameOverOverlayIdentifier:
+        (BuildContext context, CaterpillarCrawlMain game) {
+      return gameOverBuilder(context, game);
+    },
+    actionButtonsOverlayIdentifier:
+        (BuildContext context, CaterpillarCrawlMain game) {
+      return actionButtonsBuilder(context, game);
+    },
+  }));
 }
 
 class CaterpillarCrawlMain extends FlameGame
@@ -29,17 +46,23 @@ class CaterpillarCrawlMain extends FlameGame
   late CaterPillar _caterPillar;
   late GroundMap groundMap;
   late CaterpillarGameUI _gameUI;
+  late EnemyIndicatorHUD enemyIndicatorHUD;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
   int snackCount = 100; //300
-  int enemyCount = 20; //60
-  int healthUpCount = 3;
+  int enemyCount = 30; //60
+  int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
   int segmentsToUlti = 30; //30
   int maxLevelCount = 10;
+  int enemyCountOnIndicator = 15;
 
-  int playerLifeCount = 8;
+  //UI
+  double actionButtonSize = 80;
+  double gapRightSide = 14;
+
+  int playerLifeCount = 3;
   double timeToUlti = 0.6;
 
   double mapSize = 1200; //2000
@@ -54,10 +77,19 @@ class CaterpillarCrawlMain extends FlameGame
   Future<void> onLoad() async {
     await super.onLoad();
     world = World();
-    add(FpsTextComponent());
+    await add(FpsTextComponent());
+    enemyIndicatorHUD = EnemyIndicatorHUD(world: this);
+    await add(enemyIndicatorHUD);
     _gameUI =
         CaterpillarGameUI(mainGame: this, playerLifeCount: playerLifeCount);
-    add(_gameUI);
+
+    await add(_gameUI);
+    overlays.add(actionButtonsOverlayIdentifier);
+
+    await initializeMapAndView();
+  }
+
+  Future<void> initializeMapAndView() async {
     createAndAddCaterillar(mapSize, _gameUI.joystick);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
@@ -66,6 +98,9 @@ class CaterpillarCrawlMain extends FlameGame
       print("DEBUG IS ON");
     }
     world.debugMode = debugMode;
+
+    await createMap(_caterPillar);
+    _caterPillar.position = Vector2.zero();
   }
 
   @override
@@ -99,17 +134,18 @@ class CaterpillarCrawlMain extends FlameGame
         CaterpillarData.createCaterpillarData();
     _caterPillar = CaterPillar(
         mainPlayerCaterpillar, this, rotationSpeed, _gameUI.joystick);
-    _caterPillar.transform.position = Vector2.all(mapSize) - Vector2(50, 50);
+  }
 
+  Future<void> createMap(CaterPillar caterpillar) async {
     groundMap = GroundMap(
         mapSize: mapSize,
-        player: _caterPillar,
+        player: caterpillar,
         world: this,
         snackCount: snackCount,
         enemyCount: enemyCount,
         healthUpCount: healthUpCount);
-    world.add(groundMap);
-    world.add(_caterPillar);
+    await world.add(groundMap);
+    await world.add(_caterPillar);
   }
 
   void onFatRounButtonClick() {
@@ -135,5 +171,23 @@ class CaterpillarCrawlMain extends FlameGame
 
   void onLifeCountChanged(int lifeCount) {
     _gameUI.onLifeCountChanged(lifeCount);
+    if (lifeCount == 0) {
+      onGameOver();
+    }
+  }
+
+  Future<void> onGameRestart() async {
+    _caterPillar.removeCompletly();
+    groundMap.removeComnpletly();
+    await initializeMapAndView();
+    overlays.remove(gameOverOverlayIdentifier);
+    paused = false;
+  }
+
+  void onGameOver() {
+    paused = true;
+    overlays.add(gameOverOverlayIdentifier);
+    _gameUI.reset();
+    enemyIndicatorHUD.reset();
   }
 }

@@ -53,7 +53,6 @@ class MovingAroundComponent extends PositionComponent {
     }
     if (CaterpillarCrawlUtils.isOnOnMapEnd(this, map.size.x)) {
       doRecoil = true;
-      print("DECOIL");
       return;
     }
 

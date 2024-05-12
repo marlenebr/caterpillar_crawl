@@ -25,7 +25,7 @@ class HealthUpItem extends MovingAroundComponent {
   void update(double dt) {
     super.update(dt);
     if (map.player.position.distanceTo(position) < distToPlayer) {
-      map.player.lives++;
+      map.healthUp(this);
       removeFromParent();
     }
   }

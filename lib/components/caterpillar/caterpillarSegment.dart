@@ -148,4 +148,10 @@ class CaterpillarSegment extends CaterpillarElement {
   void onRemove() {
     caterpillar.isRemovingSegment = false;
   }
+
+  void reset() {
+    super.reset();
+    isFallenOff = false;
+    removeFromParent();
+  }
 }
