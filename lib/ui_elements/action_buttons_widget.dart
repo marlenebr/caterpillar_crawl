@@ -43,24 +43,34 @@ Widget circularActionButton(
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.blue,
+        // color: Colors.blue,
       ),
+      // color: Colors.blue,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
           onTap();
         },
+        highlightColor: Colors.green[200],
+        splashColor: Colors.red[700],
         borderRadius: BorderRadius.all(Radius.circular(size / 2)),
-        child: IgnorePointer(
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.lightGreen,
+        child:
+            // IgnorePointer(
+            //   child:
+            Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.deepOrange[300]!.withOpacity(0.8),
+            ),
+            // clipBehavior: Clip.hardEdge,
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Image(
+                image: AssetImage(pathToImage),
               ),
-              // clipBehavior: Clip.hardEdge,
-              child: Image(image: AssetImage(pathToImage)),
+              // ),
             ),
           ),
         ),
