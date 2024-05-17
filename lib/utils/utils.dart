@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/animation_data.dart';
+import 'package:caterpillar_crawl/models/data/animation_data.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';

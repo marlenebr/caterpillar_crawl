@@ -1,5 +1,5 @@
-import 'package:caterpillar_crawl/models/animation_data.dart';
-import 'package:caterpillar_crawl/models/moving_data.dart';
+import 'package:caterpillar_crawl/models/data/animation_data.dart';
+import 'package:caterpillar_crawl/models/data/moving_data.dart';
 import 'package:flame/components.dart';
 
 class EnemyData {

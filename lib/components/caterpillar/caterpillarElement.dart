@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/caterpillar_data.dart';
+import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:flame/components.dart';
 
 class CaterpillarElement extends PositionComponent {
@@ -73,7 +73,7 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.priority = priority - 1;
     nextSegment?.index = index + 1;
     nextSegment?.angle = angle;
-    caterpillar.segmentCount++;
+    caterpillar.caterpillarStatsViewModel.onAddSegment();
     return;
   }
 

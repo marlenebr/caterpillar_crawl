@@ -1,5 +1,5 @@
 import 'package:caterpillar_crawl/components/moving_around_component.dart';
-import 'package:caterpillar_crawl/models/enemy_data.dart';
+import 'package:caterpillar_crawl/models/data/enemy_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 

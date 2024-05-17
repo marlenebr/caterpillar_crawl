@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
@@ -8,6 +10,7 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
 
   Map<int, Obstacle> obstacles = {};
   List<Obstacle> temporaryObstacles = [];
+  List<BombObstacle> eggSplashes = [];
 
   ObstacleSnapshot({required this.mapSize, required this.world});
 
@@ -46,6 +49,7 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     } else if (T == BombObstacle) {
       obstacle = BombObstacle(
           caterpillarWorld: world, index: newIndex, obstacleSize: size);
+      eggSplashes.add(obstacle as BombObstacle);
     } else if (T == PlayerHurtObstacle) {
       obstacle = PlayerHurtObstacle(
           caterpillarWorld: world, index: newIndex, obstacleSize: size);
@@ -76,12 +80,30 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     }
   }
 
+  void onLevelUp(int percentageToRemoveSplashes) {
+    removeEggSplashesPercentual(percentageToRemoveSplashes);
+    removeTemporaryObstacles();
+    renderSnapshotOnNextFrame();
+  }
+
+  void removeEggSplashesPercentual(int percantage) {
+    List<BombObstacle> temp = List<BombObstacle>.from(eggSplashes);
+    for (BombObstacle eggSplash in temp) {
+      double randomVal = Random().nextDouble();
+      if (randomVal <= percantage / 100) {
+        //Remove
+        eggSplashes.remove(eggSplash);
+        eggSplash.removeFromParent();
+      }
+    }
+    temp.clear();
+  }
+
   void removeTemporaryObstacles() {
     for (int i = 0; i < temporaryObstacles.length; i++) {
       obstacles.remove(temporaryObstacles[i].index);
       temporaryObstacles[i].removeFromParent();
     }
     temporaryObstacles = [];
-    renderSnapshotOnNextFrame();
   }
 }

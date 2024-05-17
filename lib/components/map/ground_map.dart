@@ -7,8 +7,8 @@ import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/components/powerups/health_up_item.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/enemy_data.dart';
-import 'package:caterpillar_crawl/models/moving_data.dart';
+import 'package:caterpillar_crawl/models/data/enemy_data.dart';
+import 'package:caterpillar_crawl/models/data/moving_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
@@ -201,7 +201,7 @@ class GroundMap extends PositionComponent {
     print("LEVEL UP");
     await fillWithEnemies(world.enemyCount - world.remainingEnemiesToLevelUp);
     world.onLevelUp();
-    obstacleSnapshot.removeTemporaryObstacles();
+    obstacleSnapshot.onLevelUp(80);
   }
 
   void killEnemy(Enemy enemy, bool respawnNew) {

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/enemy.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/egg_data.dart';
+import 'package:caterpillar_crawl/models/data/egg_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 

@@ -41,7 +41,8 @@ class CaterpillarSegment extends CaterpillarElement {
   }
 
   void updateHCollisionWithSelf() {
-    if (caterpillar.currentState == CaterpillarState.onHoldForEgg) {
+    if (caterpillar.caterpillarStatsViewModel.currentState !=
+        CaterpillarState.crawling) {
       return;
     }
     if (caterpillar.isInUlti) {
@@ -141,12 +142,12 @@ class CaterpillarSegment extends CaterpillarElement {
           null);
     }
     removeFromParent();
-    caterpillar.segmentCount--;
+    caterpillar.caterpillarStatsViewModel.onRemoveSegment();
   }
 
   @override
   void onRemove() {
-    caterpillar.isRemovingSegment = false;
+    caterpillar.caterpillarStateViewModel.setIsRemovingSegment(false);
   }
 
   void reset() {

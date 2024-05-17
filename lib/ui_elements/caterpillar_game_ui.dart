@@ -1,9 +1,7 @@
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:flame/components.dart';
-import 'package:flame/input.dart';
 import 'package:flame/layout.dart';
-import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
 ///The body segments to be added behind the previous one (or the head)
@@ -25,8 +23,6 @@ class CaterpillarGameUI extends PositionComponent {
 
   String innerJoystickSpritePath = "joystick_inner_128.png";
   String outerJoystickSpritePath = "joystick_outer_128.png";
-  double joystickKnobRadius = 35;
-  double jouystickBackgroundRadius = 70;
 
   CaterpillarGameUI(
       {required this.mainGame, required this.playerLifeCount, super.priority});
@@ -42,18 +38,18 @@ class CaterpillarGameUI extends PositionComponent {
 
     Sprite knobSprite = await Sprite.load(innerJoystickSpritePath);
     SpriteComponent knobSpriteComponent = SpriteComponent(
-        size: Vector2.all(joystickKnobRadius * 2), sprite: knobSprite);
+        size: Vector2.all(mainGame.joystickKnobRadius * 2), sprite: knobSprite);
 
     Sprite joystickOuterSprite = await Sprite.load(outerJoystickSpritePath);
     SpriteComponent joystickOuterSpriteComponent = SpriteComponent(
-        size: Vector2.all(jouystickBackgroundRadius * 2),
+        size: Vector2.all(mainGame.joystickBackgroundRadius * 2),
         sprite: joystickOuterSprite);
 
     joystick = CaterpillarJoystick(
       background: joystickOuterSpriteComponent,
-      size: jouystickBackgroundRadius * 2,
+      size: mainGame.joystickBackgroundRadius * 2,
       knob: knobSpriteComponent,
-      knobRadius: joystickKnobRadius * 2,
+      knobRadius: mainGame.joystickKnobRadius * 2,
       margin: const EdgeInsets.only(left: 10, bottom: 10),
     );
 
@@ -136,11 +132,12 @@ class CaterpillarGameUI extends PositionComponent {
 
   void setSegmentCountUi() {
     _segmentCounterText.text =
-        "Points:  ${mainGame.groundMap.player.segmentCount}";
+        "Segments:  ${mainGame.caterpillarStatsViewModel.segmentCount}";
   }
 
   void setEnemyKilledUi() {
-    _enemykilledText.text = "Kills: ${mainGame.groundMap.player.enemyKilled}";
+    _enemykilledText.text =
+        "Kills: ${mainGame.caterpillarStatsViewModel.enemyKilled}";
   }
 
   void setRemainingEnemiesdUi() {
@@ -148,7 +145,7 @@ class CaterpillarGameUI extends PositionComponent {
   }
 
   void setLevelUp() {
-    _levelText.text = "Level: ${mainGame.groundMap.level}";
+    _levelText.text = "Level: ${mainGame.caterpillarStatsViewModel.level}";
   }
 
   TextPaint createRegularTextStyle(Color color, double fontsize) {
@@ -178,9 +175,9 @@ class CaterpillarGameUI extends PositionComponent {
     return CircleComponent(radius: radius, paint: color);
   }
 
-  void onCaterPillarFatRoundButtonClick() {
-    mainGame.onFatRounButtonClick();
-  }
+  // void onCaterPillarFatRoundButtonClick() {
+  //   mainGame.onFatRounButtonClick();
+  // }
 
   void onPewPewButtonclicked() {
     mainGame.onPewPewButtonclicked();

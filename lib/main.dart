@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
 import 'package:caterpillar_crawl/ui_elements/action_buttons_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
-import 'package:caterpillar_crawl/models/caterpillar_data.dart';
+import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
 import 'package:caterpillar_crawl/ui_elements/game_over_menu.dart';
@@ -26,19 +27,22 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Flame.device.setLandscape();
   Flame.device.fullScreen();
-  runApp(GameWidget(game: CaterpillarCrawlMain(), overlayBuilderMap: {
-    pauseOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
-      return const Text('A pause menu');
-    },
-    gameOverOverlayIdentifier:
-        (BuildContext context, CaterpillarCrawlMain game) {
-      return gameOverBuilder(context, game);
-    },
-    actionButtonsOverlayIdentifier:
-        (BuildContext context, CaterpillarCrawlMain game) {
-      return actionButtonsBuilder(context, game);
-    },
-  }));
+  runApp(
+    GameWidget(game: CaterpillarCrawlMain(), overlayBuilderMap: {
+      pauseOverlayIdentifier:
+          (BuildContext context, CaterpillarCrawlMain game) {
+        return const Text('A pause menu');
+      },
+      gameOverOverlayIdentifier:
+          (BuildContext context, CaterpillarCrawlMain game) {
+        return gameOverBuilder(context, game);
+      },
+      actionButtonsOverlayIdentifier:
+          (BuildContext context, CaterpillarCrawlMain game) {
+        return ActionButtons(game: game);
+      }
+    }),
+  );
 }
 
 class CaterpillarCrawlMain extends FlameGame
@@ -48,22 +52,29 @@ class CaterpillarCrawlMain extends FlameGame
   late CaterpillarGameUI _gameUI;
   late EnemyIndicatorHUD enemyIndicatorHUD;
 
+  //View Models - Hopefully Singletons
+  CaterpillarStateViewModel caterpillarStateViewModel;
+  CaterpillarStatsViewModel caterpillarStatsViewModel;
+
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
   int snackCount = 100; //300
   int enemyCount = 30; //60
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
-  int segmentsToUlti = 30; //30
+  int segmentsToUlti = 10; //30
+  int enemyKillsToUlti = 6; //15
   int maxLevelCount = 10;
   int enemyCountOnIndicator = 15;
 
   //UI
-  double actionButtonSize = 80;
+  double actionButtonSize = 100;
   double gapRightSide = 14;
+  double joystickKnobRadius = 40;
+  double joystickBackgroundRadius = 90;
 
   int playerLifeCount = 3;
-  double timeToUlti = 0.6;
+  double timeToUlti = 0.9;
 
   double mapSize = 1200; //2000
 
@@ -71,7 +82,9 @@ class CaterpillarCrawlMain extends FlameGame
   //Frame Ticks to reset at 10
   int frameTicks = 0;
 
-  CaterpillarCrawlMain();
+  CaterpillarCrawlMain()
+      : caterpillarStateViewModel = CaterpillarStateViewModel(),
+        caterpillarStatsViewModel = CaterpillarStatsViewModel();
 
   @override
   Future<void> onLoad() async {
@@ -132,8 +145,11 @@ class CaterpillarCrawlMain extends FlameGame
   void createAndAddCaterillar(double mapSiz, CaterpillarJoystick joystick) {
     CaterpillarData mainPlayerCaterpillar =
         CaterpillarData.createCaterpillarData();
-    _caterPillar = CaterPillar(
-        mainPlayerCaterpillar, this, rotationSpeed, _gameUI.joystick);
+    _caterPillar = CaterPillar(mainPlayerCaterpillar, this,
+        rotationSpeed: rotationSpeed,
+        joystick: _gameUI.joystick,
+        caterpillarStateViewModel: caterpillarStateViewModel,
+        caterpillarStatsViewModel: caterpillarStatsViewModel);
   }
 
   Future<void> createMap(CaterPillar caterpillar) async {
@@ -148,8 +164,13 @@ class CaterpillarCrawlMain extends FlameGame
     await world.add(_caterPillar);
   }
 
-  void onFatRounButtonClick() {
+  void onLayEggTap() {
     _caterPillar.toggleEggAndCrawl();
+    print("EGG");
+  }
+
+  void onUltiTap() {
+    _caterPillar.ulti();
   }
 
   void onPewPewButtonclicked() {

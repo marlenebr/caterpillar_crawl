@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
-import 'package:caterpillar_crawl/models/moving_data.dart';
+import 'package:caterpillar_crawl/models/data/moving_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
