@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
+import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/weapons/egg.dart';
 import 'package:caterpillar_crawl/components/weapons/pellet.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
@@ -40,7 +41,7 @@ class CaterPillar extends CaterpillarElement {
   late double angleToLerpTo;
   late double scaledAnchorYPos;
 
-  CaterpillarJoystick joystick;
+  PlayerController playerController;
 
   CaterpillarSegment? lastSegment;
   late int entriesNeeded;
@@ -71,7 +72,7 @@ class CaterPillar extends CaterpillarElement {
 
   CaterPillar(super.caterpillardata, super.gameWorld,
       {required this.rotationSpeed,
-      required this.joystick,
+      required this.playerController,
       required this.caterpillarStateViewModel,
       required this.caterpillarStatsViewModel}) {
     lives = gameWorld.playerLifeCount;
@@ -124,7 +125,7 @@ class CaterPillar extends CaterpillarElement {
     CaterpillarCrawlUtils.updateLerpToAngle(
         dt,
         transform,
-        CaterpillarCrawlUtils.getAngleFromUp(joystick.currentDelta),
+        CaterpillarCrawlUtils.getAngleFromUp(playerController.currentDelta),
         rotationSpeed);
     if (caterpillarStatsViewModel.isReadyToEgg) {
       return;

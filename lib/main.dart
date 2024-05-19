@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
-import 'package:caterpillar_crawl/ui_elements/hud/action_buttons_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
-import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
 import 'package:caterpillar_crawl/ui_elements/game_over_menu.dart';
 import 'package:caterpillar_crawl/ui_elements/hud/hud.dart';
@@ -16,6 +15,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 final Images imageLoader = Images();
@@ -46,10 +46,11 @@ void main() {
 }
 
 class CaterpillarCrawlMain extends FlameGame
-    with TapCallbacks, HasCollisionDetection {
+    with TapCallbacks, HasKeyboardHandlerComponents {
   late CaterPillar _caterPillar;
   late GroundMap groundMap;
   late CaterpillarGameUI _gameUI;
+  late PlayerController _playerController;
   late EnemyIndicatorHUD enemyIndicatorHUD;
 
   //View Models - Hopefully Singletons
@@ -96,17 +97,27 @@ class CaterpillarCrawlMain extends FlameGame
     _gameUI =
         CaterpillarGameUI(mainGame: this, playerLifeCount: playerLifeCount);
 
+    await initPlayerController();
     await add(_gameUI);
     overlays.add(hudOverlayIdentifier);
 
     await initializeMapAndView();
   }
 
+  Future<void> initPlayerController() async {
+    if (kIsWeb) {
+      _playerController = WebPlayerController(mainGame: this);
+    } else {
+      _playerController = MobilePlayerController(mainGame: this);
+    }
+    await add(_playerController);
+  }
+
   Future<void> initializeMapAndView() async {
-    createAndAddCaterillar(mapSize, _gameUI.joystick);
+    createAndAddCaterillar(mapSize, _playerController);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
-    debugMode = true;
+    debugMode = false;
     if (debugMode) {
       print("DEBUG IS ON");
     }
@@ -142,12 +153,13 @@ class CaterpillarCrawlMain extends FlameGame
     camera.viewfinder.add(effect);
   }
 
-  void createAndAddCaterillar(double mapSiz, CaterpillarJoystick joystick) {
+  void createAndAddCaterillar(
+      double mapSiz, PlayerController playerController) {
     CaterpillarData mainPlayerCaterpillar =
         CaterpillarData.createCaterpillarData();
     _caterPillar = CaterPillar(mainPlayerCaterpillar, this,
         rotationSpeed: rotationSpeed,
-        joystick: _gameUI.joystick,
+        playerController: playerController,
         caterpillarStateViewModel: caterpillarStateViewModel,
         caterpillarStatsViewModel: caterpillarStatsViewModel);
   }
@@ -166,7 +178,6 @@ class CaterpillarCrawlMain extends FlameGame
 
   void onLayEggTap() {
     _caterPillar.toggleEggAndCrawl();
-    print("EGG");
   }
 
   void onUltiTap() {
@@ -176,19 +187,6 @@ class CaterpillarCrawlMain extends FlameGame
   void onPewPewButtonclicked() {
     _caterPillar.onPewPew();
   }
-
-  // void onPointsAddedToPlayer() {
-  //   _gameUI.setSegmentCountUi();
-  // }
-
-  // void onEnemiesChanged() {
-  //   _gameUI.setEnemyKilledUi();
-  //   _gameUI.setRemainingEnemiesdUi();
-  // }
-
-  // void onLevelUp() {
-  //   _gameUI.setLevelUp();
-  // }
 
   void onLifeCountChanged(int lifeCount) {
     _gameUI.onLifeCountChanged(lifeCount);
