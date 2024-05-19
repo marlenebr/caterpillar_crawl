@@ -113,7 +113,7 @@ class GroundMap extends PositionComponent {
     for (int i = 0; i < enemyCount; i++) {
       await _addEnemy();
     }
-    world.onEnemiesChanged();
+    world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
   }
 
   Future<void> fillWithHealthUpItems(int itemCount) async {
@@ -200,7 +200,7 @@ class GroundMap extends PositionComponent {
     player.grow();
     print("LEVEL UP");
     await fillWithEnemies(world.enemyCount - world.remainingEnemiesToLevelUp);
-    world.onLevelUp();
+    world.caterpillarStatsViewModel.setLevelUp();
     obstacleSnapshot.onLevelUp(80);
   }
 
@@ -214,7 +214,7 @@ class GroundMap extends PositionComponent {
     if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
       levelUp();
     }
-    world.onEnemiesChanged();
+    world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
   }
 
   void cleanUp() {

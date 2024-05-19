@@ -3,18 +3,21 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
+import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ActionButtons extends StatefulWidget {
-  CaterpillarCrawlMain game;
-  ActionButtons({required this.game, super.key});
+  final CaterpillarCrawlMain game;
+  const ActionButtons({required this.game, super.key});
   @override
   _ActionButtons createState() => _ActionButtons(game: game);
 }
 
 class _ActionButtons extends State<ActionButtons> {
   CaterpillarCrawlMain game;
+
+  _ActionButtons({required this.game});
 
   late CaterpillarStatsViewModel caterpillarStateViewModel;
   String pathToEggButtonImage = 'assets/images/bomb_128_button.png';
@@ -27,20 +30,17 @@ class _ActionButtons extends State<ActionButtons> {
     caterpillarStateViewModel = game.caterpillarStatsViewModel;
   }
 
-  late CaterpillarStatsViewModel caterpillarStareViewModel;
-  _ActionButtons({required this.game});
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<CaterpillarStatsViewModel>(
         create: (context) => game.caterpillarStatsViewModel,
         child: Consumer<CaterpillarStatsViewModel>(
           builder: (context, cart, child) =>
-              actionButtonsBuilder(context, game),
+              _actionButtonsBuilder(context, game),
         ));
   }
 
-  Widget actionButtonsBuilder(
+  Widget _actionButtonsBuilder(
       BuildContext buildContext, CaterpillarCrawlMain game) {
     CaterpillarStatsViewModel caterpillarStatsViewModel =
         game.caterpillarStatsViewModel;
@@ -56,27 +56,26 @@ class _ActionButtons extends State<ActionButtons> {
       onButtonTap = () => game.onLayEggTap();
     }
 
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: SizedBox(
-        width: game.actionButtonSize * 2 + game.gapRightSide,
-        height: game.actionButtonSize * 1.5 + game.gapRightSide,
-        child: Material(
-          color: Colors.transparent,
-          child: Stack(
-            children: [
-              eggAndUltiButton(caterpillarStatsViewModel, game.actionButtonSize,
-                  0, game.actionButtonSize / 2, onButtonTap, buttonImagePath),
-              regularWeaponButton(
-                  game.actionButtonSize,
-                  game.actionButtonSize,
-                  0,
-                  () => game.onPewPewButtonclicked(),
-                  'assets/images/pewpew_128_button.png'),
-            ],
-          ),
-        ),
-      ),
+    return
+        // Align(
+        //   alignment: Alignment.bottomRight,
+        //   child: SizedBox(
+        //     width: game.actionButtonSize * 2 + game.gapRightSide,
+        //     height: game.actionButtonSize * 1.5 + game.gapRightSide,
+        //     child: Material(
+        //       color: Colors.transparent,
+        //       child:
+        Stack(
+      children: [
+        eggAndUltiButton(caterpillarStatsViewModel, game.actionButtonSize, 0,
+            game.actionButtonSize / 2, onButtonTap, buttonImagePath),
+        regularWeaponButton(
+            game.actionButtonSize,
+            game.actionButtonSize,
+            0,
+            () => game.onPewPewButtonclicked(),
+            'assets/images/pewpew_128_button.png'),
+      ],
     );
   }
 
@@ -113,10 +112,7 @@ class _ActionButtons extends State<ActionButtons> {
             shape: BoxShape.circle,
             gradient: SweepGradient(
                 startAngle: 0,
-                colors: [
-                  ActionButtonColors.segmentsToUltiRingColor!,
-                  ActionButtonColors.buttonColor!
-                ],
+                colors: [UiColors.segmentColor!, UiColors.buttonColor!],
                 stops: [
                   caterpillarStatsViewModel.segmentCount / game.segmentsToUlti,
                   caterpillarStatsViewModel.segmentCount / game.segmentsToUlti
@@ -136,10 +132,7 @@ class _ActionButtons extends State<ActionButtons> {
                 shape: BoxShape.circle,
                 gradient: SweepGradient(
                     startAngle: 0,
-                    colors: [
-                      ActionButtonColors.enemyToUltiRingColor!,
-                      ActionButtonColors.buttonColor!
-                    ],
+                    colors: [UiColors.enemyUiColor!, UiColors.buttonColor!],
                     stops: [
                       caterpillarStatsViewModel.enemyKilledSinceUlti /
                           game.enemyKillsToUlti,
@@ -165,14 +158,14 @@ class _ActionButtons extends State<ActionButtons> {
         onTap();
       },
       highlightColor: const Color.fromARGB(255, 21, 24, 21),
-      splashColor: ActionButtonColors.tapColor,
+      splashColor: UiColors.tapColor,
       borderRadius: BorderRadius.all(Radius.circular(size / 2)),
       child: Padding(
         padding: EdgeInsets.all(10.0),
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: ActionButtonColors.buttonColor,
+            color: UiColors.buttonColor,
           ),
           // clipBehavior: Clip.hardEdge,
           child: Padding(
@@ -188,65 +181,58 @@ class _ActionButtons extends State<ActionButtons> {
   }
 }
 
-//TODO: FINISH
-class IndicatorRing extends StatefulWidget {
-  final CaterpillarCrawlMain game;
-  final Widget child;
+// //TODO: FINISH
+// class IndicatorRing extends StatefulWidget {
+//   final CaterpillarCrawlMain game;
+//   final Widget child;
 
-  final double size;
+//   final double size;
 
-  const IndicatorRing(
-      {required this.game, required this.child, required this.size, super.key});
+//   const IndicatorRing(
+//       {required this.game, required this.child, required this.size, super.key});
 
-  @override
-  State<StatefulWidget> createState() =>
-      _IndicatorRing(game: game, child: child, size: size);
-}
+//   @override
+//   State<StatefulWidget> createState() =>
+//       _IndicatorRing(game: game, child: child, size: size);
+// }
 
-class _IndicatorRing extends State<IndicatorRing> {
-  Widget child;
-  CaterpillarCrawlMain game;
-  double size;
+// class _IndicatorRing extends State<IndicatorRing> {
+//   Widget child;
+//   CaterpillarCrawlMain game;
+//   double size;
 
-  late CaterpillarStatsViewModel caterpillarStateViewModel;
+//   late CaterpillarStatsViewModel caterpillarStateViewModel;
 
-  @override
-  void initState() {
-    super.initState();
-    caterpillarStateViewModel = game.caterpillarStatsViewModel;
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     caterpillarStateViewModel = game.caterpillarStatsViewModel;
+//   }
 
-  late CaterpillarStatsViewModel caterpillarStatsViewModel;
-  _IndicatorRing({required this.game, required this.child, required this.size});
+//   late CaterpillarStatsViewModel caterpillarStatsViewModel;
+//   _IndicatorRing({required this.game, required this.child, required this.size});
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: SweepGradient(
-                startAngle: 0,
-                colors: [Colors.green, Colors.transparent],
-                stops: [
-                  caterpillarStatsViewModel.segmentCount / 30,
-                  caterpillarStatsViewModel.segmentCount / 30
-                ],
-                tileMode: TileMode.decal,
-                transform: GradientRotation(-pi / 2))
-            // color: Colors.blue,
-            ),
-        // color: Colors.blue,
-        clipBehavior: Clip.hardEdge,
-        child: child);
-  }
-}
-
-class ActionButtonColors {
-  static Color? enemyToUltiRingColor = Colors.orange[700];
-  static Color? segmentsToUltiRingColor = Colors.lightGreenAccent[400];
-  static Color? buttonColor = Colors.lightBlue[400];
-  static Color? tapColor = Colors.lime;
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     // TODO: implement build
+//     return Container(
+//         width: size,
+//         height: size,
+//         decoration: BoxDecoration(
+//             shape: BoxShape.circle,
+//             gradient: SweepGradient(
+//                 startAngle: 0,
+//                 colors: [Colors.green, Colors.transparent],
+//                 stops: [
+//                   caterpillarStatsViewModel.segmentCount / 30,
+//                   caterpillarStatsViewModel.segmentCount / 30
+//                 ],
+//                 tileMode: TileMode.decal,
+//                 transform: GradientRotation(-pi / 2))
+//             // color: Colors.blue,
+//             ),
+//         // color: Colors.blue,
+//         clipBehavior: Clip.hardEdge,
+//         child: child);
+//   }
+// }

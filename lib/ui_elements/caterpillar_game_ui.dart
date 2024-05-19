@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 ///The body segments to be added behind the previous one (or the head)
 class CaterpillarGameUI extends PositionComponent {
-  late TextComponent _segmentCounterText;
-  late TextComponent _enemykilledText;
-  late TextComponent _remainingEnemies;
-  late TextComponent _levelText;
+  // late TextComponent _segmentCounterText;
+  // late TextComponent _enemykilledText;
+  // late TextComponent _remainingEnemies;
+  // late TextComponent _levelText;
 
   late CaterpillarJoystick joystick;
 
@@ -53,41 +53,41 @@ class CaterpillarGameUI extends PositionComponent {
       margin: const EdgeInsets.only(left: 10, bottom: 10),
     );
 
-    _segmentCounterText = TextComponent(
-        position: Vector2(size.x, 0),
-        size: Vector2(textLength, textHeight + 8),
-        textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
-        anchor: Anchor.topRight,
-        text: "Segments: 000");
+    // _segmentCounterText = TextComponent(
+    //     position: Vector2(size.x, 0),
+    //     size: Vector2(textLength, textHeight + 8),
+    //     textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
+    //     anchor: Anchor.topRight,
+    //     text: "Segments: 000");
 
-    add(_segmentCounterText);
+    // add(_segmentCounterText);
 
-    _enemykilledText = TextComponent(
-        position: Vector2(super.size.x, textHeight),
-        size: Vector2(textLength, textHeight + 8),
-        textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
-        anchor: Anchor.topRight,
-        text: "Kills: 000");
+    // _enemykilledText = TextComponent(
+    //     position: Vector2(super.size.x, textHeight),
+    //     size: Vector2(textLength, textHeight + 8),
+    //     textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
+    //     anchor: Anchor.topRight,
+    //     text: "Kills: 000");
 
-    add(_enemykilledText);
+    // add(_enemykilledText);
 
-    _remainingEnemies = TextComponent(
-        position: Vector2(super.size.x, textHeight * 2),
-        size: Vector2(textLength, textHeight + 8),
-        textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
-        anchor: Anchor.topRight,
-        text: "Remaining enem: 000");
+    // _remainingEnemies = TextComponent(
+    //     position: Vector2(super.size.x, textHeight * 2),
+    //     size: Vector2(textLength, textHeight + 8),
+    //     textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
+    //     anchor: Anchor.topRight,
+    //     text: "Remaining enem: 000");
 
-    add(_remainingEnemies);
+    // add(_remainingEnemies);
 
-    _levelText = TextComponent(
-        position: Vector2(super.size.x, textHeight * 3),
-        size: Vector2(textLength, textHeight + 8),
-        textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
-        anchor: Anchor.topRight,
-        text: "Level: 0");
+    // _levelText = TextComponent(
+    //     position: Vector2(super.size.x, textHeight * 3),
+    //     size: Vector2(textLength, textHeight + 8),
+    //     textRenderer: createRegularTextStyle(Colors.white, textHeight - 4),
+    //     anchor: Anchor.topRight,
+    //     text: "Level: 0");
 
-    add(_levelText);
+    // add(_levelText);
 
     PositionComponent buttonContainer = PositionComponent(
       size: Vector2(220, 120),
@@ -118,35 +118,35 @@ class CaterpillarGameUI extends PositionComponent {
     add(liveBar);
   }
 
-  @override
-  void onMount() {
-    reset();
-  }
+  // @override
+  // void onMount() {
+  //    reset();
+  // }
 
-  void reset() {
-    setSegmentCountUi();
-    setEnemyKilledUi();
-    setRemainingEnemiesdUi();
-    setLevelUp();
-  }
+  // void reset() {
+  //   setSegmentCountUi();
+  //   setEnemyKilledUi();
+  //   setRemainingEnemiesdUi();
+  //   setLevelUp();
+  // }
 
-  void setSegmentCountUi() {
-    _segmentCounterText.text =
-        "Segments:  ${mainGame.caterpillarStatsViewModel.segmentCount}";
-  }
+  // void setSegmentCountUi() {
+  //   _segmentCounterText.text =
+  //       "Segments:  ${mainGame.caterpillarStatsViewModel.segmentCount}";
+  // }
 
-  void setEnemyKilledUi() {
-    _enemykilledText.text =
-        "Kills: ${mainGame.caterpillarStatsViewModel.enemyKilled}";
-  }
+  // void setEnemyKilledUi() {
+  //   _enemykilledText.text =
+  //       "Kills: ${mainGame.caterpillarStatsViewModel.enemyKilled}";
+  // }
 
-  void setRemainingEnemiesdUi() {
-    _remainingEnemies.text = "Remaining: ${mainGame.groundMap.enemies.length}";
-  }
+  // void setRemainingEnemiesdUi() {
+  //   _remainingEnemies.text = "Remaining: ${mainGame.groundMap.enemies.length}";
+  // }
 
-  void setLevelUp() {
-    _levelText.text = "Level: ${mainGame.caterpillarStatsViewModel.level}";
-  }
+  // void setLevelUp() {
+  //   _levelText.text = "Level: ${mainGame.caterpillarStatsViewModel.level}";
+  // }
 
   TextPaint createRegularTextStyle(Color color, double fontsize) {
     return TextPaint(

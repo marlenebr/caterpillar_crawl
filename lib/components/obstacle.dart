@@ -76,7 +76,7 @@ class BombObstacle extends Obstacle {
 
 class UltiObstacle extends Obstacle {
   bool stoppedMoving = false;
-  double shootingSpeed = 10;
+  double shootingSpeed = 8;
   double flyTime;
 
   UltiObstacle(

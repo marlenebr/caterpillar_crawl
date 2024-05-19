@@ -110,6 +110,7 @@ class CaterPillar extends CaterpillarElement {
   @override
   void onMount() {
     super.onMount();
+    position = Vector2.zero();
   }
 
   @override
@@ -252,7 +253,7 @@ class CaterPillar extends CaterpillarElement {
   @override
   void onGameResize(Vector2 gameSize) {
     super.onGameResize(gameSize);
-    position = gameSize / 2;
+    //position = gameSize / 2;
   }
 
   void onMoveDirectionChange(Vector2 pointToMoveTo) {
@@ -349,7 +350,8 @@ class CaterPillar extends CaterpillarElement {
 
   void onSegmentAddedOrRemoved() {
     speedMultiplier = 0.5 + (caterpillarStatsViewModel.segmentCount / 400);
-    gameWorld.onPointsAddedToPlayer();
+    gameWorld.caterpillarStatsViewModel
+        .setSegmentCount(caterpillarStatsViewModel.segmentCount);
   }
 
   void onEnemyKilled() {

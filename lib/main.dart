@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
-import 'package:caterpillar_crawl/ui_elements/action_buttons_widget.dart';
+import 'package:caterpillar_crawl/ui_elements/hud/action_buttons_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
 import 'package:caterpillar_crawl/ui_elements/game_over_menu.dart';
+import 'package:caterpillar_crawl/ui_elements/hud/hud.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -20,7 +21,7 @@ import 'package:flutter/material.dart';
 final Images imageLoader = Images();
 
 const String pauseOverlayIdentifier = 'PauseMenu';
-const String actionButtonsOverlayIdentifier = 'ActionButtons';
+const String hudOverlayIdentifier = 'Hud';
 const String gameOverOverlayIdentifier = 'GameOverMenu';
 
 void main() {
@@ -37,9 +38,8 @@ void main() {
           (BuildContext context, CaterpillarCrawlMain game) {
         return gameOverBuilder(context, game);
       },
-      actionButtonsOverlayIdentifier:
-          (BuildContext context, CaterpillarCrawlMain game) {
-        return ActionButtons(game: game);
+      hudOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
+        return GameHud(game: game);
       }
     }),
   );
@@ -62,8 +62,8 @@ class CaterpillarCrawlMain extends FlameGame
   int enemyCount = 30; //60
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
-  int segmentsToUlti = 10; //30
-  int enemyKillsToUlti = 6; //15
+  int segmentsToUlti = 30; //30
+  int enemyKillsToUlti = 15; //15
   int maxLevelCount = 10;
   int enemyCountOnIndicator = 15;
 
@@ -73,8 +73,8 @@ class CaterpillarCrawlMain extends FlameGame
   double joystickKnobRadius = 40;
   double joystickBackgroundRadius = 90;
 
-  int playerLifeCount = 3;
-  double timeToUlti = 0.9;
+  int playerLifeCount = 6;
+  double timeToUlti = 0.8;
 
   double mapSize = 1200; //2000
 
@@ -97,7 +97,7 @@ class CaterpillarCrawlMain extends FlameGame
         CaterpillarGameUI(mainGame: this, playerLifeCount: playerLifeCount);
 
     await add(_gameUI);
-    overlays.add(actionButtonsOverlayIdentifier);
+    overlays.add(hudOverlayIdentifier);
 
     await initializeMapAndView();
   }
@@ -106,7 +106,7 @@ class CaterpillarCrawlMain extends FlameGame
     createAndAddCaterillar(mapSize, _gameUI.joystick);
     camera.viewfinder.zoom = 1;
     camera.follow(_caterPillar);
-    debugMode = false;
+    debugMode = true;
     if (debugMode) {
       print("DEBUG IS ON");
     }
@@ -177,18 +177,18 @@ class CaterpillarCrawlMain extends FlameGame
     _caterPillar.onPewPew();
   }
 
-  void onPointsAddedToPlayer() {
-    _gameUI.setSegmentCountUi();
-  }
+  // void onPointsAddedToPlayer() {
+  //   _gameUI.setSegmentCountUi();
+  // }
 
-  void onEnemiesChanged() {
-    _gameUI.setEnemyKilledUi();
-    _gameUI.setRemainingEnemiesdUi();
-  }
+  // void onEnemiesChanged() {
+  //   _gameUI.setEnemyKilledUi();
+  //   _gameUI.setRemainingEnemiesdUi();
+  // }
 
-  void onLevelUp() {
-    _gameUI.setLevelUp();
-  }
+  // void onLevelUp() {
+  //   _gameUI.setLevelUp();
+  // }
 
   void onLifeCountChanged(int lifeCount) {
     _gameUI.onLifeCountChanged(lifeCount);
@@ -208,7 +208,7 @@ class CaterpillarCrawlMain extends FlameGame
   void onGameOver() {
     paused = true;
     overlays.add(gameOverOverlayIdentifier);
-    _gameUI.reset();
+    // _gameUI.reset();
     enemyIndicatorHUD.reset();
   }
 }

@@ -56,6 +56,9 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
   int _enemyKilled = 0;
   int get enemyKilled => _enemyKilled;
 
+  int _enemiesInGame = 0;
+  int get enemiesInGame => _enemiesInGame;
+
   int _enemyKilledSinceUlti = 0;
   int get enemyKilledSinceUlti => _enemyKilledSinceUlti;
 
@@ -84,6 +87,11 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
 
   void setEnemyKilled(int enemyKilled) {
     _enemyKilled = enemyKilled;
+    notifyListeners();
+  }
+
+  void setEnemiesInGame(int enemiesInGame) {
+    _enemiesInGame = enemiesInGame;
     notifyListeners();
   }
 
