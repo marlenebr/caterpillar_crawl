@@ -1,4 +1,4 @@
-import 'package:caterpillar_crawl/models/animationData.dart';
+import 'package:caterpillar_crawl/models/data/animation_data.dart';
 import 'package:flame/components.dart';
 
 class EggData {
@@ -18,10 +18,10 @@ class EggData {
           finalSize: Vector2.all(64),
           animationstepCount: 4),
       explodingEgg: AnimationData(
-          imagePath: 'explodeanimall.png',
+          imagePath: 'bombanimexplode.png',
           spriteSize: Vector2.all(128),
           finalSize: Vector2.all(128),
-          animationstepCount: 8),
+          animationstepCount: 11),
     );
   }
 }
