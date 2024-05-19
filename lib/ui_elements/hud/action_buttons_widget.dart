@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
+import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,43 +32,26 @@ class _ActionButtons extends State<ActionButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<CaterpillarStatsViewModel>(
-        create: (context) => game.caterpillarStatsViewModel,
-        child: Consumer<CaterpillarStatsViewModel>(
-          builder: (context, cart, child) =>
-              _actionButtonsBuilder(context, game),
-        ));
+    return _actionButtonsBuilder(context, game);
   }
 
   Widget _actionButtonsBuilder(
       BuildContext buildContext, CaterpillarCrawlMain game) {
     CaterpillarStatsViewModel caterpillarStatsViewModel =
         game.caterpillarStatsViewModel;
-    String buttonImagePath = '';
-    Function onButtonTap;
 
-    if (caterpillarStatsViewModel.currentState ==
-        CaterpillarState.readyForUlti) {
-      buttonImagePath = pathToUltiButtonImage;
-      onButtonTap = () => game.onUltiTap();
-    } else {
-      buttonImagePath = pathToEggButtonImage;
-      onButtonTap = () => game.onLayEggTap();
-    }
-
-    return
-        // Align(
-        //   alignment: Alignment.bottomRight,
-        //   child: SizedBox(
-        //     width: game.actionButtonSize * 2 + game.gapRightSide,
-        //     height: game.actionButtonSize * 1.5 + game.gapRightSide,
-        //     child: Material(
-        //       color: Colors.transparent,
-        //       child:
-        Stack(
+    return Stack(
       children: [
-        eggAndUltiButton(caterpillarStatsViewModel, game.actionButtonSize, 0,
-            game.actionButtonSize / 2, onButtonTap, buttonImagePath),
+        ChangeNotifierProvider<CaterpillarStatsViewModel>(
+          create: (context) => game.caterpillarStatsViewModel,
+          child: Consumer<CaterpillarStatsViewModel>(
+            builder: (context, cart, child) => eggAndUltiButton(
+                caterpillarStatsViewModel,
+                game.actionButtonSize,
+                0,
+                game.actionButtonSize / 2),
+          ),
+        ),
         regularWeaponButton(
             game.actionButtonSize,
             game.actionButtonSize,
@@ -95,61 +78,68 @@ class _ActionButtons extends State<ActionButtons> {
     );
   }
 
-  Widget eggAndUltiButton(
-      CaterpillarStatsViewModel caterpillarStatsViewModel,
-      double size,
-      double posX,
-      double posY,
-      Function onTap,
-      String pathToImage) {
+  Widget eggAndUltiButton(CaterpillarStatsViewModel caterpillarStatsViewModel,
+      double size, double posX, double posY) {
+    String buttonImagePath = '';
+    Function onButtonTap;
+
+    if (caterpillarStatsViewModel.currentState ==
+        CaterpillarState.readyForUlti) {
+      buttonImagePath = pathToUltiButtonImage;
+      onButtonTap = () => game.onUltiTap();
+    } else {
+      buttonImagePath = pathToEggButtonImage;
+      onButtonTap = () => game.onLayEggTap();
+    }
+
     return Positioned(
-      top: posY,
-      left: posX,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: SweepGradient(
-                startAngle: 0,
-                colors: [UiColors.segmentColor!, UiColors.buttonColor!],
-                stops: [
-                  caterpillarStatsViewModel.segmentCount / game.segmentsToUlti,
-                  caterpillarStatsViewModel.segmentCount / game.segmentsToUlti
-                ],
-                tileMode: TileMode.decal,
-                transform: GradientRotation(-pi / 2))
-            // color: Colors.blue,
+        top: posY,
+        left: posX,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: SweepGradient(
+                  startAngle: 0,
+                  colors: [UiColors.segmentColor!, UiColors.buttonColor!],
+                  stops: [
+                    caterpillarStatsViewModel.segmentCount /
+                        game.segmentsToUlti,
+                    caterpillarStatsViewModel.segmentCount / game.segmentsToUlti
+                  ],
+                  tileMode: TileMode.decal,
+                  transform: GradientRotation(-pi / 2))
+              // color: Colors.blue,
+              ),
+          // color: Colors.blue,
+          clipBehavior: Clip.hardEdge,
+          child: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: SweepGradient(
+                      startAngle: 0,
+                      colors: [UiColors.enemyUiColor!, UiColors.buttonColor!],
+                      stops: [
+                        caterpillarStatsViewModel.enemyKilledSinceUlti /
+                            game.enemyKillsToUlti,
+                        caterpillarStatsViewModel.enemyKilledSinceUlti /
+                            game.enemyKillsToUlti
+                      ],
+                      tileMode: TileMode.decal,
+                      transform: GradientRotation(-pi / 2))
+                  // color: Colors.blue,
+                  ),
+              // color: Colors.blue,
+              clipBehavior: Clip.hardEdge,
+              child: imageButton(buttonImagePath, onButtonTap, size),
             ),
-        // color: Colors.blue,
-        clipBehavior: Clip.hardEdge,
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: SweepGradient(
-                    startAngle: 0,
-                    colors: [UiColors.enemyUiColor!, UiColors.buttonColor!],
-                    stops: [
-                      caterpillarStatsViewModel.enemyKilledSinceUlti /
-                          game.enemyKillsToUlti,
-                      caterpillarStatsViewModel.enemyKilledSinceUlti /
-                          game.enemyKillsToUlti
-                    ],
-                    tileMode: TileMode.decal,
-                    transform: GradientRotation(-pi / 2))
-                // color: Colors.blue,
-                ),
-            // color: Colors.blue,
-            clipBehavior: Clip.hardEdge,
-            child: imageButton(pathToImage, onTap, size),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget imageButton(String imagePath, Function onTap, double size) {

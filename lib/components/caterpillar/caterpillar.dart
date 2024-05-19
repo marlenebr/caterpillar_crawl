@@ -6,7 +6,7 @@ import 'package:caterpillar_crawl/components/weapons/egg.dart';
 import 'package:caterpillar_crawl/components/weapons/pellet.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/data/egg_data.dart';
-import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
+import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';

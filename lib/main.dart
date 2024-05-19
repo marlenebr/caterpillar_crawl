@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
-import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
+import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';

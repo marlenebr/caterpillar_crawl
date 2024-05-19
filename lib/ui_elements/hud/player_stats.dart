@@ -1,5 +1,5 @@
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/view_models/caterpillar_state_model.dart';
+import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -41,37 +41,48 @@ class _PlayerStatsWidget extends State<PlayerStatsWidget> {
   Widget _playerStatsWidgetBuilder(
       BuildContext buildContext, CaterpillarCrawlMain game) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Row(children: [
+        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           Text(
             'Enemies',
             style: TextStyles.uiLabelTextStyle,
           ),
           // _statsElement(iconPath,), //TODO: POINTS
-          _statsElement(Icons.kayaking, UiColors.enemyUiColor!,
+          _statsElement('kill_icon.png',
               caterpillarStatsViewModel.enemyKilled.toString()),
-          _statsElement(Icons.bug_report_sharp, UiColors.enemyUiColor!,
+          _statsElement('enemy_icon.png',
               caterpillarStatsViewModel.enemiesInGame.toString()),
+          SizedBox(
+            height: 1,
+            width: game.gapRightSide,
+          )
         ]),
         Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             // _statsElement(iconPath,), //TODO: POINTS
-            _statsElement(Icons.auto_awesome_motion, UiColors.segmentColor!,
+            _statsElement('segment_icon.png',
                 caterpillarStatsViewModel.segmentCount.toString()),
-            _statsElement(Icons.arrow_circle_up_rounded, UiColors.levelColor!,
-                caterpillarStatsViewModel.level.toString()),
+            _statsElement(
+                'level_icon.png', caterpillarStatsViewModel.level.toString()),
+            SizedBox(
+              height: 1,
+              width: game.gapRightSide,
+            )
           ],
         )
       ],
     );
   }
 
-  Widget _statsElement(IconData tempIcon, Color iconColor, String value) {
-    return Row(children: [
-      Icon(
-        tempIcon,
-        color: iconColor,
-        size: TextStyles.iconSize,
+  Widget _statsElement(String iconImagePath, String value) {
+    String pathToIcons = 'assets/icons/';
+    return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      Image(
+        image: AssetImage(pathToIcons + iconImagePath),
+        width: UIConstants.iconSize,
+        height: UIConstants.iconSize,
       ),
       Text(
         value,

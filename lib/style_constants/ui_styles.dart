@@ -19,3 +19,7 @@ class TextStyles {
   static TextStyle uiLabelTextStyle =
       TextStyle(fontSize: TextStyles.textSize, color: TextStyles.textColor);
 }
+
+class UIConstants {
+  static double iconSize = 16;
+}
