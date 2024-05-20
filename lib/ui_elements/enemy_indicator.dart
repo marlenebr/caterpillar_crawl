@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:flame/components.dart';
 
@@ -11,7 +11,7 @@ class EnemyIndicatorHUD extends PositionComponent with HasVisibility {
 
   EnemyIndicatorHUD({required this.world});
 
-  String spritePath = "heartgreen_64.png";
+  String spritePath = "enemy_icon.png";
   double iconSize = 16;
 
   late SpriteComponent spriteComponent;
@@ -20,11 +20,6 @@ class EnemyIndicatorHUD extends PositionComponent with HasVisibility {
   Future<void> onLoad() async {
     super.priority = double.maxFinite.toInt();
     super.onLoad();
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
   }
 
   Future<void> onAddEnemy(Enemy enemy) async {

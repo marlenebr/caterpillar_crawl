@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
-import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/components/powerups/health_up_item.dart';
@@ -204,11 +204,8 @@ class GroundMap extends PositionComponent {
     obstacleSnapshot.onLevelUp(80);
   }
 
-  void killEnemy(Enemy enemy, bool respawnNew) {
+  void killEnemy(Enemy enemy) {
     player.onEnemyKilled();
-    if (respawnNew) {
-      _addEnemy();
-    }
     world.enemyIndicatorHUD.onRemoveEnemy(enemy);
     enemies.remove(enemy.index);
     if (enemies.values.length <= world.remainingEnemiesToLevelUp) {

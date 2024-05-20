@@ -60,7 +60,7 @@ class CaterpillarCrawlMain extends FlameGame
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
   int snackCount = 100; //300
-  int enemyCount = 30; //60
+  int enemyCount = 15; //60
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
   int segmentsToUlti = 30; //30

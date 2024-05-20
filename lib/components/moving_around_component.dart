@@ -22,7 +22,7 @@ class MovingAroundComponent extends PositionComponent {
   bool doRecoil = false;
 
   bool disAllowMoving = false;
-  bool _moveToPlayer = false;
+  bool moveToPlayer = false;
 
   MovingAroundComponent({required this.map, required this.movingdata}) {
     _fractionAngle = (2 * pi) / movingdata.angleSteps.toDouble();
@@ -56,14 +56,7 @@ class MovingAroundComponent extends PositionComponent {
       return;
     }
 
-    if (map.player.position.distanceTo(position) <
-        movingdata.distToFollowPlayer) {
-      _moveToPlayer = true;
-    } else {
-      _moveToPlayer = false;
-    }
-
-    if (!_moveToPlayer) {
+    if (!moveToPlayer) {
       if (movingdata.movingStatus == MovingMode.walkInCircles) {
         updateWalkInCircles(dt);
       } else if (movingdata.movingStatus == MovingMode.moveRandom) {

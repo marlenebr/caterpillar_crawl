@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/weapons/egg.dart';
-import 'package:caterpillar_crawl/components/weapons/pellet.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/mini_sword.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/data/egg_data.dart';
+import 'package:caterpillar_crawl/models/data/weapon_data.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
-import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -19,6 +20,8 @@ enum CaterpillarState { crawling, onHoldForEgg, readyForUlti }
 class CaterPillar extends CaterpillarElement {
   CaterpillarStateViewModel caterpillarStateViewModel;
   CaterpillarStatsViewModel caterpillarStatsViewModel;
+
+  BaseMeleeWeapon? baseMeleeWeapon;
 
   // bool isRemovingSegment = false;
   // bool isHurt = false;
@@ -102,7 +105,8 @@ class CaterPillar extends CaterpillarElement {
         caterpillardata.idleAnimation.spriteSize.y);
     anchor = Anchor(0.5, anchorPos);
     angleToLerpTo = angle;
-    add(caterPillarAnimations);
+    await add(caterPillarAnimations);
+    await addMeleeWeapon();
     priority = 10000;
     index = 0;
     baseSpeed = caterpillardata.movingspeed;
@@ -200,7 +204,6 @@ class CaterPillar extends CaterpillarElement {
     );
     add(effect);
     baseSpeed += 0.2;
-    caterpillarStatsViewModel.setLevelUp();
     gameWorld.zoomOut(caterpillarStatsViewModel.level);
   }
 
@@ -345,8 +348,17 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void onPewPew() {
-    Pellet.shootMultiplePellets(
-        gameWorld, position, angle, caterpillarStatsViewModel.level + 1);
+    // Pellet.shootMultiplePellets(
+    //     gameWorld, position, angle, caterpillarStatsViewModel.level + 1);
+    baseMeleeWeapon?.startAttacking();
+  }
+
+  Future<void> addMeleeWeapon() async {
+    baseMeleeWeapon = MiniSword(
+        weaponData: WeaponData.createSwordData(), map: gameWorld.groundMap);
+    await add(baseMeleeWeapon!);
+    baseMeleeWeapon!.position = Vector2(size.x / 2, 30);
+    print(baseMeleeWeapon!.position);
   }
 
   void onSegmentAddedOrRemoved() {
@@ -366,14 +378,7 @@ class CaterPillar extends CaterpillarElement {
         state == CaterpillarState.onHoldForEgg) {
       caterPillarAnimations.current = state;
     }
-    // if (state == CaterpillarState.readyForUlti) {
-    //   onReadyForulti();
-    // }
   }
-
-  // void onReadyForulti()
-  // {
-  // }
 
   void removeCompletly() {
     super.reset();

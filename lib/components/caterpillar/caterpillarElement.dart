@@ -11,7 +11,7 @@ class CaterpillarElement extends PositionComponent {
   CaterpillarData caterpillardata;
   CaterpillarCrawlMain gameWorld;
 
-  double distToCollide = 20;
+  double distToCollide = 25;
 
   Queue<MovementTransferData> angleQueue =
       Queue<MovementTransferData>(); // ListQueue() by default

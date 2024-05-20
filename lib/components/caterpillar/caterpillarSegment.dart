@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
-import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';

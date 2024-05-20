@@ -25,7 +25,7 @@ class MovingData {
         baseRotationSpeed: 4,
         huntRotationSpeed: 8,
         angleSteps: 3,
-        distToFollowPlayer: 100,
+        distToFollowPlayer: 120,
         movingStatus: MovingMode.walkInCircles);
   }
 

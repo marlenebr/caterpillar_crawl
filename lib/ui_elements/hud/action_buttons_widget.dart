@@ -52,12 +52,8 @@ class _ActionButtons extends State<ActionButtons> {
                 game.actionButtonSize / 2),
           ),
         ),
-        regularWeaponButton(
-            game.actionButtonSize,
-            game.actionButtonSize,
-            0,
-            () => game.onPewPewButtonclicked(),
-            'assets/images/pewpew_128_button.png'),
+        regularWeaponButton(game.actionButtonSize, game.actionButtonSize, 0,
+            () => game.onPewPewButtonclicked(), 'assets/images/sword.png'),
       ],
     );
   }

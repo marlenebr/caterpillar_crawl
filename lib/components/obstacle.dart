@@ -1,4 +1,4 @@
-import 'package:caterpillar_crawl/components/enemy.dart';
+import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
