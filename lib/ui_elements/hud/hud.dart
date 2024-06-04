@@ -1,6 +1,9 @@
 import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:caterpillar_crawl/ui_elements/hud/action_buttons_widget.dart';
-import 'package:caterpillar_crawl/ui_elements/hud/player_stats.dart';
+import 'package:caterpillar_crawl/ui_elements/hud/health_status_widget.dart';
+import 'package:caterpillar_crawl/ui_elements/hud/player_stats_widget.dart';
+import 'package:caterpillar_crawl/ui_elements/options_menu_widget.dart';
 import 'package:flutter/material.dart';
 
 class GameHud extends StatelessWidget {
@@ -14,6 +17,7 @@ class GameHud extends StatelessWidget {
       children: [
         getActionbuttonCorner(),
         getPlayerstats(),
+        getLeftUpperCorner()
       ],
     );
   }
@@ -44,5 +48,31 @@ class GameHud extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget getLeftUpperCorner() {
+    return Align(
+        alignment: Alignment.topLeft,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+            width: 200,
+            height: 80,
+            child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    HealthStatusWidget(game: game),
+                    IconButton.filled(
+                      onPressed: () => {game.onGamePause(null)},
+                      icon: const Icon(Icons.pause),
+                      iconSize: UIConstants.iconSizeMedium,
+                      color: UiColors.segmentColor,
+                    ),
+                  ],
+                )),
+          ),
+          OptionsMenuWidget(game: game),
+        ]));
   }
 }

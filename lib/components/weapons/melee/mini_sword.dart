@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:caterpillar_crawl/components/weapons/melee/base_melee.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:flame/components.dart';
 
 class MiniSword extends BaseMeleeWeapon {
@@ -24,17 +24,13 @@ class MiniSword extends BaseMeleeWeapon {
 
   void updateAttacking(double dt) {
     if (isAttacking) {
-      angle -= weaponData.rotationSpeed! * startAngle * dt;
+      angle -= meleeWeapondata.rotationSpeed! * startAngle * dt;
       if (angle < endAngle) {
         isAttacking = false;
         angle = startAngle;
         scale = idlescale;
       }
     }
-    // if (isTranslating) {
-    //   orientation = Vector2(1 * sin(angle), -1 * cos(angle)).normalized();
-    //   position += orientation * weaponData.movementSpeed! * dt;
-    // }
   }
 
   void initializeMovementData() {
@@ -44,15 +40,11 @@ class MiniSword extends BaseMeleeWeapon {
   }
 
   void createBlade() {
-    for (double i = size.y - weaponData.hitRadius * 2;
+    for (double i = size.y - meleeWeapondata.hitRadius * 2;
         i > 0;
-        i -= weaponData.hitRadius * 2) {
+        i -= meleeWeapondata.hitRadius * 2) {
       PositionComponent hitPoint =
           PositionComponent(position: Vector2(size.x / 2, i));
-      // hitPoint.add(CircleComponent(
-      //   radius: weaponData.hitRadius,
-      //   paint: Paint()..color = Color.fromARGB(255, 226, 0, 30),
-      // ));
       add(hitPoint);
       hitPoints.add(hitPoint);
     }

@@ -29,6 +29,6 @@ class EnemyData {
           animationstepCount: 9,
         ),
         movingData: MovingData.createenemyMovingData(),
-        hitCooldownTime: 0.6);
+        hitCooldownTime: 0.2);
   }
 }

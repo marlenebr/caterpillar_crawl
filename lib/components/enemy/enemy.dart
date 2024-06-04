@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/damage_indicator.dart';
 import 'package:caterpillar_crawl/components/moving_around_component.dart';
-import 'package:caterpillar_crawl/components/weapons/melee/base_melee.dart';
-import 'package:caterpillar_crawl/components/weapons/melee/dung_ball.dart';
+import 'package:caterpillar_crawl/components/weapons/base_weapon.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
+import 'package:caterpillar_crawl/components/weapons/distance/dung_ball.dart';
 import 'package:caterpillar_crawl/models/data/enemy_data.dart';
 import 'package:caterpillar_crawl/models/data/weapon_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
@@ -16,7 +17,7 @@ class Enemy extends MovingAroundComponent {
   late SpriteAnimation _deadAnimation;
   late SpriteAnimationGroupComponent _enemyAnimations;
 
-  BaseMeleeWeapon? meleeWeapon;
+  BaseWeapon? enemyWeapon;
 
   double _timeToDie = 0.8;
   double _timeToCooldown;
@@ -68,9 +69,6 @@ class Enemy extends MovingAroundComponent {
     await add(_damageIndicator);
     priority = 1000;
     _damageIndicator.priority = 1001;
-    if (map.level >= 1) {
-      createEnemyWeoapon();
-    }
   }
 
   @override
@@ -103,6 +101,7 @@ class Enemy extends MovingAroundComponent {
     }
     _timeToCooldown -= dt;
     if (_timeToCooldown < 0) {
+      _timeToCooldown = enemyData.hitCooldownTime;
       _isInCoolDown = false;
     }
   }
@@ -137,18 +136,18 @@ class Enemy extends MovingAroundComponent {
       _shootIntervallTimer += dt;
       if (_shootIntervallTimer >= shootIntervall) {
         shootIntervall = 4;
-        meleeWeapon!.startAttacking();
+        enemyWeapon!.startAttacking();
         _shootIntervallTimer = 0;
       }
     }
   }
 
   void createEnemyWeoapon() {
-    meleeWeapon = DungBall(weaponData: WeaponData.createDungBall(), map: map);
-    add(meleeWeapon!);
-    meleeWeapon!.position = Vector2(size.x / 2, size.y / 2);
-    meleeWeapon!.priority = priority - 10;
-    meleeWeapon!.weaponHolder = WeaponHolder.enemy;
+    enemyWeapon = DungBallShooter(
+        weaponData: DistanceWeaponData.createDungBall(), map: map);
+    add(enemyWeapon!);
+    enemyWeapon!.position = Vector2(size.x / 2, size.y / 2);
+    enemyWeapon!.weaponHolder = WeaponHolder.enemy;
     shootIntervall = Random().nextDouble() * shootIntervall;
     hasWeapon = true;
   }

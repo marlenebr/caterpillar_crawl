@@ -49,23 +49,4 @@ class Pellet extends SpriteComponent {
       }
     }
   }
-
-  static shootMultiplePellets(CaterpillarCrawlMain gameWorld, Vector2 position,
-      double angle, int pelletCount) {
-    int pelletsPerSide = (pelletCount / 2).toInt();
-    double rotationAngle = 0.3;
-    double startAngle = angle - (rotationAngle * pelletsPerSide);
-    if (pelletCount % 2 == 0) {
-      startAngle += rotationAngle / 2;
-    }
-    for (int i = 0; i < pelletCount; i++) {
-      Pellet pellet = Pellet(
-          forwardAngle: startAngle + i * rotationAngle,
-          gameWorld: gameWorld,
-          lifeTime: 1.5,
-          shootingSpeed: 10);
-      gameWorld.world.add(pellet);
-      pellet.position = Vector2(position.x, position.y);
-    }
-  }
 }

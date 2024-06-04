@@ -36,6 +36,9 @@ class CaterpillarSegment extends CaterpillarElement {
   void update(double dt) {
     super.update(dt);
     //initSegment();
+    if (isInitializing) {
+      return;
+    }
     updateHCollisionWithSelf();
     updateEnemyCollision();
   }
@@ -115,11 +118,11 @@ class CaterpillarSegment extends CaterpillarElement {
   }
 
   void addCaterpillarSegemntRequest() {
-    if (!isInitializing) {
-      addCaterPillarSegment(caterpillar);
-    } else {
-      segemntAddRequest = true;
-    }
+    // if (!isInitializing) {
+    //   addCaterPillarSegment(caterpillar);
+    // } else {
+    segemntAddRequest = true;
+    // }
   }
 
   void falloff(bool isUlti) {

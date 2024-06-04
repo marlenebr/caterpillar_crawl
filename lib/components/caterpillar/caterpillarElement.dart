@@ -11,7 +11,7 @@ class CaterpillarElement extends PositionComponent {
   CaterpillarData caterpillardata;
   CaterpillarCrawlMain gameWorld;
 
-  double distToCollide = 25;
+  double distToCollide = 15;
 
   Queue<MovementTransferData> angleQueue =
       Queue<MovementTransferData>(); // ListQueue() by default
@@ -60,18 +60,18 @@ class CaterpillarElement extends PositionComponent {
     return false;
   }
 
-  void addCaterPillarSegment(CaterPillar caterpillar) {
+  Future<void> addCaterPillarSegment(CaterPillar caterpillar) async {
     if (caterpillardata.maxElementCount <= index) {
       return;
     }
     nextSegment = CaterpillarSegment(caterpillardata, gameWorld,
         previousSegment: this, caterpillar: caterpillar);
-    nextSegment?.position = position;
-    gameWorld.world.add(nextSegment!);
+    nextSegment?.index = index + 1;
     caterpillar.lastSegment = nextSegment;
+    nextSegment?.position = position;
+    await gameWorld.world.add(nextSegment!);
     nextSegment?.previousSegment = this;
     nextSegment?.priority = priority - 1;
-    nextSegment?.index = index + 1;
     nextSegment?.angle = angle;
     caterpillar.caterpillarStatsViewModel.onAddSegment();
     return;

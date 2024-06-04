@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/health_status_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
 import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
-import 'package:caterpillar_crawl/ui_elements/game_over_menu.dart';
+import 'package:caterpillar_crawl/ui_elements/game_end_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/hud/hud.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
@@ -36,7 +39,7 @@ void main() {
       },
       gameOverOverlayIdentifier:
           (BuildContext context, CaterpillarCrawlMain game) {
-        return gameOverBuilder(context, game);
+        return GameEndWidget(game: game);
       },
       hudOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
         return GameHud(game: game);
@@ -56,11 +59,13 @@ class CaterpillarCrawlMain extends FlameGame
   //View Models - Hopefully Singletons
   CaterpillarStateViewModel caterpillarStateViewModel;
   CaterpillarStatsViewModel caterpillarStatsViewModel;
+  HealthStatusViewModel healthStatusViewModel;
+  GameStateViewModel gameStateViewModel;
+  SnackCountValue snackCountSettingsViewModel;
+  EnemyCountValue enemyCountViewModel;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
-  int snackCount = 100; //300
-  int enemyCount = 15; //60
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
   int segmentsToUlti = 30; //30
@@ -85,13 +90,18 @@ class CaterpillarCrawlMain extends FlameGame
 
   CaterpillarCrawlMain()
       : caterpillarStateViewModel = CaterpillarStateViewModel(),
-        caterpillarStatsViewModel = CaterpillarStatsViewModel();
+        caterpillarStatsViewModel = CaterpillarStatsViewModel(),
+        healthStatusViewModel = HealthStatusViewModel(),
+        gameStateViewModel = GameStateViewModel(),
+        snackCountSettingsViewModel = SnackCountValue(100),
+        enemyCountViewModel = EnemyCountValue(15);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     world = World();
-    await add(FpsTextComponent());
+    await add(
+        FpsTextComponent(position: Vector2(200, 0), scale: Vector2.all(0.4)));
     enemyIndicatorHUD = EnemyIndicatorHUD(world: this);
     await add(enemyIndicatorHUD);
     _gameUI =
@@ -169,8 +179,8 @@ class CaterpillarCrawlMain extends FlameGame
         mapSize: mapSize,
         player: caterpillar,
         world: this,
-        snackCount: snackCount,
-        enemyCount: enemyCount,
+        snackCount: snackCountSettingsViewModel.value,
+        enemyCount: enemyCountViewModel.value,
         healthUpCount: healthUpCount);
     await world.add(groundMap);
     await world.add(_caterPillar);
@@ -189,7 +199,7 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   void onLifeCountChanged(int lifeCount) {
-    _gameUI.onLifeCountChanged(lifeCount);
+    healthStatusViewModel.setHealthStatus(lifeCount);
     if (lifeCount == 0) {
       onGameOver();
     }
@@ -200,7 +210,8 @@ class CaterpillarCrawlMain extends FlameGame
     groundMap.removeComnpletly();
     await initializeMapAndView();
     overlays.remove(gameOverOverlayIdentifier);
-    paused = false;
+
+    onGamePause(false);
   }
 
   void onGameOver() {
@@ -208,5 +219,10 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.add(gameOverOverlayIdentifier);
     // _gameUI.reset();
     enemyIndicatorHUD.reset();
+  }
+
+  void onGamePause(bool? isPaused) {
+    paused = isPaused ?? !paused;
+    gameStateViewModel.setGamePause(paused);
   }
 }

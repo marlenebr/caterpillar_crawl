@@ -22,4 +22,7 @@ class TextStyles {
 
 class UIConstants {
   static double iconSize = 16;
+  static double iconSizeMedium = 32;
+
+  static double endOfScreenPadding = 3;
 }

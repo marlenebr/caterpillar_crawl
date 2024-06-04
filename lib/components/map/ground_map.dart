@@ -169,6 +169,9 @@ class GroundMap extends PositionComponent {
     enemyIndexer++;
     world.world.add(enemy);
     await world.enemyIndicatorHUD.onAddEnemy(enemy);
+    if (level >= 0) {
+      enemy.createEnemyWeoapon();
+    }
   }
 
   // void _removeObstacle(Obstacle obstacle) {
@@ -197,9 +200,14 @@ class GroundMap extends PositionComponent {
 
   Future<void> levelUp() async {
     level++;
+    if (level >= world.maxLevelCount) {
+      world.onGameOver();
+      return;
+    }
     player.grow();
     print("LEVEL UP");
-    await fillWithEnemies(world.enemyCount - world.remainingEnemiesToLevelUp);
+    await fillWithEnemies(
+        world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp);
     world.caterpillarStatsViewModel.setLevelUp();
     obstacleSnapshot.onLevelUp(80);
   }

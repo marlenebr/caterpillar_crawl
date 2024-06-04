@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/weapons/egg.dart';
-import 'package:caterpillar_crawl/components/weapons/melee/base_melee.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/components/weapons/melee/mini_sword.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/models/data/egg_data.dart';
@@ -265,23 +265,23 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void addCaterpillarSegemntRequest() {
-    if (!isInitializing) {
-      addSegment();
-    } else {
-      segemntAddRequest = true;
-    }
+    // if (!isInitializing) {
+    //   addSegment();
+    // } else {
+    segemntAddRequest = true;
+    // }
   }
 
   void addSegment() {
+    segemntAddRequest = false;
+
     if (lastSegment != null) {
-      lastSegment!.addCaterpillarSegemntRequest();
+      lastSegment!.addCaterPillarSegment(this);
     } else {
       super.addCaterPillarSegment(this);
     }
-    segemntAddRequest = false;
 
     checkReadyForUlti();
-
     onSegmentAddedOrRemoved();
   }
 
@@ -355,7 +355,8 @@ class CaterPillar extends CaterpillarElement {
 
   Future<void> addMeleeWeapon() async {
     baseMeleeWeapon = MiniSword(
-        weaponData: WeaponData.createSwordData(), map: gameWorld.groundMap);
+        weaponData: MeleeWeaponData.createSwordData(),
+        map: gameWorld.groundMap);
     await add(baseMeleeWeapon!);
     baseMeleeWeapon!.position = Vector2(size.x / 2, 30);
     print(baseMeleeWeapon!.position);
