@@ -206,11 +206,11 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   Future<void> onGameRestart() async {
+    enemyIndicatorHUD.reset();
     _caterPillar.removeCompletly();
     groundMap.removeComnpletly();
     await initializeMapAndView();
     overlays.remove(gameOverOverlayIdentifier);
-
     onGamePause(false);
   }
 
