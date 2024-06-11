@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
@@ -200,8 +201,8 @@ class GroundMap extends PositionComponent {
 
   Future<void> levelUp() async {
     level++;
-    if (level >= world.maxLevelCount) {
-      world.onGameOver();
+    if (level >= world.maxLevelValue.value) {
+      world.onGameWon();
       return;
     }
     player.grow();

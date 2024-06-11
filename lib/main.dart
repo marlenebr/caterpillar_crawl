@@ -6,11 +6,11 @@ import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_mode
 import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/health_status_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
-import 'package:caterpillar_crawl/ui_elements/caterpillar_game_ui.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
-import 'package:caterpillar_crawl/ui_elements/game_end_widget.dart';
+import 'package:caterpillar_crawl/ui_elements/game_over_widget.dart';
+import 'package:caterpillar_crawl/ui_elements/game_won_widget.dart';
 import 'package:caterpillar_crawl/ui_elements/hud/hud.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
@@ -26,6 +26,7 @@ final Images imageLoader = Images();
 const String pauseOverlayIdentifier = 'PauseMenu';
 const String hudOverlayIdentifier = 'Hud';
 const String gameOverOverlayIdentifier = 'GameOverMenu';
+const String gameWonOverlayIdentifier = 'GameWon';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,11 @@ void main() {
       },
       gameOverOverlayIdentifier:
           (BuildContext context, CaterpillarCrawlMain game) {
-        return GameEndWidget(game: game);
+        return GameOverWidget(game: game);
+      },
+      gameWonOverlayIdentifier:
+          (BuildContext context, CaterpillarCrawlMain game) {
+        return GameWonWidget(game: game);
       },
       hudOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
         return GameHud(game: game);
@@ -52,7 +57,6 @@ class CaterpillarCrawlMain extends FlameGame
     with TapCallbacks, HasKeyboardHandlerComponents {
   late CaterPillar _caterPillar;
   late GroundMap groundMap;
-  late CaterpillarGameUI _gameUI;
   late PlayerController _playerController;
   late EnemyIndicatorHUD enemyIndicatorHUD;
 
@@ -63,6 +67,7 @@ class CaterpillarCrawlMain extends FlameGame
   GameStateViewModel gameStateViewModel;
   SnackCountValue snackCountSettingsViewModel;
   EnemyCountValue enemyCountViewModel;
+  MaxLevelCountValue maxLevelValue;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
@@ -70,7 +75,6 @@ class CaterpillarCrawlMain extends FlameGame
   int remainingEnemiesToLevelUp = 0;
   int segmentsToUlti = 30; //30
   int enemyKillsToUlti = 15; //15
-  int maxLevelCount = 10;
   int enemyCountOnIndicator = 15;
 
   //UI
@@ -94,7 +98,8 @@ class CaterpillarCrawlMain extends FlameGame
         healthStatusViewModel = HealthStatusViewModel(),
         gameStateViewModel = GameStateViewModel(),
         snackCountSettingsViewModel = SnackCountValue(100),
-        enemyCountViewModel = EnemyCountValue(15);
+        enemyCountViewModel = EnemyCountValue(15),
+        maxLevelValue = MaxLevelCountValue(10);
 
   @override
   Future<void> onLoad() async {
@@ -104,11 +109,8 @@ class CaterpillarCrawlMain extends FlameGame
         FpsTextComponent(position: Vector2(200, 0), scale: Vector2.all(0.4)));
     enemyIndicatorHUD = EnemyIndicatorHUD(world: this);
     await add(enemyIndicatorHUD);
-    _gameUI =
-        CaterpillarGameUI(mainGame: this, playerLifeCount: playerLifeCount);
 
     await initPlayerController();
-    await add(_gameUI);
     overlays.add(hudOverlayIdentifier);
 
     await initializeMapAndView();
@@ -154,7 +156,7 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   void zoomOut(level) {
-    double correct = level / maxLevelCount;
+    double correct = level / maxLevelValue.value;
     double zoomRatio = 1.0 - (correct * 0.05);
     final effect = ScaleEffect.by(
       Vector2.all(zoomRatio),
@@ -211,14 +213,19 @@ class CaterpillarCrawlMain extends FlameGame
     groundMap.removeComnpletly();
     await initializeMapAndView();
     overlays.remove(gameOverOverlayIdentifier);
+    overlays.remove(gameWonOverlayIdentifier);
+    caterpillarStatsViewModel.reset();
     onGamePause(false);
   }
 
   void onGameOver() {
     paused = true;
     overlays.add(gameOverOverlayIdentifier);
-    // _gameUI.reset();
-    enemyIndicatorHUD.reset();
+  }
+
+  void onGameWon() {
+    paused = true;
+    overlays.add(gameWonOverlayIdentifier);
   }
 
   void onGamePause(bool? isPaused) {

@@ -1,3 +1,4 @@
+import 'package:caterpillar_crawl/models/data/animation_data.dart';
 import 'package:flame/components.dart';
 
 class WeaponData {
@@ -17,9 +18,11 @@ class WeaponData {
 
 class DistanceWeaponData extends WeaponData {
   double distanceToShoot;
+  AnimationData munitionanimation;
 
   DistanceWeaponData(
       {required this.distanceToShoot,
+      required this.munitionanimation,
       required super.pathToSprite,
       required super.size,
       required super.hitRadius,
@@ -29,6 +32,11 @@ class DistanceWeaponData extends WeaponData {
   static DistanceWeaponData createDungBall() {
     return DistanceWeaponData(
         distanceToShoot: 120,
+        munitionanimation: AnimationData(
+            animationstepCount: 3,
+            finalSize: Vector2.all(32),
+            imagePath: "dungball_animation.png",
+            spriteSize: Vector2.all(64)),
         pathToSprite: "",
         attackSpeed: 1,
         size: Vector2(32, 32),
@@ -54,7 +62,7 @@ class MeleeWeaponData extends WeaponData {
     return MeleeWeaponData(
         pathToSprite: "sword.png",
         meleeMovement: MeleMovement.rotate,
-        rotationSpeed: 4.5,
+        rotationSpeed: 6.5,
         attackSpeed: 4.5,
         size: Vector2(64, 128),
         hitRadius: 10,

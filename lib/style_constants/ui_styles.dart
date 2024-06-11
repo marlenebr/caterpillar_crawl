@@ -12,8 +12,8 @@ class UiColors {
 }
 
 class TextStyles {
-  static double textSize = 16;
-  static double iconSize = 16;
+  static double textSize = UIConstants.iconSize;
+  static double iconSize = UIConstants.iconSize;
   static Color textColor = Colors.white;
 
   static TextStyle uiLabelTextStyle =
@@ -21,8 +21,11 @@ class TextStyles {
 }
 
 class UIConstants {
-  static double iconSize = 16;
+  static double iconSize = 24;
   static double iconSizeMedium = 32;
 
+  static double imageSizeSmall = 64;
+
   static double endOfScreenPadding = 3;
+  static double defaultPaddingMedium = 5;
 }

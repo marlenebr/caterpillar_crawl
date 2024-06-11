@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
+import 'package:caterpillar_crawl/components/particles/magic_around_particles.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/weapons/egg.dart';
 import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
@@ -107,9 +108,11 @@ class CaterPillar extends CaterpillarElement {
     angleToLerpTo = angle;
     await add(caterPillarAnimations);
     await addMeleeWeapon();
-    priority = 10000;
+    priority = 2000;
     index = 0;
     baseSpeed = caterpillardata.movingspeed;
+    startCrawling();
+    add(MagicAroundParticles());
   }
 
   @override

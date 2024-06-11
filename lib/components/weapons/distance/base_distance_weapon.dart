@@ -15,6 +15,7 @@ class BaseDistanceWeapon extends BaseWeapon {
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    anchor = Anchor.center;
   }
 
   shootMultipleMunitions(CaterpillarCrawlMain gameWorld, Vector2 position,
@@ -22,7 +23,7 @@ class BaseDistanceWeapon extends BaseWeapon {
     int pelletsPerSide = (pelletCount / 2).toInt();
     double rotationAngle = 0.3;
     double startAngle = rotationAngle * pelletsPerSide;
-    if (pelletCount % 2 == 0) {
+    if (pelletCount % 2 != 0) {
       startAngle += rotationAngle / 2;
     }
     for (int i = 0; i < pelletCount; i++) {
@@ -34,7 +35,7 @@ class BaseDistanceWeapon extends BaseWeapon {
   }
 }
 
-class BaseDistanceMunition extends SpriteComponent {
+class BaseDistanceMunition extends PositionComponent {
   Vector2 initPosition = Vector2.zero();
 
   BaseDistanceWeapon distanceWeapon;
@@ -42,11 +43,14 @@ class BaseDistanceMunition extends SpriteComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    int randomInt = Random().nextInt(2) + 1;
-    sprite = await Sprite.load("snack00$randomInt.png");
+    SpriteAnimationComponent spriteAnimation =
+        await CaterpillarCrawlUtils.createAnimationComponent(
+            distanceWeapon.distanceWeapondata.munitionanimation);
+    add(spriteAnimation);
     anchor = Anchor.center;
-    priority = 1000;
-    size = Vector2.all(16);
+    priority = 100;
+    size = Vector2.all(
+        distanceWeapon.distanceWeapondata.munitionanimation.finalSize.x);
     distanceWeapon.hitPoints.add(this);
     initPosition = Vector2(absolutePosition.x, absolutePosition.y);
   }

@@ -49,13 +49,26 @@ class _OptionsMenuwidget extends State<OptionsMenuWidget> {
               child: Column(
                 children: [
                   SettingsNumberPicker<SnackCountValue>(
-                      game: widget.game,
-                      viewModel: widget.game.snackCountSettingsViewModel,
-                      text: "Snack Count"),
+                    game: widget.game,
+                    viewModel: widget.game.snackCountSettingsViewModel,
+                    text: "Snack Count",
+                    minValue: 50,
+                    maxValue: 300,
+                  ),
                   SettingsNumberPicker<EnemyCountValue>(
-                      game: widget.game,
-                      viewModel: widget.game.enemyCountViewModel,
-                      text: "Enemy Count"),
+                    game: widget.game,
+                    viewModel: widget.game.enemyCountViewModel,
+                    text: "Enemy Count",
+                    minValue: 1,
+                    maxValue: 100,
+                  ),
+                  SettingsNumberPicker<MaxLevelCountValue>(
+                    game: widget.game,
+                    viewModel: widget.game.maxLevelValue,
+                    text: "Enemy Count",
+                    minValue: 1,
+                    maxValue: 10,
+                  ),
                   IconButton.filled(
                     onPressed: () => {widget.game.onGameRestart()},
                     icon: const Icon(Icons.loop),
@@ -84,6 +97,8 @@ class _OptionsMenuwidget extends State<OptionsMenuWidget> {
 class SettingsNumberPicker<ChangableIntValue> extends StatefulWidget {
   final CaterpillarCrawlMain game;
   final ChangableIntValue viewModel;
+  final int minValue;
+  final int maxValue;
 
   final String text;
 
@@ -91,7 +106,9 @@ class SettingsNumberPicker<ChangableIntValue> extends StatefulWidget {
       {super.key,
       required this.game,
       required this.viewModel,
-      required this.text});
+      required this.text,
+      required this.minValue,
+      required this.maxValue});
   @override
   createState() => _SettingsNumberPicker();
 }
@@ -109,8 +126,8 @@ class _SettingsNumberPicker extends State<SettingsNumberPicker> {
                       value: widget.viewModel.value,
                       axis: Axis.horizontal,
                       itemHeight: 30,
-                      minValue: 0,
-                      maxValue: 100,
+                      minValue: widget.minValue,
+                      maxValue: widget.maxValue,
                       onChanged: (value) =>
                           setState(() => widget.viewModel.setValue(value)),
                     ),

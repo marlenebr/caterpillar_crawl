@@ -40,7 +40,7 @@ class GameHud extends StatelessWidget {
     return Align(
       alignment: Alignment.topRight,
       child: SizedBox(
-        width: 200,
+        width: 250,
         height: 100,
         child: Material(
           color: Colors.transparent,

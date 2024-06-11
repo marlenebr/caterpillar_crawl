@@ -12,15 +12,15 @@ class BaseWeapon extends PositionComponent {
 
   GroundMap map;
 
-  double enemyHitRadius = 0;
-  double playerhitradius = 0;
-  BaseWeapon({required this.weaponData, required this.map});
+  final double _enemyHitRadius;
+  final double _playerhitradius;
+  BaseWeapon({required this.weaponData, required this.map})
+      : _enemyHitRadius = weaponData.hitRadius + 10,
+        _playerhitradius = weaponData.hitRadius;
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    enemyHitRadius = weaponData.hitRadius + 10;
-    playerhitradius = map.player.size.x / 2;
     size = weaponData.size;
     if (weaponData.pathToSprite != "") {
       Sprite weaponSprite = await Sprite.load(weaponData.pathToSprite);
@@ -30,7 +30,7 @@ class BaseWeapon extends PositionComponent {
     }
     anchor = Anchor.center;
     anchor = Anchor.bottomCenter;
-    priority = 1000;
+    priority = -1;
   }
 
   void updateHits() {
@@ -38,7 +38,7 @@ class BaseWeapon extends PositionComponent {
       case WeaponHolder.enemy:
         for (PositionComponent hitPos in hitPoints) {
           if (map.player.absolutePosition.distanceTo(hitPos.absolutePosition) <
-              playerhitradius) {
+              _playerhitradius + 16) {
             map.player.hurt();
             continue;
           }
@@ -47,7 +47,7 @@ class BaseWeapon extends PositionComponent {
         for (Enemy enemy in map.enemies.values) {
           for (PositionComponent hitPos in hitPoints) {
             if (enemy.absolutePosition.distanceTo(hitPos.absolutePosition) <
-                enemyHitRadius) {
+                _enemyHitRadius) {
               enemy.onEnemyHit(weaponData.damagePerHit, false);
               continue;
             }

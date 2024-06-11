@@ -21,3 +21,9 @@ class EnemyCountValue extends ChangableIntValue {
     setValue(initValue);
   }
 }
+
+class MaxLevelCountValue extends ChangableIntValue {
+  MaxLevelCountValue(int initValue) {
+    setValue(initValue);
+  }
+}

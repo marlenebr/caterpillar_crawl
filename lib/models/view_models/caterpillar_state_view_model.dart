@@ -5,35 +5,9 @@ class CaterpillarStateViewModel extends ChangeNotifier {
   bool _isRemovingSegments = false;
   bool get isRemovingSegments => _isRemovingSegments;
 
-  // bool _isHurt = false;
-  // bool get isHurt => _isHurt;
-
-  // bool _isReadyToEgg = false;
-  // bool get isReadyToEgg => _isReadyToEgg;
-
-  // CaterpillarState _currentState = CaterpillarState.crawling;
-  // CaterpillarState get currentState => _currentState;
-
   void setIsRemovingSegment(bool isRemovingSegments) {
     _isRemovingSegments = isRemovingSegments;
-    //notifyListeners();
-    //TODO: DO WE NEED NOTIFY?
   }
-
-  // void setIsHurt(bool isHurt) {
-  //   _isHurt = isHurt;
-  //   notifyListeners();
-  // }
-
-  // void setIsReadyToEgg(bool isReadyToEgg) {
-  //   _isReadyToEgg = isReadyToEgg;
-  //   notifyListeners();
-  // }
-
-  // void setCaterpillarstate(CaterpillarState state) {
-  //   _currentState = state;
-  //   notifyListeners();
-  // }
 }
 
 class CaterpillarStatsViewModel extends ChangeNotifier {
@@ -123,6 +97,15 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
 
   void setCaterpillarstate(CaterpillarState state) {
     _currentState = state;
+    notifyListeners();
+  }
+
+  void reset() {
+    _snacksEaten = 0;
+    _segmentCount = 0;
+    _enemyKilled = 0;
+    _enemyKilledSinceUlti = 0;
+    _level = 0;
     notifyListeners();
   }
 }

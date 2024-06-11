@@ -17,9 +17,7 @@ class DungBallShooter extends BaseDistanceWeapon {
 
   @override
   void startAttacking() {
-    if (isAttacking) {
-      return;
-    }
+    super.startAttacking();
     shootMultipleMunitions(map.world, position, angle, map.level + 1);
   }
 }

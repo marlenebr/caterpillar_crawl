@@ -2,10 +2,10 @@ import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 
-class GameEndWidget extends StatelessWidget {
+class GameOverWidget extends StatelessWidget {
   final CaterpillarCrawlMain game;
 
-  GameEndWidget({required this.game});
+  GameOverWidget({required this.game});
 
   @override
   Widget build(Object context) {
@@ -16,7 +16,7 @@ class GameEndWidget extends StatelessWidget {
         color: Colors.transparent,
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-            "Game Over Or Won",
+            "Game Over",
             style: TextStyles.uiLabelTextStyle,
           ),
           IconButton.filled(

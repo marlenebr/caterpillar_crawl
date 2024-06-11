@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/damage_indicator.dart';
 import 'package:caterpillar_crawl/components/moving_around_component.dart';
+import 'package:caterpillar_crawl/components/particles/splash_out_particles.dart';
 import 'package:caterpillar_crawl/components/weapons/base_weapon.dart';
-import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/components/weapons/distance/dung_ball.dart';
 import 'package:caterpillar_crawl/models/data/enemy_data.dart';
 import 'package:caterpillar_crawl/models/data/weapon_data.dart';
@@ -114,6 +114,10 @@ class Enemy extends MovingAroundComponent {
       return;
     }
     hitPoints -= damage;
+    SplashOutParticles hitSplash = SplashOutParticles();
+    add(hitSplash);
+    hitSplash.position = Vector2(size.x / 2, size.y / 2);
+
     if (hitPoints <= 0) {
       hitPoints = 0;
       setEnemyState(EnemyStatus.dead);
@@ -146,7 +150,7 @@ class Enemy extends MovingAroundComponent {
     enemyWeapon = DungBallShooter(
         weaponData: DistanceWeaponData.createDungBall(), map: map);
     add(enemyWeapon!);
-    enemyWeapon!.position = Vector2(size.x / 2, size.y / 2);
+    enemyWeapon!.position = Vector2(size.x / 2, size.y / 4);
     enemyWeapon!.weaponHolder = WeaponHolder.enemy;
     shootIntervall = Random().nextDouble() * shootIntervall;
     hasWeapon = true;
