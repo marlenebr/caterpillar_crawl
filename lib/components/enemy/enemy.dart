@@ -67,8 +67,8 @@ class Enemy extends MovingAroundComponent {
     _damageIndicator =
         DamageIndicator(maxHealthValue: hitPoints, parentToTakeDamage: this);
     await add(_damageIndicator);
-    priority = 1000;
-    _damageIndicator.priority = 1001;
+    priority = 10;
+    _damageIndicator.priority = 11;
   }
 
   @override

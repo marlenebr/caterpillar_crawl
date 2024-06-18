@@ -55,22 +55,29 @@ class GameHud extends StatelessWidget {
         alignment: Alignment.topLeft,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
-            width: 200,
-            height: 80,
+            width: 220,
+            height: 100,
             child: Material(
                 color: Colors.transparent,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    HealthStatusWidget(game: game),
-                    IconButton.filled(
-                      onPressed: () => {game.onGamePause(null)},
-                      icon: const Icon(Icons.pause),
-                      iconSize: UIConstants.iconSizeMedium,
-                      color: UiColors.segmentColor,
-                    ),
-                  ],
-                )),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding:
+                            EdgeInsets.all(UIConstants.defaultPaddingMedium),
+                        child: HealthStatusWidget(game: game),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.all(UIConstants.defaultPaddingMedium),
+                        child: IconButton.filled(
+                          onPressed: () => {game.onGamePause(null)},
+                          icon: const Icon(Icons.pause),
+                          iconSize: UIConstants.iconSizeMedium,
+                          color: UiColors.segmentColor,
+                        ),
+                      ),
+                    ])),
           ),
           OptionsMenuWidget(game: game),
         ]));

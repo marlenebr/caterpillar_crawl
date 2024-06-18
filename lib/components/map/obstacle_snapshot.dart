@@ -16,7 +16,7 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
 
   @override
   Future<void> onLoad() async {
-    priority = 2;
+    priority = 3;
     anchor = Anchor.center;
   }
 

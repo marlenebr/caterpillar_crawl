@@ -54,12 +54,18 @@ class GroundMap extends PositionComponent {
   @override
   Future<void> onLoad() async {
     priority = 1;
-    await add(GroundMapFloorParallax(player, super.size / 6));
-    await add(SpriteComponent(
-        sprite: await Sprite.load('leafGround01.png'),
-        size: Vector2.all(mapSize)));
     anchor = Anchor.center;
+    await add(GroundMapFloorParallax(player, super.size / 6));
+    await add(
+      SpriteComponent(
+        priority: 1,
+        sprite: await Sprite.load('leafGround01.png'),
+        size: Vector2.all(mapSize),
+        anchor: Anchor.center,
+      ),
+    );
     await _createMapContent();
+    position = Vector2.all(mapSize / 2);
     // //DEBUG: 55FPS
     // for (int i = 0; i < 1600; i++) {
     //   obstacleSnapshot.addObstacle(getRandomPositionInMap(), 0, i);
@@ -142,7 +148,7 @@ class GroundMap extends PositionComponent {
         index: newIndex);
     snacks[newIndex] = newSnack;
     snackData[newIndex] = newSnack.position;
-    world.world.add(newSnack);
+    add(newSnack);
     return newSnack;
   }
 
@@ -168,7 +174,7 @@ class GroundMap extends PositionComponent {
     enemies[enemyIndexer]!.transform.position = randomPos;
     hasEnemies = true;
     enemyIndexer++;
-    world.world.add(enemy);
+    add(enemy);
     await world.enemyIndicatorHUD.onAddEnemy(enemy);
     if (level >= 0) {
       enemy.createEnemyWeoapon();
@@ -188,7 +194,7 @@ class GroundMap extends PositionComponent {
     HealthUpItem healthUp = HealthUpItem(
         iconSize: 32, map: this, movingdata: MovingData.createItemMovingdata());
     healthUp.position = randomPos;
-    world.world.add(healthUp);
+    add(healthUp);
     powerUps.add(healthUp);
   }
 
@@ -263,8 +269,12 @@ class GroundMap extends PositionComponent {
     await fillWithSnacks(snackCount);
     await fillWithEnemies(enemyCount);
     await fillWithHealthUpItems(healthUpCount);
+    await add(player);
+    player.position = size / 2;
+    ;
+
     obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
-    world.world.add(obstacleSnapshot);
+    add(obstacleSnapshot);
   }
 }
 
@@ -285,6 +295,8 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
         filterQuality: FilterQuality.none,
         repeat: ImageRepeat.repeat,
         size: tileSize);
+    priority = 0;
+    anchor = Anchor.center;
   }
 
   @override

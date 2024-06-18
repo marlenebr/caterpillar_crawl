@@ -13,6 +13,7 @@ import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_mode
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flutter/material.dart';
 
 import 'caterpillarElement.dart';
 
@@ -44,6 +45,7 @@ class CaterPillar extends CaterpillarElement {
 
   late double angleToLerpTo;
   late double scaledAnchorYPos;
+  late MagicAroundParticles magicAround;
 
   PlayerController playerController;
 
@@ -108,11 +110,18 @@ class CaterPillar extends CaterpillarElement {
     angleToLerpTo = angle;
     await add(caterPillarAnimations);
     await addMeleeWeapon();
-    priority = 2000;
     index = 0;
     baseSpeed = caterpillardata.movingspeed;
     startCrawling();
-    add(MagicAroundParticles());
+    magicAround = MagicAroundParticles(
+      parentPosComp: this,
+      particlePerTick: 3,
+      timeForTick: 0.3,
+      world: gameWorld,
+    );
+    await gameWorld.groundMap.add(magicAround);
+    super.priority = 400;
+    magicAround.priority = 500;
   }
 
   @override
@@ -195,6 +204,8 @@ class CaterPillar extends CaterpillarElement {
   void ulti() {
     isInUlti = true;
     fallOffAllSegments(true);
+    magicAround.stopSparkling();
+
     lives = gameWorld.playerLifeCount;
     caterpillarStatsViewModel.onUlti();
     startCrawling();
@@ -281,7 +292,7 @@ class CaterPillar extends CaterpillarElement {
     if (lastSegment != null) {
       lastSegment!.addCaterPillarSegment(this);
     } else {
-      super.addCaterPillarSegment(this);
+      addCaterPillarSegment(this);
     }
 
     checkReadyForUlti();
@@ -302,7 +313,7 @@ class CaterPillar extends CaterpillarElement {
       angleQueue = segment.angleQueue;
     }
     caterpillarStateViewModel.setIsRemovingSegment(true);
-    gameWorld.world.remove(segment);
+    gameWorld.groundMap.remove(segment);
     caterpillarStatsViewModel.onRemoveSegment();
     onSegmentAddedOrRemoved();
   }
@@ -313,6 +324,7 @@ class CaterPillar extends CaterpillarElement {
             gameWorld.enemyKillsToUlti) {
       // ulti();
       setCaterpillarState(CaterpillarState.readyForUlti);
+      magicAround.startSparkling();
     }
   }
 

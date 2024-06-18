@@ -69,7 +69,7 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.index = index + 1;
     caterpillar.lastSegment = nextSegment;
     nextSegment?.position = position;
-    await gameWorld.world.add(nextSegment!);
+    await gameWorld.groundMap.add(nextSegment!);
     nextSegment?.previousSegment = this;
     nextSegment?.priority = priority - 1;
     nextSegment?.angle = angle;

@@ -18,7 +18,7 @@ class HealthUpItem extends MovingAroundComponent {
         SpriteComponent(size: Vector2.all(iconSize), sprite: heartSprite);
     anchor = Anchor.center;
     add(spriteComponent);
-    priority = 1002;
+    priority = 8;
   }
 
   @override

@@ -104,7 +104,7 @@ class CaterpillarCrawlMain extends FlameGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    world = World();
+    // world = World();
     await add(
         FpsTextComponent(position: Vector2(200, 0), scale: Vector2.all(0.4)));
     enemyIndicatorHUD = EnemyIndicatorHUD(world: this);
@@ -126,17 +126,14 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   Future<void> initializeMapAndView() async {
-    createAndAddCaterillar(mapSize, _playerController);
     camera.viewfinder.zoom = 1;
-    camera.follow(_caterPillar);
     debugMode = false;
     if (debugMode) {
       print("DEBUG IS ON");
     }
     world.debugMode = debugMode;
 
-    await createMap(_caterPillar);
-    _caterPillar.position = Vector2.zero();
+    await createMap();
   }
 
   @override
@@ -176,16 +173,20 @@ class CaterpillarCrawlMain extends FlameGame
         caterpillarStatsViewModel: caterpillarStatsViewModel);
   }
 
-  Future<void> createMap(CaterPillar caterpillar) async {
+  Future<void> createMap() async {
+    createAndAddCaterillar(mapSize, _playerController);
+
     groundMap = GroundMap(
         mapSize: mapSize,
-        player: caterpillar,
+        player: _caterPillar,
         world: this,
         snackCount: snackCountSettingsViewModel.value,
         enemyCount: enemyCountViewModel.value,
         healthUpCount: healthUpCount);
     await world.add(groundMap);
-    await world.add(_caterPillar);
+    camera.world = world;
+    camera.follow(_caterPillar);
+    _caterPillar.priority = 20;
   }
 
   void onLayEggTap() {

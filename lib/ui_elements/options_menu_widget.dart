@@ -41,40 +41,42 @@ class _OptionsMenuwidget extends State<OptionsMenuWidget> {
         offstage: !gameStateViewModel.isPaused,
         child: Material(
           color: UiColors.enemyUiColor,
-          child: Padding(
-            padding: EdgeInsets.all(5),
-            child: Container(
-              width: 260,
-              color: UiColors.segmentColor,
-              child: Column(
-                children: [
-                  SettingsNumberPicker<SnackCountValue>(
-                    game: widget.game,
-                    viewModel: widget.game.snackCountSettingsViewModel,
-                    text: "Snack Count",
-                    minValue: 50,
-                    maxValue: 300,
-                  ),
-                  SettingsNumberPicker<EnemyCountValue>(
-                    game: widget.game,
-                    viewModel: widget.game.enemyCountViewModel,
-                    text: "Enemy Count",
-                    minValue: 1,
-                    maxValue: 100,
-                  ),
-                  SettingsNumberPicker<MaxLevelCountValue>(
-                    game: widget.game,
-                    viewModel: widget.game.maxLevelValue,
-                    text: "Enemy Count",
-                    minValue: 1,
-                    maxValue: 10,
-                  ),
-                  IconButton.filled(
-                    onPressed: () => {widget.game.onGameRestart()},
-                    icon: const Icon(Icons.loop),
-                    color: UiColors.segmentColor,
-                  )
-                ],
+          child: Container(
+            width: 260,
+            height: 260,
+            color: UiColors.segmentColor,
+            child: Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SettingsNumberPicker<SnackCountValue>(
+                      game: widget.game,
+                      viewModel: widget.game.snackCountSettingsViewModel,
+                      text: "Snack Count",
+                      minValue: 50,
+                      maxValue: 300,
+                    ),
+                    SettingsNumberPicker<EnemyCountValue>(
+                      game: widget.game,
+                      viewModel: widget.game.enemyCountViewModel,
+                      text: "Enemy Count",
+                      minValue: 1,
+                      maxValue: 100,
+                    ),
+                    SettingsNumberPicker<MaxLevelCountValue>(
+                      game: widget.game,
+                      viewModel: widget.game.maxLevelValue,
+                      text: "Max Level",
+                      minValue: 1,
+                      maxValue: 10,
+                    ),
+                    IconButton.filled(
+                      onPressed: () => {widget.game.onGameRestart()},
+                      icon: const Icon(Icons.loop),
+                      color: UiColors.segmentColor,
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -125,7 +127,7 @@ class _SettingsNumberPicker extends State<SettingsNumberPicker> {
                     NumberPicker(
                       value: widget.viewModel.value,
                       axis: Axis.horizontal,
-                      itemHeight: 30,
+                      itemHeight: 60,
                       minValue: widget.minValue,
                       maxValue: widget.maxValue,
                       onChanged: (value) =>
