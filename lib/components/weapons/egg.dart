@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/enemy/enemy.dart';
+import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/egg_data.dart';
@@ -91,7 +92,11 @@ class Egg extends PositionComponent {
       if (explosionTimer < 0) {
         gameWorld.groundMap.obstacleSnapshot
             .addObstacleAndRenderSnapshot<BombObstacle>(
-                position, eggData.explodingEgg.spriteSize, angle, true);
+                position,
+                eggData.explodingEgg.spriteSize,
+                angle,
+                true,
+                ObstacleType.bomb);
         removeFromParent();
       }
     }

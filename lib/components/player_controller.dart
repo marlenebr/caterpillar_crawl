@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/ui_elements/caterpillar_joystick.dart';
+import 'package:caterpillar_crawl/ui/caterpillar_joystick.dart';
 import 'package:flame/components.dart';
 import 'package:flame/layout.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class MobilePlayerController extends PlayerController {
   String innerJoystickSpritePath = "joystick_inner_128.png";
   String outerJoystickSpritePath = "joystick_outer_128.png";
 
-  MobilePlayerController({required super.mainGame}) {}
+  MobilePlayerController({required super.mainGame});
 
   @override
   Future<void> onLoad() async {

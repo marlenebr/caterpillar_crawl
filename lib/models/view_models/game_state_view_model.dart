@@ -1,20 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 class GameStateViewModel extends ChangeNotifier {
-  bool _isPaused = false;
-  bool get isPaused => _isPaused;
+  PauseType _pauseType = PauseType.none;
+  PauseType get pauseType => _pauseType;
 
-  // double _aTestValue = 30;
-  // double get aTestValue => _aTestValue;
-
-  void setGamePause(bool isPaused) {
-    _isPaused = isPaused;
+  void setGamePause(PauseType pauseType) {
+    _pauseType = pauseType;
     notifyListeners();
   }
-
-  // void setaTestValue(double aTestValue) {
-  //   _aTestValue = aTestValue;
-  //   print("SLIDER TEST: $aTestValue");
-  //   notifyListeners();
-  // }
 }
+
+enum PauseType { debug, settings, none }

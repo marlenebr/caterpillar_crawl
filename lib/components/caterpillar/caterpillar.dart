@@ -13,7 +13,6 @@ import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_mode
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flutter/material.dart';
 
 import 'caterpillarElement.dart';
 
@@ -120,8 +119,8 @@ class CaterPillar extends CaterpillarElement {
       world: gameWorld,
     );
     await gameWorld.groundMap.add(magicAround);
-    super.priority = 400;
-    magicAround.priority = 500;
+    priority = 950;
+    magicAround.priority = 1000;
   }
 
   @override

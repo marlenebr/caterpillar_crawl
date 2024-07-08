@@ -8,10 +8,10 @@ import 'package:caterpillar_crawl/models/view_models/health_status_view_model.da
 import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
-import 'package:caterpillar_crawl/ui_elements/enemy_indicator.dart';
-import 'package:caterpillar_crawl/ui_elements/game_over_widget.dart';
-import 'package:caterpillar_crawl/ui_elements/game_won_widget.dart';
-import 'package:caterpillar_crawl/ui_elements/hud/hud.dart';
+import 'package:caterpillar_crawl/ui/enemy_indicator.dart';
+import 'package:caterpillar_crawl/ui/game_over_widget.dart';
+import 'package:caterpillar_crawl/ui/game_won_widget.dart';
+import 'package:caterpillar_crawl/ui/hud/hud.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -60,7 +60,7 @@ class CaterpillarCrawlMain extends FlameGame
   late PlayerController _playerController;
   late EnemyIndicatorHUD enemyIndicatorHUD;
 
-  //View Models - Hopefully Singletons
+  //View Models - Singletons
   CaterpillarStateViewModel caterpillarStateViewModel;
   CaterpillarStatsViewModel caterpillarStatsViewModel;
   HealthStatusViewModel healthStatusViewModel;
@@ -68,13 +68,14 @@ class CaterpillarCrawlMain extends FlameGame
   SnackCountValue snackCountSettingsViewModel;
   EnemyCountValue enemyCountViewModel;
   MaxLevelCountValue maxLevelValue;
+  MapSizeValue mapSizeValue;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
-  int segmentsToUlti = 30; //30
-  int enemyKillsToUlti = 15; //15
+  int segmentsToUlti = 20; //30
+  int enemyKillsToUlti = 10; //15
   int enemyCountOnIndicator = 15;
 
   //UI
@@ -85,8 +86,6 @@ class CaterpillarCrawlMain extends FlameGame
 
   int playerLifeCount = 6;
   double timeToUlti = 0.8;
-
-  double mapSize = 1200; //2000
 
   late Timer interval;
   //Frame Ticks to reset at 10
@@ -99,7 +98,8 @@ class CaterpillarCrawlMain extends FlameGame
         gameStateViewModel = GameStateViewModel(),
         snackCountSettingsViewModel = SnackCountValue(100),
         enemyCountViewModel = EnemyCountValue(15),
-        maxLevelValue = MaxLevelCountValue(10);
+        maxLevelValue = MaxLevelCountValue(10),
+        mapSizeValue = MapSizeValue(1200);
 
   @override
   Future<void> onLoad() async {
@@ -162,8 +162,7 @@ class CaterpillarCrawlMain extends FlameGame
     camera.viewfinder.add(effect);
   }
 
-  void createAndAddCaterillar(
-      double mapSiz, PlayerController playerController) {
+  void createAndAddCaterillar(int mapSiz, PlayerController playerController) {
     CaterpillarData mainPlayerCaterpillar =
         CaterpillarData.createCaterpillarData();
     _caterPillar = CaterPillar(mainPlayerCaterpillar, this,
@@ -174,10 +173,10 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   Future<void> createMap() async {
-    createAndAddCaterillar(mapSize, _playerController);
+    createAndAddCaterillar(mapSizeValue.value, _playerController);
 
     groundMap = GroundMap(
-        mapSize: mapSize,
+        mapSize: mapSizeValue.value,
         player: _caterPillar,
         world: this,
         snackCount: snackCountSettingsViewModel.value,
@@ -186,7 +185,7 @@ class CaterpillarCrawlMain extends FlameGame
     await world.add(groundMap);
     camera.world = world;
     camera.follow(_caterPillar);
-    _caterPillar.priority = 20;
+    _caterPillar.priority = 900;
   }
 
   void onLayEggTap() {
@@ -208,7 +207,7 @@ class CaterpillarCrawlMain extends FlameGame
     }
   }
 
-  Future<void> onGameRestart() async {
+  Future<void> onGameRestart(PauseType pauseType) async {
     enemyIndicatorHUD.reset();
     _caterPillar.removeCompletly();
     groundMap.removeComnpletly();
@@ -216,7 +215,7 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.remove(gameOverOverlayIdentifier);
     overlays.remove(gameWonOverlayIdentifier);
     caterpillarStatsViewModel.reset();
-    onGamePause(false);
+    onGamePause(pauseType);
   }
 
   void onGameOver() {
@@ -229,8 +228,9 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.add(gameWonOverlayIdentifier);
   }
 
-  void onGamePause(bool? isPaused) {
-    paused = isPaused ?? !paused;
-    gameStateViewModel.setGamePause(paused);
+  void onGamePause(PauseType pauseType) {
+    paused = pauseType != PauseType.none;
+    gameStateViewModel.setGamePause(pauseType);
+    groundMap.setGamePause(paused);
   }
 }

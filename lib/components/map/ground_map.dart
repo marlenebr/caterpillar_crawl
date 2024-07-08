@@ -16,7 +16,7 @@ import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';
 
 class GroundMap extends PositionComponent {
-  double mapSize;
+  int mapSize;
   int snackCount;
   int enemyCount;
   int healthUpCount;
@@ -49,7 +49,7 @@ class GroundMap extends PositionComponent {
       required this.snackCount,
       required this.enemyCount,
       required this.healthUpCount})
-      : super(size: Vector2.all(mapSize));
+      : super(size: Vector2.all(mapSize.toDouble()));
 
   @override
   Future<void> onLoad() async {
@@ -60,7 +60,7 @@ class GroundMap extends PositionComponent {
       SpriteComponent(
         priority: 1,
         sprite: await Sprite.load('leafGround01.png'),
-        size: Vector2.all(mapSize),
+        size: Vector2.all(mapSize.toDouble()),
         anchor: Anchor.center,
       ),
     );
@@ -103,7 +103,7 @@ class GroundMap extends PositionComponent {
   bool coolDownForNextSpeedChange = false;
 
   void resetPlayerOnMapEnd() {
-    if (CaterpillarCrawlUtils.isOnOnMapEnd(player, mapSize)) {
+    if (CaterpillarCrawlUtils.isOnOnMapEnd(player, mapSize.toDouble())) {
       player.hurt();
       player.angle = (player.angle + pi) % (2 * pi);
       player.angleToLerpTo = player.angle;
@@ -153,8 +153,13 @@ class GroundMap extends PositionComponent {
   }
 
   Vector2 getRandomPositionInMap() {
-    return Vector2(Random().nextDouble(), Random().nextDouble()) * mapSize -
+    return Vector2(Random().nextDouble(), Random().nextDouble()) *
+            mapSize.toDouble() -
         size / 2;
+  }
+
+  void setGamePause(bool isPaused) {
+    player.startCrawling();
   }
 
   void removeSnack(Snack snack) {
@@ -180,11 +185,6 @@ class GroundMap extends PositionComponent {
       enemy.createEnemyWeoapon();
     }
   }
-
-  // void _removeObstacle(Obstacle obstacle) {
-  //   obstacles.remove(obstacle.index);
-  //   obstacle.rem
-  // }
 
   void _addHealthUp() {
     Vector2 randomPos = getRandomPositionInMap();
@@ -260,11 +260,6 @@ class GroundMap extends PositionComponent {
     removeFromParent();
   }
 
-  // void reset(CaterPillar caterpillar) {
-  //   cleanUp();
-  //   _createMapContent();
-  // }
-
   Future<void> _createMapContent() async {
     await fillWithSnacks(snackCount);
     await fillWithEnemies(enemyCount);
@@ -273,7 +268,8 @@ class GroundMap extends PositionComponent {
     player.position = size / 2;
     ;
 
-    obstacleSnapshot = ObstacleSnapshot(mapSize: mapSize, world: world);
+    obstacleSnapshot =
+        ObstacleSnapshot(mapSize: mapSize.toDouble(), world: world);
     add(obstacleSnapshot);
   }
 }

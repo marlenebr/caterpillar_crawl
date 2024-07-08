@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
 import 'package:caterpillar_crawl/components/enemy/enemy.dart';
+import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
@@ -131,19 +132,13 @@ class CaterpillarSegment extends CaterpillarElement {
     }
     isFallenOff = true;
     nextSegment?.falloff(isUlti);
-    if (isUlti) {
-      gameWorld.groundMap.obstacleSnapshot.addObstacle<UltiObstacle>(
-          Vector2(transform.position.x, transform.position.y),
-          size * scale.x,
-          angle,
-          null);
-    } else {
-      gameWorld.groundMap.obstacleSnapshot.addObstacle<PlayerHurtObstacle>(
-          Vector2(transform.position.x, transform.position.y),
-          size * scale.x,
-          angle,
-          null);
-    }
+    ObstacleType obstacleType =
+        isUlti ? ObstacleType.ultiSegment : ObstacleType.deadSegment;
+    gameWorld.groundMap.obstacleSnapshot.addObstacle<ThrowableObstacle>(
+        Vector2(transform.position.x, transform.position.y),
+        angle,
+        null,
+        obstacleType);
     removeFromParent();
     caterpillar.caterpillarStatsViewModel.onRemoveSegment();
   }

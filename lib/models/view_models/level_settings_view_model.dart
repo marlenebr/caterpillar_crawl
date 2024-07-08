@@ -27,3 +27,9 @@ class MaxLevelCountValue extends ChangableIntValue {
     setValue(initValue);
   }
 }
+
+class MapSizeValue extends ChangableIntValue {
+  MapSizeValue(int initValue) {
+    setValue(initValue);
+  }
+}

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/models/data/obstacle_data.dart';
 import 'package:flame/components.dart';
 
 class ObstacleSnapshot extends PositionComponent with Snapshot {
@@ -28,9 +29,9 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
 
   Obstacle addObstacle<T extends Obstacle>(
     Vector2 position,
-    Vector2 size,
     double angle,
     int? index,
+    ObstacleType obstacleType,
   ) {
     int newIndex = 0;
     if (index == null) {
@@ -40,19 +41,30 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     }
 
     Obstacle? obstacle;
-    if (T == UltiObstacle) {
-      obstacle = UltiObstacle(
+    if (obstacleType == ObstacleType.ultiSegment) {
+      ThrowableObstacleData throwableObstacleData =
+          ThrowableObstacleData.createUltiSegmentObstacle();
+      obstacle = ThrowableObstacle(
+          throwableObstacleData: throwableObstacleData,
           flyTime: world.timeToUlti,
           caterpillarWorld: world,
           index: newIndex,
-          obstacleSize: size);
-    } else if (T == BombObstacle) {
+          obstacleData: throwableObstacleData.obstacleData);
+    } else if (obstacleType == ObstacleType.bomb) {
       obstacle = BombObstacle(
-          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+          caterpillarWorld: world,
+          index: newIndex,
+          obstacleData: ObstacleData.createBombObstacle());
       eggSplashes.add(obstacle as BombObstacle);
-    } else if (T == PlayerHurtObstacle) {
-      obstacle = PlayerHurtObstacle(
-          caterpillarWorld: world, index: newIndex, obstacleSize: size);
+    } else if (obstacleType == ObstacleType.deadSegment) {
+      ThrowableObstacleData throwableObstacleData =
+          ThrowableObstacleData.createDeadSegmentObstacle();
+      obstacle = ThrowableObstacle(
+          throwableObstacleData: throwableObstacleData,
+          flyTime: world.timeToUlti,
+          caterpillarWorld: world,
+          index: newIndex,
+          obstacleData: throwableObstacleData.obstacleData);
       temporaryObstacles.add(obstacle);
     }
     obstacle!.position = position;
@@ -63,9 +75,9 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     return obstacle;
   }
 
-  void addObstacleAndRenderSnapshot<T extends Obstacle>(
-      Vector2 position, Vector2 size, double angle, bool isDead) {
-    addObstacle<T>(position, size, angle, null);
+  void addObstacleAndRenderSnapshot<T extends Obstacle>(Vector2 position,
+      Vector2 size, double angle, bool isDead, ObstacleType type) {
+    addObstacle<T>(position, angle, null, type);
     renderSnapshotOnNextFrame();
   }
 
@@ -106,4 +118,10 @@ class ObstacleSnapshot extends PositionComponent with Snapshot {
     }
     temporaryObstacles = [];
   }
+}
+
+enum ObstacleType {
+  deadSegment,
+  ultiSegment,
+  bomb,
 }

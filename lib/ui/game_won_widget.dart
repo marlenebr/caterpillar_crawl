@@ -1,4 +1,5 @@
 import 'package:caterpillar_crawl/main.dart';
+import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -37,7 +38,7 @@ class GameWonWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(UIConstants.defaultPaddingMedium),
             child: IconButton.filled(
-              onPressed: () => {game.onGameRestart()},
+              onPressed: () => {game.onGameRestart(PauseType.none)},
               icon: Icon(Icons.loop),
               color: UiColors.segmentColor,
             ),
