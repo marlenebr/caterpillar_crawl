@@ -1,16 +1,20 @@
+import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/ui/elements/settings_button_widget.dart';
 import 'package:flutter/material.dart';
 
 class SettingsMenuWidget extends StatelessWidget {
-  const SettingsMenuWidget({super.key});
+  final CaterpillarCrawlMain game;
+
+  const SettingsMenuWidget({required this.game, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SettingsButtonWidget(text: "TEST"),
-        SettingsButtonWidget(text: "TUT"),
-        SettingsButtonWidget(text: "TTT"),
+        SettingsButtonWidget(
+          text: "TUT",
+          onTab: () => game.ToggleTutorial(),
+        ),
       ],
     );
   }

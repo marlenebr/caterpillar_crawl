@@ -9,15 +9,23 @@ class UiColors {
   static Color? segmentColor = Colors.lightGreenAccent[400];
   static Color? buttonColor = Colors.lightBlue[400];
   static Color? tapColor = Colors.lime;
+
+  static Color? darkLineColor = Color.fromARGB(96, 41, 11, 241);
 }
 
 class TextStyles {
-  static double textSize = UIConstants.iconSize;
+  static double textSizeBig = UIConstants.iconSize;
+  static double textSizeMedium = 16;
+  static double textSizeSmall = 12;
+
   static double iconSize = UIConstants.iconSize;
   static Color textColor = Colors.white;
 
   static TextStyle uiLabelTextStyle =
-      TextStyle(fontSize: TextStyles.textSize, color: TextStyles.textColor);
+      TextStyle(fontSize: TextStyles.textSizeBig, color: TextStyles.textColor);
+
+  static TextStyle infoLabelTextStyle = TextStyle(
+      fontSize: TextStyles.textSizeMedium, color: UiColors.darkLineColor);
 }
 
 class UIConstants {
@@ -28,4 +36,6 @@ class UIConstants {
 
   static double endOfScreenPadding = 3;
   static double defaultPaddingMedium = 5;
+
+  static double defaultBorderRadius = 8;
 }

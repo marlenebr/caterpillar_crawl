@@ -21,7 +21,7 @@ class GameOverWidget extends StatelessWidget {
             style: TextStyles.uiLabelTextStyle,
           ),
           IconButton.filled(
-            onPressed: () => {game.onGameRestart(PauseType.none)},
+            onPressed: () => {game.onGameRestart()},
             icon: Icon(Icons.loop),
             color: UiColors.segmentColor,
           )

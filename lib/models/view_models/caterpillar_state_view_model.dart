@@ -59,10 +59,10 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setEnemyKilled(int enemyKilled) {
-    _enemyKilled = enemyKilled;
-    notifyListeners();
-  }
+  // void setEnemyKilled(int enemyKilled) {
+  //   _enemyKilled = enemyKilled;
+  //   notifyListeners();
+  // }
 
   void setEnemiesInGame(int enemiesInGame) {
     _enemiesInGame = enemiesInGame;
@@ -92,7 +92,6 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
 
   void setIsReadyToEgg(bool isReadyToEgg) {
     _isReadyToEgg = isReadyToEgg;
-    //notifyListeners();
   }
 
   void setCaterpillarstate(CaterpillarState state) {

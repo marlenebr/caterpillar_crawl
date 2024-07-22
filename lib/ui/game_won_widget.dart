@@ -38,7 +38,7 @@ class GameWonWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(UIConstants.defaultPaddingMedium),
             child: IconButton.filled(
-              onPressed: () => {game.onGameRestart(PauseType.none)},
+              onPressed: () => {game.onGameRestart()},
               icon: Icon(Icons.loop),
               color: UiColors.segmentColor,
             ),

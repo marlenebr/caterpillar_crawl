@@ -63,7 +63,7 @@ class _OptionsMenuwidget extends State<GameMenuWidget> {
             Offstage(
               offstage: widget.game.gameStateViewModel.pauseType !=
                   PauseType.settings,
-              child: SettingsMenuWidget(),
+              child: SettingsMenuWidget(game: widget.game),
             ),
           ],
         ),

@@ -17,23 +17,9 @@ class CaterpillarJoystick extends JoystickComponent {
     super.key,
   });
 
-  // @override
-  // Future<void> onLoad() async {
-  //   Sprite knobSprite = await Sprite.load(innerJoystickSpritePath);
-  //   SpriteComponent knobSpriteComponent =
-  //       SpriteComponent(size: Vector2.all(knobRadius), sprite: knobSprite);
-  //   await knob!.add(knobSpriteComponent);
-
-  //   Sprite joystickOuterSprite = await Sprite.load(outerJoystickSpritePath);
-  //   SpriteComponent joystickOuterSpriteComponent =
-  //       SpriteComponent(size: Vector2.all(size.x), sprite: joystickOuterSprite);
-  //   await background!.add(joystickOuterSpriteComponent);
-  // }
-
   @override
   bool onDragUpdate(DragUpdateEvent event) {
     super.onDragUpdate(event);
-    //_unscaledDelta.add(event.delta);
     currentDelta = Vector2(-delta.x, -delta.y);
     return false;
   }

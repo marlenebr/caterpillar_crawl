@@ -159,7 +159,7 @@ class GroundMap extends PositionComponent {
   }
 
   void setGamePause(bool isPaused) {
-    player.startCrawling();
+    if (isPaused) player.startCrawling();
   }
 
   void removeSnack(Snack snack) {
@@ -206,13 +206,13 @@ class GroundMap extends PositionComponent {
   }
 
   Future<void> levelUp() async {
+    if (world.tutorialModeViewModel.isInTutorialMode) return;
     level++;
     if (level >= world.maxLevelValue.value) {
       world.onGameWon();
       return;
     }
     player.grow();
-    print("LEVEL UP");
     await fillWithEnemies(
         world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp);
     world.caterpillarStatsViewModel.setLevelUp();
@@ -298,6 +298,11 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
   @override
   void update(double dt) {
     super.update(dt);
-    parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
+    if (player.caterpillarStatsViewModel.currentState !=
+        CaterpillarState.onHoldForEgg) {
+      parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
+    } else {
+      parallax?.baseVelocity = Vector2.zero();
+    }
   }
 }

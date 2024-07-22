@@ -2,16 +2,21 @@ import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
+import 'package:caterpillar_crawl/components/tutorial_builder.dart';
+import 'package:caterpillar_crawl/models/view_models/action_weapon_button_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/health_status_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
 import 'package:caterpillar_crawl/components/map/ground_map.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
+import 'package:caterpillar_crawl/models/view_models/tutorial_item_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/tutorial_mode_view_model.dart';
 import 'package:caterpillar_crawl/ui/enemy_indicator.dart';
 import 'package:caterpillar_crawl/ui/game_over_widget.dart';
 import 'package:caterpillar_crawl/ui/game_won_widget.dart';
 import 'package:caterpillar_crawl/ui/hud/hud.dart';
+import 'package:caterpillar_crawl/ui/hud/tutorial_overlay_widget.dart';
 import 'package:flame/cache.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -27,11 +32,16 @@ const String pauseOverlayIdentifier = 'PauseMenu';
 const String hudOverlayIdentifier = 'Hud';
 const String gameOverOverlayIdentifier = 'GameOverMenu';
 const String gameWonOverlayIdentifier = 'GameWon';
+const String tutorialOverlayIdentifier = "TutorialOverlay";
+
+void startGame() async {
+  await Flame.device.setLandscape();
+  await Flame.device.fullScreen();
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Flame.device.setLandscape();
-  Flame.device.fullScreen();
+  startGame();
   runApp(
     GameWidget(game: CaterpillarCrawlMain(), overlayBuilderMap: {
       pauseOverlayIdentifier:
@@ -48,7 +58,13 @@ void main() {
       },
       hudOverlayIdentifier: (BuildContext context, CaterpillarCrawlMain game) {
         return GameHud(game: game);
-      }
+      },
+      tutorialOverlayIdentifier:
+          (BuildContext context, CaterpillarCrawlMain game) {
+        return TutorialOverlayWidget(
+          game: game,
+        );
+      },
     }),
   );
 }
@@ -60,6 +76,8 @@ class CaterpillarCrawlMain extends FlameGame
   late PlayerController _playerController;
   late EnemyIndicatorHUD enemyIndicatorHUD;
 
+  late TutorialBuilder tutorialBuilder;
+
   //View Models - Singletons
   CaterpillarStateViewModel caterpillarStateViewModel;
   CaterpillarStatsViewModel caterpillarStatsViewModel;
@@ -69,6 +87,10 @@ class CaterpillarCrawlMain extends FlameGame
   EnemyCountValue enemyCountViewModel;
   MaxLevelCountValue maxLevelValue;
   MapSizeValue mapSizeValue;
+  TutorialItemViewModel tutorialItemViewModel;
+  TutorialModeViewModel tutorialModeViewModel;
+  ActionUltiAndDistanceButtonViewModel distanceActionButtonViewModel;
+  ActionMeleeWeaponButtonViewModel meleeButtonViewModel;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
@@ -83,6 +105,8 @@ class CaterpillarCrawlMain extends FlameGame
   double gapRightSide = 14;
   double joystickKnobRadius = 40;
   double joystickBackgroundRadius = 90;
+
+  Map<ViewType, GlobalKey> globalKeysToViews;
 
   int playerLifeCount = 6;
   double timeToUlti = 0.8;
@@ -99,7 +123,12 @@ class CaterpillarCrawlMain extends FlameGame
         snackCountSettingsViewModel = SnackCountValue(100),
         enemyCountViewModel = EnemyCountValue(15),
         maxLevelValue = MaxLevelCountValue(10),
-        mapSizeValue = MapSizeValue(1200);
+        mapSizeValue = MapSizeValue(1200),
+        tutorialItemViewModel = TutorialItemViewModel(),
+        tutorialModeViewModel = TutorialModeViewModel(),
+        distanceActionButtonViewModel = ActionUltiAndDistanceButtonViewModel(),
+        meleeButtonViewModel = ActionMeleeWeaponButtonViewModel(),
+        globalKeysToViews = {};
 
   @override
   Future<void> onLoad() async {
@@ -114,6 +143,13 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.add(hudOverlayIdentifier);
 
     await initializeMapAndView();
+    tutorialBuilder = TutorialBuilder(mainGame: this);
+    overlays.add(tutorialOverlayIdentifier);
+
+    meleeButtonViewModel.onChangeType(
+        'assets/images/sword.png', () => onPewPewButtonclicked());
+    distanceActionButtonViewModel.onChangeType(
+        'assets/images/bomb_128_button.png', () => onLayEggTap());
   }
 
   Future<void> initPlayerController() async {
@@ -207,7 +243,7 @@ class CaterpillarCrawlMain extends FlameGame
     }
   }
 
-  Future<void> onGameRestart(PauseType pauseType) async {
+  Future<void> onGameRestart() async {
     enemyIndicatorHUD.reset();
     _caterPillar.removeCompletly();
     groundMap.removeComnpletly();
@@ -215,7 +251,25 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.remove(gameOverOverlayIdentifier);
     overlays.remove(gameWonOverlayIdentifier);
     caterpillarStatsViewModel.reset();
-    onGamePause(pauseType);
+    distanceActionButtonViewModel.reset();
+    onGamePause(PauseType.none);
+  }
+
+  Future<void> ToggleTutorial() async {
+    if (tutorialModeViewModel.isInTutorialMode) {
+      await _stopTutorial();
+    } else {
+      await _startTutorial();
+    }
+  }
+
+  Future<void> _startTutorial() async {
+    await tutorialBuilder.startTutotial();
+    groundMap.player.setCaterpillarState(CaterpillarState.onHoldForEgg);
+  }
+
+  Future<void> _stopTutorial() async {
+    tutorialBuilder.stopTutorial();
   }
 
   void onGameOver() {

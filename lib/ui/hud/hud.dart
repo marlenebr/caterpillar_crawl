@@ -1,7 +1,7 @@
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
-import 'package:caterpillar_crawl/ui/hud/action_buttons_widget.dart';
+import 'package:caterpillar_crawl/ui/hud/action_weapon_button_view.dart';
 import 'package:caterpillar_crawl/ui/hud/health_status_widget.dart';
 import 'package:caterpillar_crawl/ui/hud/player_stats_widget.dart';
 import 'package:caterpillar_crawl/ui/game_menu_widget.dart';
@@ -31,7 +31,12 @@ class GameHud extends StatelessWidget {
         height: game.actionButtonSize * 1.5 + game.gapRightSide,
         child: Material(
           color: Colors.transparent,
-          child: ActionButtons(game: game),
+          child: ActionWeaponButtonView(
+            actionButtonSize: game.actionButtonSize,
+            mainGame: game,
+            meleeButtonViewModel: game.meleeButtonViewModel,
+            ultiButtonViewModel: game.distanceActionButtonViewModel,
+          ),
         ),
       ),
     );
@@ -66,7 +71,9 @@ class GameHud extends StatelessWidget {
                       Padding(
                         padding:
                             EdgeInsets.all(UIConstants.defaultPaddingMedium),
-                        child: HealthStatusWidget(game: game),
+                        child: HealthStatusWidget(
+                            game: game,
+                            key: game.healthStatusViewModel.globalKey),
                       ),
                       Row(children: [
                         Padding(
@@ -105,4 +112,10 @@ class GameHud extends StatelessWidget {
           GameMenuWidget(game: game),
         ]));
   }
+}
+
+enum ViewType {
+  healthBar,
+  bombButton,
+  meleeButton,
 }
