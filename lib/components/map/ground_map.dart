@@ -212,11 +212,11 @@ class GroundMap extends PositionComponent {
       world.onGameWon();
       return;
     }
-    player.grow();
+    // player.grow();
     await fillWithEnemies(
         world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp);
     world.caterpillarStatsViewModel.setLevelUp();
-    obstacleSnapshot.onLevelUp(80);
+    obstacleSnapshot.onLevelUp(10);
   }
 
   void killEnemy(Enemy enemy) {

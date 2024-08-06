@@ -94,11 +94,13 @@ class CaterpillarCrawlMain extends FlameGame
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
+  int playerMaxLength = 100;
   int healthUpCount = 1;
   int remainingEnemiesToLevelUp = 0;
   int segmentsToUlti = 20; //30
   int enemyKillsToUlti = 10; //15
   int enemyCountOnIndicator = 15;
+  bool canDoUlti = false;
 
   //UI
   double actionButtonSize = 100;

@@ -246,6 +246,21 @@ class CaterPillar extends CaterpillarElement {
     }
   }
 
+  void fallOffLastSegments(bool isUlti) {
+    if (!isDroppingsegments && nextSegment != null) {
+      isDroppingsegments = true;
+      CaterpillarElement newLastSegment = lastSegment!.previousSegment;
+      lastSegment!.falloff(isUlti);
+      _setSegmentCount(caterpillarStatsViewModel.segmentCount - 1);
+      if (!isUlti) {
+        gameWorld.groundMap.obstacleSnapshot.renderSnapshotOnNextFrame();
+      }
+      lastSegment =
+          newLastSegment is CaterpillarSegment ? newLastSegment : null;
+      isDroppingsegments = false;
+    }
+  }
+
   void _setSegmentCount(int segmentCount) {
     caterpillarStatsViewModel.setSegmentCount(segmentCount);
     gameWorld.distanceActionButtonViewModel.setSegmentCount(segmentCount);
@@ -268,7 +283,7 @@ class CaterPillar extends CaterpillarElement {
     }
     caterpillarStatsViewModel.setIsHurt(true);
     lives = lives - 1;
-    fallOffAllSegments(false);
+    fallOffLastSegments(false);
     startCrawling();
   }
 
@@ -290,6 +305,10 @@ class CaterPillar extends CaterpillarElement {
     segemntAddRequest = false;
 
     if (lastSegment != null) {
+      if (caterpillarStatsViewModel.segmentCount > gameWorld.playerMaxLength) {
+        return;
+      }
+
       lastSegment!.addCaterPillarSegment(this);
     } else {
       addCaterPillarSegment(this);
@@ -322,6 +341,9 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void checkReadyForUlti() {
+    if (!gameWorld.canDoUlti) {
+      return;
+    }
     if (caterpillarStatsViewModel.segmentCount >= gameWorld.segmentsToUlti &&
         caterpillarStatsViewModel.enemyKilledSinceUlti >=
             gameWorld.enemyKillsToUlti) {
@@ -386,7 +408,7 @@ class CaterPillar extends CaterpillarElement {
   }
 
   void onSegmentAddedOrRemoved() {
-    speedMultiplier = 0.5 + (caterpillarStatsViewModel.segmentCount / 400);
+    // speedMultiplier = 0.5 + (caterpillarStatsViewModel.segmentCount / 400);
     _setSegmentCount(caterpillarStatsViewModel.segmentCount);
   }
 
