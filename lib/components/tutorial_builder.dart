@@ -16,15 +16,15 @@ class TutorialBuilder {
       : tempMapSize = mainGame.mapSizeValue.value,
         tempEnemyCount = mainGame.enemyCountViewModel.value,
         tempSnackCountValue = mainGame.snackCountSettingsViewModel.value,
-        tempSegmentsToUlti = mainGame.segmentsToUlti,
-        tempEnemiesToUlti = mainGame.enemyKillsToUlti,
+        // tempSegmentsToUlti = mainGame.segmentsToUlti,
+        // tempEnemiesToUlti = mainGame.enemyKillsToUlti,
         tutorialStepData = {};
 
   int tempMapSize;
   int tempEnemyCount;
   int tempSnackCountValue;
-  int tempSegmentsToUlti;
-  int tempEnemiesToUlti;
+  // int tempSegmentsToUlti;
+  // int tempEnemiesToUlti;
 
   Future<void> startTutotial() async {
     tutorialStepData = TutorialData.createTutorialData();
@@ -32,11 +32,11 @@ class TutorialBuilder {
     tempMapSize = mainGame.mapSizeValue.value;
     tempEnemyCount = mainGame.enemyCountViewModel.value;
     tempSnackCountValue = mainGame.snackCountSettingsViewModel.value;
-    tempSegmentsToUlti = mainGame.segmentsToUlti;
-    tempEnemiesToUlti = mainGame.enemyKillsToUlti;
+    // tempSegmentsToUlti = mainGame.segmentsToUlti;
+    // tempEnemiesToUlti = mainGame.enemyKillsToUlti;
     mainGame.tutorialModeViewModel.setValue(true);
-    mainGame.segmentsToUlti = 4;
-    mainGame.enemyKillsToUlti = 4;
+    // mainGame.segmentsToUlti = 4;
+    // mainGame.enemyKillsToUlti = 4;
     await setTutorialSteps();
   }
 
@@ -51,8 +51,8 @@ class TutorialBuilder {
     mainGame.groundMap.player.startCrawling();
     mainGame.enemyCountViewModel.setValue(tempEnemyCount);
     mainGame.snackCountSettingsViewModel.setValue(tempSnackCountValue);
-    mainGame.segmentsToUlti = tempSegmentsToUlti;
-    mainGame.enemyKillsToUlti = tempEnemiesToUlti;
+    // mainGame.segmentsToUlti = tempSegmentsToUlti;
+    // mainGame.enemyKillsToUlti = tempEnemiesToUlti;
     mainGame.tutorialModeViewModel.setValue(false);
     await mainGame.onGameRestart();
   }

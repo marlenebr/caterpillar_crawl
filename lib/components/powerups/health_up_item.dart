@@ -5,6 +5,7 @@ class HealthUpItem extends MovingAroundComponent {
   double iconSize;
   final String _heartIconSpritePath = "heartgreen_64.png";
   double distToPlayer;
+  late SpriteComponent heartSpriteComponent;
   HealthUpItem(
       {required this.iconSize, required super.map, required super.movingdata})
       : distToPlayer = iconSize / 2 + map.player.size.x / 2;
@@ -14,19 +15,28 @@ class HealthUpItem extends MovingAroundComponent {
     super.onLoad();
     size = Vector2.all(iconSize);
     Sprite heartSprite = await Sprite.load(_heartIconSpritePath);
-    SpriteComponent spriteComponent =
+    heartSpriteComponent =
         SpriteComponent(size: Vector2.all(iconSize), sprite: heartSprite);
     anchor = Anchor.center;
-    add(spriteComponent);
+    await add(heartSpriteComponent);
     priority = 8;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+    //no rotation of sprite
+    heartSpriteComponent.angle = -angle;
+    //magnetic effect somehow
     if (map.player.position.distanceTo(position) < distToPlayer) {
       map.healthUp(this);
       removeFromParent();
+      return;
+    } else if (map.player.position.distanceTo(position) <
+        map.player.size.x * 1.5) {
+      moveToPlayer = true;
+    } else {
+      moveToPlayer = false;
     }
   }
 }

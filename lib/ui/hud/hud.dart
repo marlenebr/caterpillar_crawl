@@ -35,7 +35,7 @@ class GameHud extends StatelessWidget {
             actionButtonSize: game.actionButtonSize,
             mainGame: game,
             meleeButtonViewModel: game.meleeButtonViewModel,
-            ultiButtonViewModel: game.distanceActionButtonViewModel,
+            distanceWeaponViewModel: game.distanceActionButtonViewModel,
           ),
         ),
       ),

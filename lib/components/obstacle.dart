@@ -12,7 +12,7 @@ class Obstacle extends PositionComponent {
   CaterpillarCrawlMain caterpillarWorld;
   Vector2 playerPosition = Vector2.zero();
 
-  bool isDamaging = false;
+  bool isDamaging = true;
   late SpriteComponent _spriteComponent;
 
   Obstacle({

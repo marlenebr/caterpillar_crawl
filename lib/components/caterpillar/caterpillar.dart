@@ -65,7 +65,9 @@ class CaterPillar extends CaterpillarElement {
     if (value <= 0) {
       _lives = 0;
     }
-    if (value > gameWorld.playerLifeCount) {}
+    if (value > gameWorld.playerLifeCount) {
+      _lives = gameWorld.playerLifeCount;
+    }
     gameWorld.onLifeCountChanged(_lives);
   }
 
@@ -263,7 +265,6 @@ class CaterPillar extends CaterpillarElement {
 
   void _setSegmentCount(int segmentCount) {
     caterpillarStatsViewModel.setSegmentCount(segmentCount);
-    gameWorld.distanceActionButtonViewModel.setSegmentCount(segmentCount);
   }
 
   void updateCoolDownDead(double dt) {
@@ -313,8 +314,6 @@ class CaterPillar extends CaterpillarElement {
     } else {
       addCaterPillarSegment(this);
     }
-
-    checkReadyForUlti();
     onSegmentAddedOrRemoved();
 
     gameWorld.tutorialBuilder
@@ -338,20 +337,6 @@ class CaterPillar extends CaterpillarElement {
     gameWorld.groundMap.remove(segment);
     caterpillarStatsViewModel.onRemoveSegment();
     onSegmentAddedOrRemoved();
-  }
-
-  void checkReadyForUlti() {
-    if (!gameWorld.canDoUlti) {
-      return;
-    }
-    if (caterpillarStatsViewModel.segmentCount >= gameWorld.segmentsToUlti &&
-        caterpillarStatsViewModel.enemyKilledSinceUlti >=
-            gameWorld.enemyKillsToUlti) {
-      gameWorld.tutorialBuilder
-          .onConditionReached(TutorialConditions.fillUlti, null);
-      setCaterpillarState(CaterpillarState.readyForUlti);
-      magicAround.startSparkling();
-    }
   }
 
   void toggleEggAndCrawl() {
@@ -414,8 +399,6 @@ class CaterPillar extends CaterpillarElement {
 
   void onEnemyKilled() {
     caterpillarStatsViewModel.onEnemyKilled();
-    gameWorld.distanceActionButtonViewModel.onEnemyKilled();
-    checkReadyForUlti();
     gameWorld.tutorialBuilder
         .onConditionReached(TutorialConditions.killEnemy, null);
   }

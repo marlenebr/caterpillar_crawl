@@ -47,7 +47,7 @@ class _HealthStatusWidget extends State<HealthStatusWidget> {
           children: <Widget>[
             for (int i = 0; i < game.playerLifeCount; i++)
               Image(
-                image: AssetImage(i <= healthStatsViewModel.lifeCount
+                image: AssetImage(i + 1 <= healthStatsViewModel.lifeCount
                     ? pathToFullHeartIcon
                     : pathToEmptyHeartIcon),
                 width: UIConstants.iconSizeMedium,

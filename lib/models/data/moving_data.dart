@@ -32,7 +32,7 @@ class MovingData {
   static MovingData createItemMovingdata() {
     return MovingData(
         baseSpeed: 0.2,
-        huntSpeed: 1,
+        huntSpeed: 2,
         baseRotationSpeed: 4,
         huntRotationSpeed: 12,
         angleSteps: 3,

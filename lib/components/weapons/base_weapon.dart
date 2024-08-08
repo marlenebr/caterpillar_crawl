@@ -7,6 +7,7 @@ class BaseWeapon extends PositionComponent {
   WeaponData weaponData;
   bool isAttacking = false;
   WeaponHolder weaponHolder = WeaponHolder.player;
+  bool removeHitPointsOnHit = false;
 
   List<PositionComponent> hitPoints = [];
 
@@ -33,14 +34,18 @@ class BaseWeapon extends PositionComponent {
     priority = -1;
   }
 
-  void updateHits() {
+  bool updateHits() {
     switch (weaponHolder) {
       case WeaponHolder.enemy:
         for (PositionComponent hitPos in hitPoints) {
           if (map.player.absolutePosition.distanceTo(hitPos.absolutePosition) <
               _playerhitradius + 16) {
             map.player.hurt();
-            continue;
+            if (removeHitPointsOnHit) {
+              hitPoints.remove(hitPos);
+              hitPos.removeFromParent();
+            }
+            return true;
           }
         }
       case WeaponHolder.player:
@@ -49,19 +54,16 @@ class BaseWeapon extends PositionComponent {
             if (enemy.absolutePosition.distanceTo(hitPos.absolutePosition) <
                 _enemyHitRadius) {
               enemy.onEnemyHit(weaponData.damagePerHit, false);
-              continue;
+              if (removeHitPointsOnHit) {
+                hitPoints.remove(hitPos);
+                hitPos.removeFromParent();
+              }
+              return true;
             }
           }
         }
     }
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    if (isAttacking) {
-      updateHits();
-    }
+    return false;
   }
 
   void startAttacking() {

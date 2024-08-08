@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/tutorial_builder.dart';
-import 'package:caterpillar_crawl/models/view_models/action_weapon_button_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/action_melee_button_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/action_distance_weapon_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/health_status_view_model.dart';
@@ -15,6 +16,7 @@ import 'package:caterpillar_crawl/models/view_models/tutorial_mode_view_model.da
 import 'package:caterpillar_crawl/ui/enemy_indicator.dart';
 import 'package:caterpillar_crawl/ui/game_over_widget.dart';
 import 'package:caterpillar_crawl/ui/game_won_widget.dart';
+import 'package:caterpillar_crawl/ui/hud/action_weapon_button_view.dart';
 import 'package:caterpillar_crawl/ui/hud/hud.dart';
 import 'package:caterpillar_crawl/ui/hud/tutorial_overlay_widget.dart';
 import 'package:flame/cache.dart';
@@ -89,16 +91,14 @@ class CaterpillarCrawlMain extends FlameGame
   MapSizeValue mapSizeValue;
   TutorialItemViewModel tutorialItemViewModel;
   TutorialModeViewModel tutorialModeViewModel;
-  ActionUltiAndDistanceButtonViewModel distanceActionButtonViewModel;
-  ActionMeleeWeaponButtonViewModel meleeButtonViewModel;
+  ActionDistanceWeaponViewModel distanceActionButtonViewModel;
+  ActionMeleeButtonViewModel meleeButtonViewModel;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
   int playerMaxLength = 100;
-  int healthUpCount = 1;
+  int healthUpCount = 2;
   int remainingEnemiesToLevelUp = 0;
-  int segmentsToUlti = 20; //30
-  int enemyKillsToUlti = 10; //15
   int enemyCountOnIndicator = 15;
   bool canDoUlti = false;
 
@@ -123,13 +123,13 @@ class CaterpillarCrawlMain extends FlameGame
         healthStatusViewModel = HealthStatusViewModel(),
         gameStateViewModel = GameStateViewModel(),
         snackCountSettingsViewModel = SnackCountValue(100),
-        enemyCountViewModel = EnemyCountValue(15),
-        maxLevelValue = MaxLevelCountValue(10),
+        enemyCountViewModel = EnemyCountValue(8),
+        maxLevelValue = MaxLevelCountValue(6),
         mapSizeValue = MapSizeValue(1200),
         tutorialItemViewModel = TutorialItemViewModel(),
         tutorialModeViewModel = TutorialModeViewModel(),
-        distanceActionButtonViewModel = ActionUltiAndDistanceButtonViewModel(),
-        meleeButtonViewModel = ActionMeleeWeaponButtonViewModel(),
+        distanceActionButtonViewModel = ActionDistanceWeaponViewModel(),
+        meleeButtonViewModel = ActionMeleeButtonViewModel(),
         globalKeysToViews = {};
 
   @override
@@ -253,7 +253,6 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.remove(gameOverOverlayIdentifier);
     overlays.remove(gameWonOverlayIdentifier);
     caterpillarStatsViewModel.reset();
-    distanceActionButtonViewModel.reset();
     onGamePause(PauseType.none);
   }
 

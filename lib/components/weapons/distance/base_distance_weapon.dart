@@ -8,6 +8,14 @@ import 'package:flame/components.dart';
 
 class BaseDistanceWeapon extends BaseWeapon {
   DistanceWeaponData distanceWeapondata;
+  bool isInMultipleShoot = false;
+  double shootDelay = 0.2;
+  double currentShotTime = 0;
+  int currentPelletIndex = 0;
+  int currentPelletCount = 0;
+
+  double startAngle = 0;
+  double angleOffset = 0.3;
 
   BaseDistanceWeapon({required super.weaponData, required super.map})
       : distanceWeapondata = weaponData as DistanceWeaponData;
@@ -16,22 +24,50 @@ class BaseDistanceWeapon extends BaseWeapon {
   Future<void> onLoad() async {
     super.onLoad();
     anchor = Anchor.center;
+    removeHitPointsOnHit = true;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    UpdateShootMultipleMunitions(dt);
+    if (isAttacking) {
+      updateHits();
+    }
+  }
+
+  void UpdateShootMultipleMunitions(double dt) {
+    if (!isInMultipleShoot) {
+      return;
+    }
+    currentShotTime += dt;
+    if (currentShotTime > shootDelay) {
+      BaseDistanceMunition pellet = BaseDistanceMunition(distanceWeapon: this);
+      map.world.world.add(pellet);
+      pellet.position = absolutePosition;
+      pellet.angle = ((absoluteAngle - (angleOffset * currentPelletCount) / 2) +
+          (angleOffset * currentPelletIndex));
+      currentShotTime = 0;
+      currentPelletIndex++;
+      if (currentPelletIndex + 1 > currentPelletCount) {
+        isInMultipleShoot = false;
+        return;
+      }
+      currentPelletIndex++;
+    }
   }
 
   shootMultipleMunitions(CaterpillarCrawlMain gameWorld, Vector2 position,
       double angle, int pelletCount) {
+    currentPelletCount = pelletCount;
     int pelletsPerSide = (pelletCount / 2).toInt();
-    double rotationAngle = 0.3;
-    double startAngle = rotationAngle * pelletsPerSide;
-    if (pelletCount % 2 != 0) {
-      startAngle += rotationAngle / 2;
-    }
-    for (int i = 0; i < pelletCount; i++) {
-      BaseDistanceMunition pellet = BaseDistanceMunition(distanceWeapon: this);
-      gameWorld.world.add(pellet);
-      pellet.position = absolutePosition;
-      pellet.angle = absoluteAngle + startAngle * i;
-    }
+    startAngle = absoluteAngle - angleOffset * (pelletsPerSide);
+    currentPelletCount = pelletCount;
+    // if (pelletCount % 2 != 0) {
+    //   startAngle += angleOffset / 2;
+    // }
+    currentPelletIndex = 0;
+    isInMultipleShoot = true;
   }
 }
 

@@ -31,7 +31,7 @@ class DistanceWeaponData extends WeaponData {
 
   static DistanceWeaponData createDungBall() {
     return DistanceWeaponData(
-        distanceToShoot: 120,
+        distanceToShoot: 190,
         munitionanimation: AnimationData(
             animationstepCount: 3,
             finalSize: Vector2.all(32),
@@ -48,9 +48,11 @@ class DistanceWeaponData extends WeaponData {
 class MeleeWeaponData extends WeaponData {
   MeleMovement meleeMovement;
   double? rotationSpeed;
+  int durationFail;
 
   MeleeWeaponData(
       {this.rotationSpeed,
+      required this.durationFail,
       required this.meleeMovement,
       required super.pathToSprite,
       required super.size,
@@ -61,6 +63,7 @@ class MeleeWeaponData extends WeaponData {
   static MeleeWeaponData createSwordData() {
     return MeleeWeaponData(
         pathToSprite: "sword.png",
+        durationFail: 100,
         meleeMovement: MeleMovement.rotate,
         rotationSpeed: 6.5,
         attackSpeed: 4.5,

@@ -16,15 +16,24 @@ class BaseMeleeWeapon extends BaseWeapon {
   Future<void> onLoad() async {
     super.onLoad();
     scale = idlescale;
+    map.world.meleeButtonViewModel.resetDuration(meleeWeapondata.durationFail);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+    if (isAttacking) {
+      if (updateHits()) {
+        map.world.meleeButtonViewModel.setWeaponDurationDown();
+      }
+    }
   }
 
   @override
   void startAttacking() {
+    if (map.world.meleeButtonViewModel.weaponDuration <= 0) {
+      return;
+    }
     super.startAttacking();
     scale = Vector2.all(1);
   }

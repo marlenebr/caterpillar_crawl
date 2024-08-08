@@ -1,12 +1,13 @@
 import 'package:caterpillar_crawl/main.dart';
-import 'package:caterpillar_crawl/models/view_models/action_weapon_button_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/action_melee_button_view_model.dart';
+import 'package:caterpillar_crawl/models/view_models/action_distance_weapon_view_model.dart';
 import 'package:caterpillar_crawl/ui/elements/action_weapon_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ActionWeaponButtonView extends StatefulWidget {
-  final ActionMeleeWeaponButtonViewModel meleeButtonViewModel;
-  final ActionUltiAndDistanceButtonViewModel ultiButtonViewModel;
+  final ActionMeleeButtonViewModel meleeButtonViewModel;
+  final ActionDistanceWeaponViewModel distanceWeaponViewModel;
 
   final CaterpillarCrawlMain mainGame;
   final double actionButtonSize;
@@ -14,7 +15,7 @@ class ActionWeaponButtonView extends StatefulWidget {
   const ActionWeaponButtonView({
     required this.meleeButtonViewModel,
     super.key,
-    required this.ultiButtonViewModel,
+    required this.distanceWeaponViewModel,
     required this.mainGame,
     required this.actionButtonSize,
   });
@@ -29,24 +30,22 @@ class _ActionWeaponButtonViewState extends State<ActionWeaponButtonView> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ChangeNotifierProvider<ActionUltiAndDistanceButtonViewModel>(
-          create: (context) => widget.ultiButtonViewModel,
-          child: Consumer<ActionUltiAndDistanceButtonViewModel>(
-            builder: (context, cart, child) => ActionWeaponButtonWidget(
-              key: widget.ultiButtonViewModel.globalKey,
-              actionWeaponButtonViewModel: widget.ultiButtonViewModel,
-              enemyKillsToUlti: widget.mainGame.enemyKillsToUlti,
-              segmentsToUlti: widget.mainGame.segmentsToUlti,
+        ChangeNotifierProvider<ActionDistanceWeaponViewModel>(
+          create: (context) => widget.distanceWeaponViewModel,
+          child: Consumer<ActionDistanceWeaponViewModel>(
+            builder: (context, cart, child) => SimpleActionButtonWidget(
+              key: widget.distanceWeaponViewModel.globalKey,
+              actionWeaponButtonViewModel: widget.distanceWeaponViewModel,
               size: widget.actionButtonSize,
               posX: 0,
               posY: widget.actionButtonSize / 2,
             ),
           ),
         ),
-        ChangeNotifierProvider<ActionMeleeWeaponButtonViewModel>(
+        ChangeNotifierProvider<ActionMeleeButtonViewModel>(
           create: (context) => widget.meleeButtonViewModel,
-          child: Consumer<ActionMeleeWeaponButtonViewModel>(
-            builder: (context, cart, child) => SimpleActionButtonWidget(
+          child: Consumer<ActionMeleeButtonViewModel>(
+            builder: (context, cart, child) => ActionWeaponButtonWidget(
               key: widget.meleeButtonViewModel.globalKey,
               actionWeaponButtonViewModel: widget.meleeButtonViewModel,
               size: widget.actionButtonSize,
