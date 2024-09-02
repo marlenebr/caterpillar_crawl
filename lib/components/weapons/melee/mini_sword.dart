@@ -14,6 +14,8 @@ class MiniSword extends BaseMeleeWeapon {
     super.onLoad();
     initializeMovementData();
     createBlade();
+    map.world.meleeButtonViewModel.onChangeType(
+        'assets/images/sword.png', () => map.world.onPewPewButtonclicked());
   }
 
   @override

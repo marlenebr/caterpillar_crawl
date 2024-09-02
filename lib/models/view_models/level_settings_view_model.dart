@@ -10,6 +10,16 @@ class ChangableIntValue extends ChangeNotifier {
   }
 }
 
+class ChangableDoubleValue extends ChangeNotifier {
+  double _value = 0;
+  double get value => _value;
+
+  void setValue(double newValue) {
+    _value = newValue;
+    notifyListeners();
+  }
+}
+
 class SnackCountValue extends ChangableIntValue {
   SnackCountValue(int initValue) {
     setValue(initValue);
@@ -31,5 +41,30 @@ class MaxLevelCountValue extends ChangableIntValue {
 class MapSizeValue extends ChangableIntValue {
   MapSizeValue(int initValue) {
     setValue(initValue);
+  }
+}
+
+class MaxCaterpillarLength extends ChangableIntValue {
+  MaxCaterpillarLength(int initValue) {
+    setValue(initValue);
+  }
+}
+
+class MovingSpeedMultiplierValue extends ChangableDoubleValue {
+  final double _initValue;
+  MovingSpeedMultiplierValue(double initValue) : _initValue = initValue {
+    setValue(initValue);
+  }
+
+  void goUp() {
+    setValue(value + 0.2);
+  }
+
+  void goDown() {
+    setValue(value - 0.2);
+  }
+
+  void reset() {
+    setValue(_initValue);
   }
 }

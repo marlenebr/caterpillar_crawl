@@ -36,7 +36,7 @@ class CaterpillarData {
           animationstepCount: 5,
           finalSize: Vector2.all(64)),
       anchorPosY: 75,
-      movingspeed: 180,
+      movingspeed: 90,
       refinedSegmentDistance: 0.35,
       segmentAnimation: AnimationData(
           imagePath: 'caterPillar_segment.png',

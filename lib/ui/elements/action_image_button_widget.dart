@@ -2,7 +2,7 @@ import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 
 class ActionImageButtonWidget extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
   final Function onTap;
   final double size;
 
@@ -30,12 +30,10 @@ class ActionImageButtonWidget extends StatelessWidget {
           ),
           // clipBehavior: Clip.hardEdge,
           child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Image(
-              image: AssetImage(imagePath),
-            ),
-            // ),
-          ),
+              padding: EdgeInsets.all(10.0),
+              child: imagePath != null
+                  ? Image(image: AssetImage(imagePath!))
+                  : const Icon(Icons.close)),
         ),
       ),
     );

@@ -51,7 +51,7 @@ class CaterpillarCrawlUtils {
       await imageLoader.load(animationData.imagePath),
       data,
     );
-
+    eggAnim.size = animationData.finalSize;
     return eggAnim.animation!;
   }
 

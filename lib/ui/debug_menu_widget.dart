@@ -50,6 +50,13 @@ class _DebugMenuWidgetState extends State<DebugMenuWidget> {
                 maxValue: 5000,
                 step: 100,
               ),
+              SettingsNumberPicker<MaxCaterpillarLength>(
+                viewModel: widget.game.maxCaterpillarLength,
+                text: "Max Player Length",
+                minValue: 50,
+                maxValue: 500,
+                step: 10,
+              ),
               // SettingsSlider(
               //     viewModel: widget.game.mapSizeValue, text: "TEST MAPSIZE"),
               IconButton.filled(

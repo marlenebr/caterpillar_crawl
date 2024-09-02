@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ActionMeleeButtonViewModel extends ChangeNotifier {
-  String _imagePath = "";
-  String get imagePath => _imagePath;
+  String? _imagePath;
+  String? get imagePath => _imagePath;
 
-  Function _onTab = () => ();
-  Function get onTab => _onTab;
+  Function? _onTab = () => ();
+  Function? get onTab => _onTab;
 
   int _weaponDuration = 0;
   int get weaponDuration => _weaponDuration;
@@ -24,6 +24,7 @@ class ActionMeleeButtonViewModel extends ChangeNotifier {
     if (_weaponDuration <= 0) {
       _weaponDuration = 0;
       //RESET TO EMPTY WEAPON
+      onSetEmpty();
     }
     notifyListeners();
   }
@@ -31,6 +32,12 @@ class ActionMeleeButtonViewModel extends ChangeNotifier {
   void onChangeType(String imagePath, Function callBack) {
     _onTab = callBack;
     _imagePath = imagePath;
+    notifyListeners();
+  }
+
+  void onSetEmpty() {
+    _onTab = null;
+    _imagePath = null;
     notifyListeners();
   }
 

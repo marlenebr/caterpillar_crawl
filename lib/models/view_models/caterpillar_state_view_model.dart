@@ -36,16 +36,22 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
   int _enemyKilledSinceUlti = 0;
   int get enemyKilledSinceUlti => _enemyKilledSinceUlti;
 
+  int _points = 0;
+  int get points => _points;
+
   int _level = 0;
   int get level => _level;
 
-  void setSnacksEaten(int snacksEaten) {
-    _snacksEaten = snacksEaten;
-    notifyListeners();
-  }
+  // void setSnacksEaten(int snacksEaten) {
+  //   _snacksEaten = snacksEaten;
+  //   _points += 1;
+  //   notifyListeners();
+  // }
 
   void setSegmentCount(int segmentCount) {
     _segmentCount = segmentCount;
+    _points += 1;
+
     notifyListeners();
   }
 
@@ -69,14 +75,16 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onEnemyKilled() {
+  void onEnemyKilled(int killBonus) {
     _enemyKilled++;
     _enemyKilledSinceUlti++;
+    _points += 10 * (level + 1) * killBonus;
     notifyListeners();
   }
 
   void setLevelUp() {
     _level++;
+    _points += 1000; //USE TIME BONUS HERE
     notifyListeners();
   }
 
@@ -87,6 +95,12 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
 
   void setIsHurt(bool isHurt) {
     _isHurt = isHurt;
+    int penalty = 20;
+    if (points - penalty <= 0) {
+      _points = 0;
+    } else {
+      _points -= penalty;
+    }
     //notifyListeners();
   }
 
@@ -105,6 +119,7 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
     _enemyKilled = 0;
     _enemyKilledSinceUlti = 0;
     _level = 0;
+    _points = 0;
     notifyListeners();
   }
 }

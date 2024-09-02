@@ -25,6 +25,9 @@ class BaseMeleeWeapon extends BaseWeapon {
     if (isAttacking) {
       if (updateHits()) {
         map.world.meleeButtonViewModel.setWeaponDurationDown();
+        if (map.world.meleeButtonViewModel.weaponDuration <= 0) {
+          map.player.RemoveMeleeWeapon();
+        }
       }
     }
   }
@@ -37,4 +40,8 @@ class BaseMeleeWeapon extends BaseWeapon {
     super.startAttacking();
     scale = Vector2.all(1);
   }
+}
+
+enum MeleeWeaponType {
+  miniSword,
 }

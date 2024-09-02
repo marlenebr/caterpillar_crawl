@@ -52,7 +52,7 @@ class ActionWeaponButtonWidget extends StatelessWidget {
               //clipBehavior: Clip.hardEdge,
               child: ActionImageButtonWidget(
                 imagePath: actionWeaponButtonViewModel.imagePath,
-                onTap: actionWeaponButtonViewModel.onTab,
+                onTap: actionWeaponButtonViewModel.onTab ?? () => (),
                 size: size,
               ),
             ),

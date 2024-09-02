@@ -86,6 +86,7 @@ class EnemyIndicator extends PositionComponent with HasVisibility {
 
   double halfWidth;
   double halfHeight;
+  double padding = 6;
 
   EnemyIndicator(
       {required this.world,
@@ -127,10 +128,10 @@ class EnemyIndicator extends PositionComponent with HasVisibility {
     if (playerPosition.x + halfWidth < enemy.position.x) //
     {
       //on the right side - out of view
-      xPos = world.size.x - iconSize;
+      xPos = world.size.x - (iconSize + padding);
     } else if (playerPosition.x - halfWidth > enemy.position.x) {
       //on the left side - out of view
-      xPos = 0;
+      xPos = padding;
     } else {
       needsXIndicator = false;
     }
@@ -138,10 +139,10 @@ class EnemyIndicator extends PositionComponent with HasVisibility {
     if (playerPosition.y + halfHeight < enemy.position.y) //
     {
       //on the botton side - out of view
-      yPos = world.size.y - iconSize;
+      yPos = world.size.y - (iconSize + padding);
     } else if (playerPosition.y - halfHeight > enemy.position.y) {
       //on the top side - out of view
-      yPos = 0;
+      yPos = padding;
     } else {
       needsYIndicator = false;
     }

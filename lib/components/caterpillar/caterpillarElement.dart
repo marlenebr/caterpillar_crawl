@@ -74,6 +74,8 @@ class CaterpillarElement extends PositionComponent {
     nextSegment?.priority = priority - 1;
     nextSegment?.angle = angle;
     caterpillar.caterpillarStatsViewModel.onAddSegment();
+    gameWorld.groundMap.playerReachedFullLegnth(
+        nextSegment!.index >= caterpillardata.maxElementCount);
     return;
   }
 
@@ -114,7 +116,7 @@ class CaterpillarElement extends PositionComponent {
     double fixedDt = 1 / 60;
     double distPerFrame = fixedDt *
         (caterpillardata.movingspeed *
-            gameWorld.groundMap.player.speedMultiplier);
+            gameWorld.movingSpeedMultiplierValue.value);
 
     double stepsToReachDist = fixedDistToSegment / distPerFrame;
     return (stepsToReachDist).toInt();

@@ -41,6 +41,18 @@ class _PlayerStatsWidget extends State<PlayerStatsWidget> {
       children: [
         Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           Text(
+            'Points',
+            style: TextStyles.uiLabelTextStyle,
+          ),
+          _statsElement(
+              'level_icon.png', caterpillarStatsViewModel.points.toString()),
+          SizedBox(
+            height: 1,
+            width: game.gapRightSide,
+          )
+        ]),
+        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          Text(
             'Enemies',
             style: TextStyles.uiLabelTextStyle,
           ),

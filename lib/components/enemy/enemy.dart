@@ -1,14 +1,18 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:caterpillar_crawl/components/damage_indicator.dart';
 import 'package:caterpillar_crawl/components/moving_around_component.dart';
 import 'package:caterpillar_crawl/components/particles/splash_out_particles.dart';
 import 'package:caterpillar_crawl/components/weapons/base_weapon.dart';
 import 'package:caterpillar_crawl/components/weapons/distance/dung_ball.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/models/data/enemy_data.dart';
 import 'package:caterpillar_crawl/models/data/weapon_data.dart';
+import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
 class Enemy extends MovingAroundComponent {
   EnemyData enemyData;
@@ -16,6 +20,7 @@ class Enemy extends MovingAroundComponent {
   late SpriteAnimation _idleAnimation;
   late SpriteAnimation _deadAnimation;
   late SpriteAnimationGroupComponent _enemyAnimations;
+  MeleeWeaponType? hidingWeaponToDropOf;
 
   BaseWeapon? enemyWeapon;
 
@@ -39,6 +44,7 @@ class Enemy extends MovingAroundComponent {
 
   Enemy({
     required this.enemyData,
+    this.hidingWeaponToDropOf,
     required this.index,
     required super.map,
   })  : _timeToCooldown = enemyData.hitCooldownTime,
@@ -69,6 +75,14 @@ class Enemy extends MovingAroundComponent {
     await add(_damageIndicator);
     priority = 10;
     _damageIndicator.priority = 11;
+    if (hidingWeaponToDropOf != null) {
+      CircleComponent littleWeaponIndicator = CircleComponent(
+          radius: 3,
+          position: Vector2(size.x / 2, size.y / 5),
+          paint: Paint()..color = UiColors.segmentColor!);
+
+      await add(littleWeaponIndicator);
+    }
   }
 
   @override

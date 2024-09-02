@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
+import 'package:caterpillar_crawl/components/obstacle.dart';
 import 'package:caterpillar_crawl/components/weapons/base_weapon.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/weapon_data.dart';
@@ -9,7 +11,9 @@ import 'package:flame/components.dart';
 class BaseDistanceWeapon extends BaseWeapon {
   DistanceWeaponData distanceWeapondata;
   bool isInMultipleShoot = false;
-  double shootDelay = 0.2;
+  bool isInSingleShoot = false;
+
+  double shootDelay = 0.4;
   double currentShotTime = 0;
   int currentPelletIndex = 0;
   int currentPelletCount = 0;
@@ -23,29 +27,46 @@ class BaseDistanceWeapon extends BaseWeapon {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    anchor = Anchor.center;
     removeHitPointsOnHit = true;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    UpdateShootMultipleMunitions(dt);
+    _updateShootMultipleMunitions(dt);
+
     if (isAttacking) {
-      updateHits();
+      if (updateHits()) {
+        isInSingleShoot = false;
+      }
     }
   }
 
-  void UpdateShootMultipleMunitions(double dt) {
+  shootMultipleMunitions(CaterpillarCrawlMain gameWorld, Vector2 position,
+      double angle, int pelletCount) {
+    currentPelletCount = pelletCount;
+    int pelletsPerSide = (pelletCount / 2).toInt();
+    startAngle = absoluteAngle - angleOffset * (pelletsPerSide);
+    currentPelletCount = pelletCount;
+    isInMultipleShoot = true;
+  }
+
+  shootSingleMunition() {
+    if (isInSingleShoot) {
+      return;
+    }
+    startAngle = absoluteAngle;
+    _spawnMunition(absoluteAngle);
+    isInSingleShoot = true;
+  }
+
+  void _updateShootMultipleMunitions(double dt) {
     if (!isInMultipleShoot) {
       return;
     }
     currentShotTime += dt;
     if (currentShotTime > shootDelay) {
-      BaseDistanceMunition pellet = BaseDistanceMunition(distanceWeapon: this);
-      map.world.world.add(pellet);
-      pellet.position = absolutePosition;
-      pellet.angle = ((absoluteAngle - (angleOffset * currentPelletCount) / 2) +
+      _spawnMunition((absoluteAngle - (angleOffset * currentPelletCount) / 2) +
           (angleOffset * currentPelletIndex));
       currentShotTime = 0;
       currentPelletIndex++;
@@ -57,50 +78,138 @@ class BaseDistanceWeapon extends BaseWeapon {
     }
   }
 
-  shootMultipleMunitions(CaterpillarCrawlMain gameWorld, Vector2 position,
-      double angle, int pelletCount) {
-    currentPelletCount = pelletCount;
-    int pelletsPerSide = (pelletCount / 2).toInt();
-    startAngle = absoluteAngle - angleOffset * (pelletsPerSide);
-    currentPelletCount = pelletCount;
-    // if (pelletCount % 2 != 0) {
-    //   startAngle += angleOffset / 2;
-    // }
-    currentPelletIndex = 0;
-    isInMultipleShoot = true;
+  // void _updateShootSingle() {
+  //   if (isInSingleShoot) {
+  //     return;
+  //   }
+  //   _spawnMunition(absoluteAngle);
+  //   currentPelletIndex = 0;
+  // }
+
+  void _spawnMunition(double angleDirection) {
+    BaseDistanceMunition pellet = BaseDistanceMunition(distanceWeapon: this);
+    map.world.world.add(pellet);
+    pellet.position =
+        Vector2(absolutePosition.x + size.x / 2, absolutePosition.y);
+    pellet.angle = angleDirection;
   }
 }
 
 class BaseDistanceMunition extends PositionComponent {
+  bool isInExplosion = false;
+  bool canExplode = false;
   Vector2 initPosition = Vector2.zero();
+
+  double explosionTimer = 2;
+
+  late SpriteAnimationGroupComponent munitionAnimationGroup;
+  late SpriteAnimation _shootAnimation;
+  late SpriteAnimation? _explodingAnimation;
+
+  MunitionState currentState = MunitionState.inShoot;
 
   BaseDistanceWeapon distanceWeapon;
   BaseDistanceMunition({required this.distanceWeapon});
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    SpriteAnimationComponent spriteAnimation =
-        await CaterpillarCrawlUtils.createAnimationComponent(
-            distanceWeapon.distanceWeapondata.munitionanimation);
-    add(spriteAnimation);
+    if (distanceWeapon.distanceWeapondata.explodingAnimation != null) {
+      canExplode = true;
+      distanceWeapon.removeHitPointsOnHit = false;
+    }
+    _shootAnimation = await CaterpillarCrawlUtils.createAnimation(
+        animationData: distanceWeapon.distanceWeapondata.munitionanimation);
+    if (canExplode) {
+      _explodingAnimation = await CaterpillarCrawlUtils.createAnimation(
+          animationData: distanceWeapon.distanceWeapondata.explodingAnimation!,
+          loopAnimation: false);
+    }
+    if (canExplode) {
+      munitionAnimationGroup =
+          SpriteAnimationGroupComponent<MunitionState>(animations: {
+        MunitionState.inShoot: _shootAnimation,
+        MunitionState.exploding: _explodingAnimation!,
+      }, anchor: Anchor.center, current: currentState);
+    } else {
+      munitionAnimationGroup =
+          SpriteAnimationGroupComponent<MunitionState>(animations: {
+        MunitionState.inShoot: _shootAnimation,
+      }, anchor: Anchor.center, current: currentState);
+    }
+
+    add(munitionAnimationGroup);
+    munitionAnimationGroup.size =
+        distanceWeapon.distanceWeapondata.munitionanimation.finalSize;
     anchor = Anchor.center;
     priority = 100;
-    size = Vector2.all(
-        distanceWeapon.distanceWeapondata.munitionanimation.finalSize.x);
-    distanceWeapon.hitPoints.add(this);
+    // size = Vector2.all(
+    //     distanceWeapon.distanceWeapondata.munitionanimation.finalSize.x / 2);
+    if (!canExplode) {
+      distanceWeapon.hitPoints.add(this);
+    }
     initPosition = Vector2(absolutePosition.x, absolutePosition.y);
+    position = Vector2(position.x - distanceWeapon.position.x, position.y);
+    angle = distanceWeapon.absoluteAngle;
   }
 
   @override
   void update(double dt) {
+    if (isInExplosion) {
+      explosionTimer -= dt;
+      distanceWeapon.hitRadiusMultiplicator = 4;
+      if (explosionTimer < 0) {
+        distanceWeapon.hitPoints.remove(this);
+        distanceWeapon.map.obstacleSnapshot
+            .addObstacleAndRenderSnapshot<BombObstacle>(
+                absolutePosition,
+                distanceWeapon
+                    .distanceWeapondata.explodingAnimation!.spriteSize,
+                angle,
+                true,
+                ObstacleType.bomb);
+        distanceWeapon.isInSingleShoot = false;
+        distanceWeapon.hitPoints.remove(this);
+        distanceWeapon.isAttacking = false; //optimize here
+        removeFromParent();
+      }
+      return;
+    }
+    distanceWeapon.hitRadiusMultiplicator = 1;
     CaterpillarCrawlUtils.updatePosition(
         dt, transform, distanceWeapon.distanceWeapondata.attackSpeed, angle);
     if (initPosition.distanceTo(absolutePosition) >
         distanceWeapon.distanceWeapondata.distanceToShoot) {
+      if (canExplode) {
+        setCurrentMunitionState(MunitionState.exploding);
+        return;
+      }
+
+      //In single shoot done
+      distanceWeapon.isInSingleShoot = false;
       distanceWeapon.hitPoints.remove(this);
       distanceWeapon.isAttacking = false; //optimize here
+
       removeFromParent();
       return;
     }
   }
+
+  void setCurrentMunitionState(MunitionState eggState) {
+    currentState = eggState;
+    munitionAnimationGroup.current = currentState;
+    if (currentState == MunitionState.exploding) {
+      isInExplosion = true;
+      if (!distanceWeapon.hitPoints.contains(this)) {
+        distanceWeapon.hitPoints.add(this);
+      }
+
+      munitionAnimationGroup.size =
+          distanceWeapon.distanceWeapondata.explodingAnimation!.finalSize;
+    }
+  }
+}
+
+enum MunitionState {
+  inShoot,
+  exploding,
 }

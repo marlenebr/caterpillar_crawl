@@ -3,10 +3,12 @@ import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/enemy/enemy.dart';
+import 'package:caterpillar_crawl/components/items/weapon_collect_item.dart';
 import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
-import 'package:caterpillar_crawl/components/powerups/health_up_item.dart';
+import 'package:caterpillar_crawl/components/items/health_up_item.dart';
 import 'package:caterpillar_crawl/components/snack.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/enemy_data.dart';
 import 'package:caterpillar_crawl/models/data/moving_data.dart';
@@ -29,6 +31,9 @@ class GroundMap extends PositionComponent {
 
   bool hasEnemies = false;
   bool calcDist = false;
+
+  bool playerReachedLength = false;
+  bool allEnemiesKilled = false;
 
   Map<int, Vector2> snackData = {};
   Map<int, Snack> snacks = {};
@@ -117,8 +122,10 @@ class GroundMap extends PositionComponent {
   }
 
   Future<void> fillWithEnemies(int enemyCount) async {
+    //Get random enemy to hold a hiding weapon
+    int RandomWeaponHolderIndex = Random().nextInt(enemyCount);
     for (int i = 0; i < enemyCount; i++) {
-      await _addEnemy();
+      await _addEnemy(RandomWeaponHolderIndex == i);
     }
     world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
   }
@@ -163,16 +170,23 @@ class GroundMap extends PositionComponent {
   }
 
   void removeSnack(Snack snack) {
+    if (enemies.values.length <= world.remainingEnemiesToLevelUp &&
+        player.lastSegment!.index >= world.maxCaterpillarLength.value) {
+      levelUp();
+    }
     snack.removeFromParent();
   }
 
-  Future<void> _addEnemy() async {
+  Future<void> _addEnemy(bool isHoldingWeapon) async {
     Vector2 randomPos = getRandomPositionInMap();
     while (randomPos.distanceTo(player.position) < 20) {
       randomPos = getRandomPositionInMap();
     }
+    MeleeWeaponType? meleeWeaponToHoldd =
+        isHoldingWeapon ? MeleeWeaponType.miniSword : null;
     Enemy enemy = Enemy(
         enemyData: EnemyData.createEnemeyData(),
+        hidingWeaponToDropOf: meleeWeaponToHoldd,
         map: this,
         index: enemyIndexer);
     enemies[enemyIndexer] = enemy;
@@ -191,11 +205,22 @@ class GroundMap extends PositionComponent {
     while (randomPos.distanceTo(player.position) < 20) {
       randomPos = getRandomPositionInMap();
     }
-    HealthUpItem healthUp = HealthUpItem(
-        iconSize: 32, map: this, movingdata: MovingData.createItemMovingdata());
+    HealthUpItem healthUp =
+        HealthUpItem(map: this, movingdata: MovingData.createItemMovingdata());
     healthUp.position = randomPos;
     add(healthUp);
     powerUps.add(healthUp);
+  }
+
+  Future<void> _addWeaponColletibleItem(Vector2? spawnPos) async {
+    Vector2 posToSpawn = spawnPos ?? getRandomPositionInMap();
+    while (posToSpawn.distanceTo(player.position) < 20) {
+      posToSpawn = getRandomPositionInMap();
+    }
+    WeaponCollectItem weaponItem = WeaponCollectItem(
+        map: this, movingdata: MovingData.createItemMovingdata());
+    weaponItem.position = posToSpawn;
+    await add(weaponItem);
   }
 
   void healthUp(HealthUpItem healthUp) {
@@ -206,27 +231,48 @@ class GroundMap extends PositionComponent {
   }
 
   Future<void> levelUp() async {
+    allEnemiesKilled = false;
     if (world.tutorialModeViewModel.isInTutorialMode) return;
     level++;
     if (level >= world.maxLevelValue.value) {
       world.onGameWon();
       return;
     }
-    // player.grow();
+    player.levelUp();
+    //world.movingSpeedMultiplierValue.goUp();
     await fillWithEnemies(
         world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp);
     world.caterpillarStatsViewModel.setLevelUp();
     obstacleSnapshot.onLevelUp(10);
   }
 
-  void killEnemy(Enemy enemy) {
-    player.onEnemyKilled();
-    world.enemyIndicatorHUD.onRemoveEnemy(enemy);
-    enemies.remove(enemy.index);
-    if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
+  void playerReachedFullLegnth(bool reachedFullLength) {
+    playerReachedLength = reachedFullLength;
+    if (playerReachedLength && allEnemiesKilled) {
       levelUp();
     }
-    world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
+  }
+
+  Future<void> killEnemy(Enemy enemy) async {
+    player.onEnemyKilled();
+    world.enemyIndicatorHUD.onRemoveEnemy(enemy);
+    if (enemy.hidingWeaponToDropOf != null) {
+      _addWeaponColletibleItem(enemy.position);
+    }
+    enemies.remove(enemy.index);
+    // if (player.lastSegment == null ||
+    //     (player.lastSegment != null &&
+    //         player.lastSegment!.index < world.maxCaterpillarLength.value)) {
+    //   await _addEnemy(false);
+    // }
+
+    if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
+      allEnemiesKilled = true;
+    }
+    if (playerReachedLength && allEnemiesKilled) {
+      levelUp();
+      world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
+    }
   }
 
   void cleanUp() {
@@ -264,6 +310,9 @@ class GroundMap extends PositionComponent {
     await fillWithSnacks(snackCount);
     await fillWithEnemies(enemyCount);
     await fillWithHealthUpItems(healthUpCount);
+    // await _addWeaponColletibleItem(null);
+    // await _addWeaponColletibleItem(null);
+
     await add(player);
     player.position = size / 2;
     ;

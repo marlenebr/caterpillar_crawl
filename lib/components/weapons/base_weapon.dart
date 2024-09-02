@@ -13,11 +13,10 @@ class BaseWeapon extends PositionComponent {
 
   GroundMap map;
 
-  final double _enemyHitRadius;
-  final double _playerhitradius;
+  double hitRadius;
+  double hitRadiusMultiplicator = 1;
   BaseWeapon({required this.weaponData, required this.map})
-      : _enemyHitRadius = weaponData.hitRadius + 10,
-        _playerhitradius = weaponData.hitRadius;
+      : hitRadius = weaponData.hitRadius + 10;
 
   @override
   Future<void> onLoad() async {
@@ -29,7 +28,6 @@ class BaseWeapon extends PositionComponent {
           SpriteComponent(size: size, sprite: weaponSprite);
       add(spriteComponent);
     }
-    anchor = Anchor.center;
     anchor = Anchor.bottomCenter;
     priority = -1;
   }
@@ -39,7 +37,7 @@ class BaseWeapon extends PositionComponent {
       case WeaponHolder.enemy:
         for (PositionComponent hitPos in hitPoints) {
           if (map.player.absolutePosition.distanceTo(hitPos.absolutePosition) <
-              _playerhitradius + 16) {
+              hitRadius * hitRadiusMultiplicator) {
             map.player.hurt();
             if (removeHitPointsOnHit) {
               hitPoints.remove(hitPos);
@@ -52,7 +50,7 @@ class BaseWeapon extends PositionComponent {
         for (Enemy enemy in map.enemies.values) {
           for (PositionComponent hitPos in hitPoints) {
             if (enemy.absolutePosition.distanceTo(hitPos.absolutePosition) <
-                _enemyHitRadius) {
+                hitRadius * hitRadiusMultiplicator) {
               enemy.onEnemyHit(weaponData.damagePerHit, false);
               if (removeHitPointsOnHit) {
                 hitPoints.remove(hitPos);

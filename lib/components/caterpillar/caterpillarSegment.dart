@@ -12,6 +12,7 @@ import 'package:flame/components.dart';
 class CaterpillarSegment extends CaterpillarElement {
   CaterPillar caterpillar;
   CaterpillarElement previousSegment;
+  bool removeOnNextFrame = false;
 
   late SpriteAnimationComponent animation;
 
@@ -42,6 +43,7 @@ class CaterpillarSegment extends CaterpillarElement {
     }
     updateHCollisionWithSelf();
     updateEnemyCollision();
+    // UpdateFallOff(dt);
   }
 
   void updateHCollisionWithSelf() {
@@ -74,22 +76,6 @@ class CaterpillarSegment extends CaterpillarElement {
       }
     }
   }
-
-  // Future<void> addSegmentSprite() async {
-  //   final data = SpriteAnimationData.sequenced(
-  //     textureSize: caterpillardata.segmentAnimation.spriteSize,
-  //     amount: 4,
-  //     stepTime: 0.1,
-  //   );
-
-  //   animation = SpriteAnimationComponent.fromFrameData(
-  //       await imageLoader.load(caterpillardata.segmentAnimation.imagePath),
-  //       data,
-  //       scale: Vector2(
-  //           finalSize.x / caterpillardata.segmentAnimation.spriteSize.x,
-  //           finalSize.y / caterpillardata.segmentAnimation.spriteSize.y));
-  //   add(animation);
-  // }
 
   Future<void> addSegmentSprite2() async {
     Sprite segmentSprite =
@@ -126,20 +112,51 @@ class CaterpillarSegment extends CaterpillarElement {
     // }
   }
 
-  void falloff(bool isUlti) {
+  void falloff(bool justRemove) {
     if (isFallenOff) {
       return;
     }
     isFallenOff = true;
-    nextSegment?.falloff(isUlti);
-    ObstacleType obstacleType =
-        isUlti ? ObstacleType.ultiSegment : ObstacleType.deadSegment;
-    gameWorld.groundMap.obstacleSnapshot.addObstacle<ThrowableObstacle>(
-        Vector2(transform.position.x, transform.position.y),
-        angle,
-        null,
-        obstacleType);
+    nextSegment?.falloff(justRemove);
+
+    if (!justRemove) {
+      ObstacleType obstacleType =
+          justRemove ? ObstacleType.ultiSegment : ObstacleType.deadSegment;
+      gameWorld.groundMap.obstacleSnapshot.addObstacle<ThrowableObstacle>(
+          Vector2(transform.position.x, transform.position.y),
+          angle,
+          null,
+          obstacleType);
+    }
     removeFromParent();
+    caterpillar.caterpillarStatsViewModel.onRemoveSegment();
+  }
+
+  double fallOffTime = 0.1;
+
+  // void UpdateFallOff(double dt) {
+  //   if (!removeOnNextFrame) {
+  //     return;
+  //   }
+
+  //   fallOffTime -= dt;
+  //   if (fallOffTime < 0) {
+  //     if (previousSegment is CaterpillarSegment) {
+  //       (previousSegment as CaterpillarSegment).removeOnNextFrame = true;
+  //     } else if (previousSegment is CaterPillar) {
+  //       (previousSegment as CaterPillar).onAllSegmentsRemoved();
+  //     }
+  //     removeFromParent();
+  //     removeOnNextFrame = false;
+
+  //     caterpillar.caterpillarStatsViewModel.onRemoveSegment();
+  //   }
+  // }
+
+  void fallOff() {
+    nextSegment?.fallOff();
+    removeFromParent();
+    removeOnNextFrame = false;
     caterpillar.caterpillarStatsViewModel.onRemoveSegment();
   }
 

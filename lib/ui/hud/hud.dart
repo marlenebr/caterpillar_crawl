@@ -47,7 +47,7 @@ class GameHud extends StatelessWidget {
       alignment: Alignment.topRight,
       child: SizedBox(
         width: 250,
-        height: 100,
+        height: 115,
         child: Material(
           color: Colors.transparent,
           child: PlayerStatsWidget(game: game),

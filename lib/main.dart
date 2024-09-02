@@ -93,10 +93,11 @@ class CaterpillarCrawlMain extends FlameGame
   TutorialModeViewModel tutorialModeViewModel;
   ActionDistanceWeaponViewModel distanceActionButtonViewModel;
   ActionMeleeButtonViewModel meleeButtonViewModel;
+  MaxCaterpillarLength maxCaterpillarLength;
+  MovingSpeedMultiplierValue movingSpeedMultiplierValue;
 
   double angleToLerpTo = 0;
   double rotationSpeed = 5;
-  int playerMaxLength = 100;
   int healthUpCount = 2;
   int remainingEnemiesToLevelUp = 0;
   int enemyCountOnIndicator = 15;
@@ -126,10 +127,12 @@ class CaterpillarCrawlMain extends FlameGame
         enemyCountViewModel = EnemyCountValue(8),
         maxLevelValue = MaxLevelCountValue(6),
         mapSizeValue = MapSizeValue(1200),
+        maxCaterpillarLength = MaxCaterpillarLength(150),
         tutorialItemViewModel = TutorialItemViewModel(),
         tutorialModeViewModel = TutorialModeViewModel(),
         distanceActionButtonViewModel = ActionDistanceWeaponViewModel(),
         meleeButtonViewModel = ActionMeleeButtonViewModel(),
+        movingSpeedMultiplierValue = MovingSpeedMultiplierValue(1.0),
         globalKeysToViews = {};
 
   @override
@@ -148,8 +151,8 @@ class CaterpillarCrawlMain extends FlameGame
     tutorialBuilder = TutorialBuilder(mainGame: this);
     overlays.add(tutorialOverlayIdentifier);
 
-    meleeButtonViewModel.onChangeType(
-        'assets/images/sword.png', () => onPewPewButtonclicked());
+    // meleeButtonViewModel.onChangeType(
+    //     'assets/images/sword.png', () => onPewPewButtonclicked());
     distanceActionButtonViewModel.onChangeType(
         'assets/images/bomb_128_button.png', () => onLayEggTap());
   }
@@ -227,12 +230,12 @@ class CaterpillarCrawlMain extends FlameGame
   }
 
   void onLayEggTap() {
-    _caterPillar.toggleEggAndCrawl();
+    _caterPillar.toggleUseEgg();
   }
 
-  void onUltiTap() {
-    _caterPillar.ulti();
-  }
+  // void onUltiTap() {
+  //   _caterPillar.ulti();
+  // }
 
   void onPewPewButtonclicked() {
     _caterPillar.onPewPew();
@@ -253,6 +256,7 @@ class CaterpillarCrawlMain extends FlameGame
     overlays.remove(gameOverOverlayIdentifier);
     overlays.remove(gameWonOverlayIdentifier);
     caterpillarStatsViewModel.reset();
+    movingSpeedMultiplierValue.reset();
     onGamePause(PauseType.none);
   }
 
