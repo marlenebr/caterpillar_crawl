@@ -3,7 +3,6 @@ import 'package:caterpillar_crawl/models/view_models/game_state_view_model.dart'
 import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:caterpillar_crawl/ui/elements/settings_number_picker.dart';
-import 'package:caterpillar_crawl/ui/elements/settings_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

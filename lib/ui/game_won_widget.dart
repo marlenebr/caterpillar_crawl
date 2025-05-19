@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class GameWonWidget extends StatelessWidget {
   final CaterpillarCrawlMain game;
 
-  GameWonWidget({required this.game});
+  const GameWonWidget({super.key, required this.game});
 
   @override
   Widget build(Object context) {
@@ -39,7 +39,7 @@ class GameWonWidget extends StatelessWidget {
             padding: EdgeInsets.all(UIConstants.defaultPaddingMedium),
             child: IconButton.filled(
               onPressed: () => {game.onGameRestart()},
-              icon: Icon(Icons.loop),
+              icon: const Icon(Icons.loop),
               color: UiColors.segmentColor,
             ),
           )

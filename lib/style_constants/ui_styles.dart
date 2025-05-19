@@ -10,7 +10,7 @@ class UiColors {
   static Color? buttonColor = Colors.lightBlue[400];
   static Color? tapColor = Colors.lime;
 
-  static Color? darkLineColor = Color.fromARGB(96, 41, 11, 241);
+  static Color? darkLineColor = const Color.fromARGB(96, 41, 11, 241);
 }
 
 class TextStyles {

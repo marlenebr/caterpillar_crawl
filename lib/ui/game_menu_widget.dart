@@ -5,8 +5,6 @@ import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:caterpillar_crawl/ui/debug_menu_widget.dart';
 import 'package:caterpillar_crawl/ui/settings_menu_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
 class GameMenuWidget extends StatefulWidget {

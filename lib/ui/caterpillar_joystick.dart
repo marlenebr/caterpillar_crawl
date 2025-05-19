@@ -11,7 +11,7 @@ class CaterpillarJoystick extends JoystickComponent {
     super.position,
     double? size,
     double? knobRadius,
-    Anchor super.anchor = Anchor.center,
+    super.anchor = Anchor.center,
     super.children,
     super.priority,
     super.key,

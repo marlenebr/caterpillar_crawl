@@ -1,4 +1,4 @@
-import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
 import 'package:flutter/foundation.dart';
 
 class CaterpillarStateViewModel extends ChangeNotifier {
@@ -14,8 +14,8 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
   bool _isHurt = false;
   bool get isHurt => _isHurt;
 
-  bool _isReadyToEgg = false;
-  bool get isReadyToEgg => _isReadyToEgg;
+  // bool _isReadyToEgg = false;
+  // bool get isReadyToEgg => _isReadyToEgg;
 
   CaterpillarState _currentState = CaterpillarState.crawling;
   CaterpillarState get currentState => _currentState;
@@ -84,7 +84,7 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
 
   void setLevelUp() {
     _level++;
-    _points += 1000; //USE TIME BONUS HERE
+    // _points += 1000; //USE TIME BONUS HERE
     notifyListeners();
   }
 
@@ -104,9 +104,9 @@ class CaterpillarStatsViewModel extends ChangeNotifier {
     //notifyListeners();
   }
 
-  void setIsReadyToEgg(bool isReadyToEgg) {
-    _isReadyToEgg = isReadyToEgg;
-  }
+  // void setIsReadyToEgg(bool isReadyToEgg) {
+  //   _isReadyToEgg = isReadyToEgg;
+  // }
 
   void setCaterpillarstate(CaterpillarState state) {
     _currentState = state;

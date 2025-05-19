@@ -1,4 +1,3 @@
-import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 
 class SettingsButtonWidget extends StatelessWidget {

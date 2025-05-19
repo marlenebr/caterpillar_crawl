@@ -1,3 +1,5 @@
+import 'package:caterpillar_crawl/components/snack.dart';
+import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/models/data/animation_data.dart';
 import 'package:flame/components.dart';
 
@@ -19,12 +21,14 @@ class WeaponData {
 class DistanceWeaponData extends WeaponData {
   double distanceToShoot;
   AnimationData munitionanimation;
+  String pathToMunitionIcon;
   AnimationData? explodingAnimation;
 
   DistanceWeaponData({
     explodingAnimation,
     required this.distanceToShoot,
     required this.munitionanimation,
+    required this.pathToMunitionIcon,
     required super.pathToSprite,
     required super.size,
     required super.hitRadius,
@@ -41,6 +45,7 @@ class DistanceWeaponData extends WeaponData {
             imagePath: "dungball_animation.png",
             spriteSize: Vector2.all(64)),
         pathToSprite: "",
+        pathToMunitionIcon: "dungball.png",
         attackSpeed: 1,
         size: Vector2(32, 32),
         hitRadius: 16,
@@ -49,7 +54,7 @@ class DistanceWeaponData extends WeaponData {
 
   static DistanceWeaponData createExplodingEgg() {
     return DistanceWeaponData(
-        distanceToShoot: 111,
+        distanceToShoot: 250,
         explodingAnimation: AnimationData(
             animationstepCount: 11,
             finalSize: Vector2.all(128),
@@ -61,10 +66,19 @@ class DistanceWeaponData extends WeaponData {
             imagePath: "bombanim.png",
             spriteSize: Vector2.all(64)),
         pathToSprite: "",
+        pathToMunitionIcon: "bomb_128_button.png",
         attackSpeed: 6,
         size: Vector2(64, 64),
         hitRadius: 16,
         damagePerHit: 2);
+  }
+
+  static Map<SnackType, DistanceWeaponData> createMultiWeaponData01() {
+    Map<SnackType, DistanceWeaponData> allWeapons = {};
+    allWeapons[SnackType.green] = createExplodingEgg();
+    allWeapons[SnackType.red] = createDungBall();
+
+    return allWeapons;
   }
 }
 
@@ -82,6 +96,13 @@ class MeleeWeaponData extends WeaponData {
       required super.hitRadius,
       required super.damagePerHit,
       required super.attackSpeed});
+
+  static MeleeWeaponData createWeaponDataByType(MeleeWeaponType weaponType) {
+    switch (weaponType) {
+      case MeleeWeaponType.miniSword:
+        return createSwordData();
+    }
+  }
 
   static MeleeWeaponData createSwordData() {
     return MeleeWeaponData(

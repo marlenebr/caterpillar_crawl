@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class TutorialOverlayWidget extends StatefulWidget {
   final CaterpillarCrawlMain game;
 
-  TutorialOverlayWidget({required this.game, super.key});
+  const TutorialOverlayWidget({required this.game, super.key});
 
   @override
   State<TutorialOverlayWidget> createState() => _TutorialOverlayWidgetState();

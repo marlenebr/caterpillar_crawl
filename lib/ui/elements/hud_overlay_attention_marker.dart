@@ -4,7 +4,7 @@ import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
 import 'package:flutter/material.dart';
 
 class OverlayAttentionMarkerWidget extends StatelessWidget {
-  OverlayAttentionMarkerWidget(
+  const OverlayAttentionMarkerWidget(
       {super.key,
       required this.xPos,
       required this.yPos,
@@ -28,15 +28,15 @@ class OverlayAttentionMarkerWidget extends StatelessWidget {
               height: 32,
               child: ShakeWidget(
                 key: shakeKey,
+                shakeCount: 300,
+                shakeOffset: 10,
+                shakeDuration: const Duration(seconds: 500),
                 child: Container(
                     color: UiColors.darkLineColor,
                     child: Icon(
                       Icons.star_purple500_sharp,
                       color: UiColors.tapColor,
                     )),
-                shakeCount: 300,
-                shakeOffset: 10,
-                shakeDuration: Duration(seconds: 500),
               ))),
     );
   }

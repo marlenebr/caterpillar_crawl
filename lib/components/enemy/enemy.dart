@@ -162,7 +162,9 @@ class Enemy extends MovingAroundComponent {
 
   void createEnemyWeoapon() {
     enemyWeapon = DungBallShooter(
-        weaponData: DistanceWeaponData.createDungBall(), map: map);
+        weaponData: DistanceWeaponData.createDungBall(),
+        map: map,
+        isPlayerWeapon: false);
     add(enemyWeapon!);
     enemyWeapon!.position = Vector2(size.x / 2, size.y / 4);
     enemyWeapon!.weaponHolder = WeaponHolder.enemy;

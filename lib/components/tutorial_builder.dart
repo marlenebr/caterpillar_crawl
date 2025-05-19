@@ -1,9 +1,7 @@
 import 'dart:async';
-
-import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/tutorial_data.dart';
-import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -83,7 +81,7 @@ class TutorialBuilder {
         resetOnNextStep(1, 1);
         setTutorialVieModel(
             callback: mainGame.groundMap.player
-                .setCaterpillarState(CaterpillarState.onHoldForEgg));
+                .setCaterpillarState(CaterpillarState.chargingUp));
 
       case TutorialConditions.moveJoystick:
         resetOnNextStep(1, 1);

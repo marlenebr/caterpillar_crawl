@@ -2,7 +2,11 @@ import 'package:caterpillar_crawl/components/weapons/distance/base_distance_weap
 import 'package:flame/components.dart';
 
 class DungBallShooter extends BaseDistanceWeapon {
-  DungBallShooter({required super.weaponData, required super.map});
+  bool isPlayerWeapon = false;
+  DungBallShooter(
+      {required super.weaponData,
+      required super.map,
+      required this.isPlayerWeapon});
 
   @override
   Future<void> onLoad() async {
@@ -11,13 +15,12 @@ class DungBallShooter extends BaseDistanceWeapon {
   }
 
   @override
-  void update(double dt) {
-    super.update(dt);
-  }
-
-  @override
   void startAttacking() {
     super.startAttacking();
-    shootMultipleMunitions(map.world, position, angle, map.level + 1);
+    if (isPlayerWeapon) {
+      shootSingleMunition();
+    } else {
+      shootMultipleMunitions(map.world, position, angle, map.level + 1);
+    }
   }
 }

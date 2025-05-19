@@ -4,9 +4,7 @@ import 'package:caterpillar_crawl/components/tutorial_builder.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/ui/caterpillar_joystick.dart';
 import 'package:flame/components.dart';
-import 'package:flame/layout.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class PlayerController extends PositionComponent {
   Vector2 currentDelta = Vector2.zero();
@@ -78,18 +76,18 @@ class WebPlayerController extends PlayerController with KeyboardHandler {
   Vector2 direction = Vector2.zero();
   WebPlayerController({required super.mainGame});
 
-  @override
-  bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (event.data.keyLabel == "w") {
-      currentDelta = Vector2(0, 1);
-    } else if (event.data.keyLabel == "a") {
-      currentDelta = Vector2(1, 0);
-    } else if (event.data.keyLabel == "s") {
-      currentDelta = Vector2(0, -1);
-    } else if (event.data.keyLabel == "d") {
-      currentDelta = Vector2(-1, 0);
-    }
+  // @override
+  // bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+  //   if (event.data.keyLabel == "w") {
+  //     currentDelta = Vector2(0, 1);
+  //   } else if (event.data.keyLabel == "a") {
+  //     currentDelta = Vector2(1, 0);
+  //   } else if (event.data.keyLabel == "s") {
+  //     currentDelta = Vector2(0, -1);
+  //   } else if (event.data.keyLabel == "d") {
+  //     currentDelta = Vector2(-1, 0);
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 }

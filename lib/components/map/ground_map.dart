@@ -1,7 +1,7 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
 import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/components/items/weapon_collect_item.dart';
 import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
@@ -11,6 +11,7 @@ import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/components/weapons/melee/base_melee_weapon.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/enemy_data.dart';
+import 'package:caterpillar_crawl/models/data/level_data.dart';
 import 'package:caterpillar_crawl/models/data/moving_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
@@ -25,6 +26,7 @@ class GroundMap extends PositionComponent {
 
   int enemyIndexer = 1;
   int level = 0;
+  late LevelData currentLevel;
 
   CaterpillarCrawlMain world;
   late ObstacleSnapshot obstacleSnapshot;
@@ -69,6 +71,7 @@ class GroundMap extends PositionComponent {
         anchor: Anchor.center,
       ),
     );
+    currentLevel = LevelManager.getLevelData(0)!;
     await _createMapContent();
     position = Vector2.all(mapSize / 2);
     // //DEBUG: 55FPS
@@ -90,17 +93,12 @@ class GroundMap extends PositionComponent {
     calculateSnacks();
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-  }
-
   void calculateSnacks() {
     for (int i = 0; i < snacks.length; i++) {
       if (player.position.distanceTo(snacks[i]!.position) < 60) {
+        player.addSegment(snacks[i]!.snackType);
         removeSnack(snacks[i]!);
         _addSnack(i);
-        player.addCaterpillarSegemntRequest();
       }
     }
   }
@@ -121,11 +119,13 @@ class GroundMap extends PositionComponent {
     }
   }
 
-  Future<void> fillWithEnemies(int enemyCount) async {
+  Future<void> fillWithEnemies(int enemyCount, bool holdWeapon) async {
     //Get random enemy to hold a hiding weapon
     int RandomWeaponHolderIndex = Random().nextInt(enemyCount);
     for (int i = 0; i < enemyCount; i++) {
-      await _addEnemy(RandomWeaponHolderIndex == i);
+      holdWeapon
+          ? await _addEnemy(RandomWeaponHolderIndex == i)
+          : await _addEnemy(false);
     }
     world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
   }
@@ -148,11 +148,25 @@ class GroundMap extends PositionComponent {
       newIndex = index;
     }
     double randomSize = (Random().nextDouble() + 8) * 2;
-    Snack newSnack = Snack(
-        snackSize: randomSize,
-        snackPosition: pos,
-        groundMap: this,
-        index: newIndex);
+    int maxValue =
+        currentLevel.possibleSnackTypes.contains(SnackType.red) ? 10 : 2;
+    int snackTypeDistribution = Random().nextInt(maxValue);
+    Snack newSnack;
+    if (snackTypeDistribution < 7) {
+      newSnack = Snack(
+          snackSize: randomSize,
+          snackPosition: pos,
+          groundMap: this,
+          index: newIndex,
+          snackType: SnackType.green);
+    } else {
+      newSnack = Snack(
+          snackSize: randomSize,
+          snackPosition: pos,
+          groundMap: this,
+          index: newIndex,
+          snackType: SnackType.red);
+    }
     snacks[newIndex] = newSnack;
     snackData[newIndex] = newSnack.position;
     add(newSnack);
@@ -170,10 +184,6 @@ class GroundMap extends PositionComponent {
   }
 
   void removeSnack(Snack snack) {
-    if (enemies.values.length <= world.remainingEnemiesToLevelUp &&
-        player.lastSegment!.index >= world.maxCaterpillarLength.value) {
-      levelUp();
-    }
     snack.removeFromParent();
   }
 
@@ -234,6 +244,7 @@ class GroundMap extends PositionComponent {
     allEnemiesKilled = false;
     if (world.tutorialModeViewModel.isInTutorialMode) return;
     level++;
+    currentLevel = LevelManager.getLevelData(level)!;
     if (level >= world.maxLevelValue.value) {
       world.onGameWon();
       return;
@@ -241,7 +252,8 @@ class GroundMap extends PositionComponent {
     player.levelUp();
     //world.movingSpeedMultiplierValue.goUp();
     await fillWithEnemies(
-        world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp);
+        world.enemyCountViewModel.value - world.remainingEnemiesToLevelUp,
+        currentLevel.hiddenMelee != null);
     world.caterpillarStatsViewModel.setLevelUp();
     obstacleSnapshot.onLevelUp(10);
   }
@@ -253,8 +265,17 @@ class GroundMap extends PositionComponent {
     }
   }
 
+  void createNewWave(int count) {
+    fillWithEnemies(currentLevel.enemyWave, false);
+  }
+
   Future<void> killEnemy(Enemy enemy) async {
     player.onEnemyKilled();
+
+    if (world.caterpillarStatsViewModel.points >=
+        currentLevel.pointsToLevelUp) {
+      levelUp();
+    }
     world.enemyIndicatorHUD.onRemoveEnemy(enemy);
     if (enemy.hidingWeaponToDropOf != null) {
       _addWeaponColletibleItem(enemy.position);
@@ -268,7 +289,9 @@ class GroundMap extends PositionComponent {
 
     if (enemies.values.length <= world.remainingEnemiesToLevelUp) {
       allEnemiesKilled = true;
+      createNewWave(currentLevel.enemyWave);
     }
+
     if (playerReachedLength && allEnemiesKilled) {
       levelUp();
       world.caterpillarStatsViewModel.setEnemiesInGame(enemies.values.length);
@@ -308,14 +331,13 @@ class GroundMap extends PositionComponent {
 
   Future<void> _createMapContent() async {
     await fillWithSnacks(snackCount);
-    await fillWithEnemies(enemyCount);
+    await fillWithEnemies(currentLevel.enemyWave, true);
     await fillWithHealthUpItems(healthUpCount);
     // await _addWeaponColletibleItem(null);
     // await _addWeaponColletibleItem(null);
 
     await add(player);
     player.position = size / 2;
-    ;
 
     obstacleSnapshot =
         ObstacleSnapshot(mapSize: mapSize.toDouble(), world: world);
@@ -348,7 +370,7 @@ class GroundMapFloorParallax extends ParallaxComponent<CaterpillarCrawlMain> {
   void update(double dt) {
     super.update(dt);
     if (player.caterpillarStatsViewModel.currentState !=
-        CaterpillarState.onHoldForEgg) {
+        CaterpillarState.chargingUp) {
       parallax?.baseVelocity = player.orientation * player.baseSpeed * dt;
     } else {
       parallax?.baseVelocity = Vector2.zero();

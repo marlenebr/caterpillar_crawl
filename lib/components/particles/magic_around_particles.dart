@@ -27,9 +27,7 @@ class MagicAroundParticles extends PositionComponent {
   @override
   void update(double dt) {
     if (!_isSparkling) return;
-    // TODO: implement update
     super.update(dt);
-    // angle = -parentTransform.angle;
     timeElapsedSinceLastTick += dt;
     if (timeElapsedSinceLastTick > timeForTick) {
       timeElapsedSinceLastTick = 0;
@@ -51,7 +49,7 @@ class MagicAroundParticles extends PositionComponent {
         // Will move from corner to corner of the game canvas.
         child: CircleParticle(
           radius: 3.0,
-          paint: Paint()..color = Color.fromARGB(255, 175, 245, 70),
+          paint: Paint()..color = const Color.fromARGB(255, 175, 245, 70),
         ),
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:caterpillar_crawl/models/view_models/level_settings_view_model.dart';
 import 'package:caterpillar_crawl/style_constants/ui_styles.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -7,8 +7,9 @@ import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/weapon_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
-class BaseDistanceWeapon extends BaseWeapon {
+class BaseDistanceWeapon extends BaseWeapon with HasVisibility {
   DistanceWeaponData distanceWeapondata;
   bool isInMultipleShoot = false;
   bool isInSingleShoot = false;
@@ -32,6 +33,9 @@ class BaseDistanceWeapon extends BaseWeapon {
 
   @override
   void update(double dt) {
+    if (!isVisible) {
+      return;
+    }
     super.update(dt);
     _updateShootMultipleMunitions(dt);
 
@@ -42,17 +46,24 @@ class BaseDistanceWeapon extends BaseWeapon {
     }
   }
 
+  void setActive(bool activate) {
+    isVisible = activate;
+  }
+
   shootMultipleMunitions(CaterpillarCrawlMain gameWorld, Vector2 position,
       double angle, int pelletCount) {
+    if (!isVisible) {
+      return;
+    }
     currentPelletCount = pelletCount;
-    int pelletsPerSide = (pelletCount / 2).toInt();
+    int pelletsPerSide = pelletCount ~/ 2;
     startAngle = absoluteAngle - angleOffset * (pelletsPerSide);
     currentPelletCount = pelletCount;
     isInMultipleShoot = true;
   }
 
   shootSingleMunition() {
-    if (isInSingleShoot) {
+    if (isInSingleShoot || !isVisible) {
       return;
     }
     startAngle = absoluteAngle;
@@ -78,19 +89,10 @@ class BaseDistanceWeapon extends BaseWeapon {
     }
   }
 
-  // void _updateShootSingle() {
-  //   if (isInSingleShoot) {
-  //     return;
-  //   }
-  //   _spawnMunition(absoluteAngle);
-  //   currentPelletIndex = 0;
-  // }
-
   void _spawnMunition(double angleDirection) {
     BaseDistanceMunition pellet = BaseDistanceMunition(distanceWeapon: this);
     map.world.world.add(pellet);
-    pellet.position =
-        Vector2(absolutePosition.x + size.x / 2, absolutePosition.y);
+    pellet.position = Vector2(absolutePosition.x, absolutePosition.y);
     pellet.angle = angleDirection;
   }
 }
@@ -148,7 +150,7 @@ class BaseDistanceMunition extends PositionComponent {
       distanceWeapon.hitPoints.add(this);
     }
     initPosition = Vector2(absolutePosition.x, absolutePosition.y);
-    position = Vector2(position.x - distanceWeapon.position.x, position.y);
+    // position = Vector2(position.x - distanceWeapon.position.x / 2, position.y);
     angle = distanceWeapon.absoluteAngle;
   }
 

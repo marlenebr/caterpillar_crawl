@@ -34,7 +34,7 @@ class CaterpillarCrawlUtils {
     double renderSize = 10;
     return RectangleComponent(
         size: Vector2.all(renderSize),
-        paint: Paint()..color = Color.fromARGB(255, 60, 4, 214),
+        paint: Paint()..color = const Color.fromARGB(255, 60, 4, 214),
         position: Vector2(anchorPosLocal.x - renderSize / 2,
             anchorPosLocal.y - renderSize / 2));
   }

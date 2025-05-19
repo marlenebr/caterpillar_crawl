@@ -40,13 +40,13 @@ class ActionWeaponButtonWidget extends StatelessWidget {
                       actionWeaponButtonViewModel.maxWeaponDuration
                 ],
                 tileMode: TileMode.decal,
-                transform: GradientRotation(-pi / 2)),
+                transform: const GradientRotation(-pi / 2)),
             color: Colors.blue,
           ),
           clipBehavior: Clip.hardEdge,
           child: Padding(
-            padding: EdgeInsets.all(5.0),
-            child: Container(
+            padding: const EdgeInsets.all(5.0),
+            child: SizedBox(
               width: size,
               height: size,
               //clipBehavior: Clip.hardEdge,

@@ -1,5 +1,3 @@
-import 'package:caterpillar_crawl/components/moving_around_component.dart';
-
 class MovingData {
   double baseSpeed;
   double huntSpeed;

@@ -1,8 +1,12 @@
 import 'dart:async';
 
 import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
 import 'package:caterpillar_crawl/components/player_controller.dart';
 import 'package:caterpillar_crawl/components/tutorial_builder.dart';
+import 'package:caterpillar_crawl/components/weapons/distance/eggy_bomb.dart';
+import 'package:caterpillar_crawl/models/data/animation_data.dart';
+import 'package:caterpillar_crawl/models/data/weapon_data.dart';
 import 'package:caterpillar_crawl/models/view_models/action_melee_button_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/action_distance_weapon_view_model.dart';
 import 'package:caterpillar_crawl/models/view_models/caterpillar_state_view_model.dart';
@@ -125,7 +129,7 @@ class CaterpillarCrawlMain extends FlameGame
         gameStateViewModel = GameStateViewModel(),
         snackCountSettingsViewModel = SnackCountValue(100),
         enemyCountViewModel = EnemyCountValue(8),
-        maxLevelValue = MaxLevelCountValue(6),
+        maxLevelValue = MaxLevelCountValue(2),
         mapSizeValue = MapSizeValue(1200),
         maxCaterpillarLength = MaxCaterpillarLength(150),
         tutorialItemViewModel = TutorialItemViewModel(),
@@ -153,8 +157,7 @@ class CaterpillarCrawlMain extends FlameGame
 
     // meleeButtonViewModel.onChangeType(
     //     'assets/images/sword.png', () => onPewPewButtonclicked());
-    distanceActionButtonViewModel.onChangeType(
-        'assets/images/bomb_128_button.png', () => onLayEggTap());
+    //distanceActionButtonViewModel.setEmpty();
   }
 
   Future<void> initPlayerController() async {
@@ -189,7 +192,7 @@ class CaterpillarCrawlMain extends FlameGame
 
   @override
   void render(Canvas canvas) {
-    canvas.drawPaint(Paint()..color = Color.fromARGB(255, 120, 155, 117));
+    canvas.drawPaint(Paint()..color = const Color.fromARGB(255, 120, 155, 117));
     super.render(canvas);
   }
 
@@ -270,7 +273,7 @@ class CaterpillarCrawlMain extends FlameGame
 
   Future<void> _startTutorial() async {
     await tutorialBuilder.startTutotial();
-    groundMap.player.setCaterpillarState(CaterpillarState.onHoldForEgg);
+    groundMap.player.setCaterpillarState(CaterpillarState.chargingUp);
   }
 
   Future<void> _stopTutorial() async {

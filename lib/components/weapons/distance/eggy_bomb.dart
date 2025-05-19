@@ -11,11 +11,6 @@ class EggyBomb extends BaseDistanceWeapon {
   }
 
   @override
-  void update(double dt) {
-    super.update(dt);
-  }
-
-  @override
   void startAttacking() {
     super.startAttacking();
     shootSingleMunition();

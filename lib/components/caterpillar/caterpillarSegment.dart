@@ -1,25 +1,30 @@
 import 'dart:math';
 
-import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarElement.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
 import 'package:caterpillar_crawl/components/enemy/enemy.dart';
 import 'package:caterpillar_crawl/components/map/obstacle_snapshot.dart';
 import 'package:caterpillar_crawl/components/obstacle.dart';
+import 'package:caterpillar_crawl/components/snack.dart';
+import 'package:caterpillar_crawl/models/data/segment_data.dart';
 import 'package:caterpillar_crawl/utils/utils.dart';
 import 'package:flame/components.dart';
 
 ///The body segments to be added behind the previous one (or the head)
 class CaterpillarSegment extends CaterpillarElement {
-  CaterPillar caterpillar;
+  CaterpillarBase caterpillar;
   CaterpillarElement previousSegment;
   bool removeOnNextFrame = false;
+  SnackType snackType;
 
   late SpriteAnimationComponent animation;
 
   bool isFallenOff = false;
 
   CaterpillarSegment(super.caterpillardata, super.gameWorld,
-      {required this.previousSegment, required this.caterpillar});
+      {required this.snackType,
+      required this.previousSegment,
+      required this.caterpillar});
 
   @override
   Future<void> onLoad() async {
@@ -28,9 +33,8 @@ class CaterpillarSegment extends CaterpillarElement {
     size = previousSegment.size;
     scale = caterpillar.scale;
     anchor = Anchor.center;
-    SpriteAnimationComponent animation =
-        await CaterpillarCrawlUtils.createAnimationComponent(
-            caterpillardata.segmentAnimation);
+    animation = await CaterpillarCrawlUtils.createAnimationComponent(
+        SegmentData.getAnimationDataBySnackType(snackType));
     add(animation);
   }
 
@@ -49,9 +53,6 @@ class CaterpillarSegment extends CaterpillarElement {
   void updateHCollisionWithSelf() {
     if (caterpillar.caterpillarStatsViewModel.currentState !=
         CaterpillarState.crawling) {
-      return;
-    }
-    if (caterpillar.isInUlti) {
       return;
     }
 
@@ -104,13 +105,13 @@ class CaterpillarSegment extends CaterpillarElement {
     transform.angle += lerpSpeedDt;
   }
 
-  void addCaterpillarSegemntRequest() {
-    // if (!isInitializing) {
-    //   addCaterPillarSegment(caterpillar);
-    // } else {
-    segemntAddRequest = true;
-    // }
-  }
+  // void addCaterpillarSegemntRequest() {
+  //   // if (!isInitializing) {
+  //   //   addCaterPillarSegment(caterpillar);
+  //   // } else {
+  //   segemntAddRequest = true;
+  //   // }
+  // }
 
   void falloff(bool justRemove) {
     if (isFallenOff) {
@@ -130,6 +131,14 @@ class CaterpillarSegment extends CaterpillarElement {
     }
     removeFromParent();
     caterpillar.caterpillarStatsViewModel.onRemoveSegment();
+  }
+
+  Future<void> setSegmentType(SnackType snackType) async {
+    if (snackType != this.snackType) {
+      this.snackType = snackType;
+      animation = await CaterpillarCrawlUtils.createAnimationComponent(
+          SegmentData.getAnimationDataBySnackType(snackType));
+    }
   }
 
   double fallOffTime = 0.1;
@@ -165,6 +174,7 @@ class CaterpillarSegment extends CaterpillarElement {
     caterpillar.caterpillarStateViewModel.setIsRemovingSegment(false);
   }
 
+  @override
   void reset() {
     super.reset();
     isFallenOff = false;

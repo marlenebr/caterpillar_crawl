@@ -1,7 +1,8 @@
 import 'dart:collection';
 
-import 'package:caterpillar_crawl/components/caterpillar/caterpillar.dart';
 import 'package:caterpillar_crawl/components/caterpillar/caterpillarSegment.dart';
+import 'package:caterpillar_crawl/components/caterpillar/caterpillar_base.dart';
+import 'package:caterpillar_crawl/components/snack.dart';
 import 'package:caterpillar_crawl/main.dart';
 import 'package:caterpillar_crawl/models/data/caterpillar_data.dart';
 import 'package:flame/components.dart';
@@ -16,12 +17,11 @@ class CaterpillarElement extends PositionComponent {
   Queue<MovementTransferData> angleQueue =
       Queue<MovementTransferData>(); // ListQueue() by default
   bool isInitializing = true;
-  late int index;
+  int index = 0;
 
   double secondCounter = 0;
   double timeSinceInit = 0;
 
-  bool segemntAddRequest = false;
   late Vector2 finalSize;
 
   Vector2 orientation = Vector2.zero();
@@ -60,12 +60,13 @@ class CaterpillarElement extends PositionComponent {
     return false;
   }
 
-  Future<void> addCaterPillarSegment(CaterPillar caterpillar) async {
+  Future<void> addCaterPillarSegment(
+      CaterpillarBase caterpillar, SnackType snackType) async {
     if (caterpillardata.maxElementCount <= index) {
       return;
     }
     nextSegment = CaterpillarSegment(caterpillardata, gameWorld,
-        previousSegment: this, caterpillar: caterpillar);
+        snackType: snackType, previousSegment: this, caterpillar: caterpillar);
     nextSegment?.index = index + 1;
     caterpillar.lastSegment = nextSegment;
     nextSegment?.position = position;
@@ -76,6 +77,8 @@ class CaterpillarElement extends PositionComponent {
     caterpillar.caterpillarStatsViewModel.onAddSegment();
     gameWorld.groundMap.playerReachedFullLegnth(
         nextSegment!.index >= caterpillardata.maxElementCount);
+    caterpillar.onSegmentAddedOrRemoved(nextSegment!, false);
+
     return;
   }
 
@@ -132,7 +135,6 @@ class CaterpillarElement extends PositionComponent {
     isInitializing = true;
     secondCounter = 0;
     timeSinceInit = 0;
-    segemntAddRequest = false;
     orientation = Vector2.zero();
   }
 }
